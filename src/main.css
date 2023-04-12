@@ -1,0 +1,54 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+.box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+}
+
+#progress-bar {
+    width: 50vw;
+    height: 5vh;
+    border: solid 5px gray;
+    border-radius: 20px;
+}
+
+#progress-bar > div {
+    width: 20%;
+    height: 100%;
+    border-bottom-left-radius: 15.4px;
+    border-top-left-radius: 15.4px;
+    background-color: orange;
+    animation: grow 4s;
+}
+
+#img {
+    margin-bottom: 2.5rem;
+    /* animation: move 5s; */
+}
+
+@keyframes grow {
+    from {
+        width: 10%;
+    }
+
+    to {
+        width: 80%;
+    }
+}
+
+@keyframes move {
+    0% {
+        transform: translateX(-200%);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}
