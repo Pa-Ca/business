@@ -96,6 +96,7 @@ export default function Signup() {
 
   const signup = async (name: string, email: string, password: string) => {
     const response = await signUpBusinessService(name, email, password);
+    console.log(response)
 
     if (response.isError) {
       if (!!response.error) {

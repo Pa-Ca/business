@@ -26,7 +26,6 @@ type LoginResponse = {
  *
  * @param email New user email
  * @param password New user password
- * @param role New user role
  *
  * @returns API response when creating a user
  */

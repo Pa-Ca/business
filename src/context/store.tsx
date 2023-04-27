@@ -24,11 +24,9 @@ const store = configureStore({
 });
 
 // Infer the RootState and AppDispatch types from the store itself
-type DispatchFunc = () => AppDispatch;
-
 export default store;
 export const persistor = persistStore(store);
 export type AppDispatch = typeof persistor.dispatch;
-export const useAppDispatch: DispatchFunc = useDispatch;
+export const useAppDispatch: () => AppDispatch = useDispatch;
 export type RootState = ReturnType<typeof store.getState>;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
