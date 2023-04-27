@@ -1,32 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { useDispatch } from "react-redux";
-import { Box, LoginComponent } from "paca-ui";
+import { Box, ResetPasswordComponent } from "paca-ui";
 import { useAppSelector } from "../src/context/store";
-import { loginBusiness } from "../src/context/slices/business";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import loginBusinessService from "../src/services/loginBusinessService";
-import { loginUser } from "../src/context/slices/auth";
-
-import { useSession, signIn, signOut } from "next-auth/react"
-
-/* export default function Component() {
-  const { data: session } = useSession()
-  if (session) {
-    return (
-      <>
-        Signed in as {session.user.email} <br />
-        <button onClick={() => signOut()}>Sign out</button>
-      </>
-    )
-  }
-  return (
-    <>
-      Not signed in <br />
-      <button onClick={() => signIn()}>Sign in</button>
-    </>
-  )
-} */
+import resetPasswordService from "../src/services/resetPasswordService";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -39,7 +16,7 @@ const images = [
 
 export default function Signup() {
   const router = useRouter();
-  const dispatch = useDispatch();
+  const { token } = router.query;
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
@@ -53,36 +30,23 @@ export default function Signup() {
     }
   }, [auth.logged]);
 
-  const login = async (email: string, password: string) => {
+  const resetPassword = async (password: string) => {
     setError(false);
 
-    const response = await loginBusinessService(email, password);
-
-    if (!!response.isError) {
+    if (typeof token !== "string") {
       setError(true);
       return;
     }
 
-    dispatch(
-      loginUser({
-        logged: true,
-        userId: response.data!.userId,
-        id: response.data!.id,
-        email: response.data!.email,
-        token: response.data!.token,
-        refresh: response.data!.refresh,
-      })
-    );
+    const response = await resetPasswordService(password, token);
 
-    dispatch(
-      loginBusiness({
-        name: response.data!.name,
-        verified: false,
-        tier: "basic",
-      })
-    );
+    if (!!response.isError) {
+      setError(true);
+      console.log(response)
+      return;
+    }
 
-    router.push("/profile");
+    router.push("/login");
   };
 
   return (
@@ -104,14 +68,12 @@ export default function Signup() {
     >
       <Box style={{ width: "100%" }}>
         {!loading && (
-          <LoginComponent
+          <ResetPasswordComponent
             error={error}
             images={images}
+            onBackToLogin={() => router.replace("/login")}
+            onSubmit={(password: string) => resetPassword(password)}
             color={MAIN_COLOR}
-            onLogin={login}
-            onForgotClick={() => router.push("/recover-password")}
-            onGoogleSignUp={() => {}}
-            onSignUp={() => router.replace("/signup")}
             secondaryColor={SECONDARY_COLOR}
             otherLoginsColor={GREEN}
           />

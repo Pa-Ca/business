@@ -17,11 +17,11 @@
   },
   "dependencies": {
     "@next/font": "13.1.1",
-    "@reduxjs/toolkit": "^1.9.3",
+    "@reduxjs/toolkit": "1.9.3",
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
     "@types/react-dom": "18.0.10",
-    "copy-webpack-plugin": "^6.4.1",
+    "copy-webpack-plugin": "6.4.1",
     "eslint": "8.31.0",
     "eslint-config-next": "13.1.1",
     "next": "13.1.1",
@@ -29,9 +29,9 @@
     "paca-ui": "github:Pa-Ca/ui#develop",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-redux": "^8.0.5",
-    "redux": "^4.2.1",
-    "redux-persist": "^6.0.0",
+    "react-redux": "8.0.5",
+    "redux": "4.2.1",
+    "redux-persist": "6.0.0",
     "typescript": "4.9.4"
   }
 }
