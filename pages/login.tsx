@@ -8,6 +8,26 @@ import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import loginBusinessService from "../src/services/loginBusinessService";
 import { loginUser } from "../src/context/slices/auth";
 
+import { useSession, signIn, signOut } from "next-auth/react"
+
+/* export default function Component() {
+  const { data: session } = useSession()
+  if (session) {
+    return (
+      <>
+        Signed in as {session.user.email} <br />
+        <button onClick={() => signOut()}>Sign out</button>
+      </>
+    )
+  }
+  return (
+    <>
+      Not signed in <br />
+      <button onClick={() => signIn()}>Sign in</button>
+    </>
+  )
+} */
+
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimages.squarespace-cdn.com%2Fcontent%2Fv1%2F52da9677e4b03d314575985a%2F1576342982271-R07XT8R39LD93NT1XOZ1%2Fke17ZwdGBToddI8pDm48kJK4Mm1kch8SFO9ZNkN1NT97gQa3H78H3Y0txjaiv_0fDoOvxcdMmMKkDsyUqMSsMWxHk725yiiHCCLfrh8O1z5QHyNOqBUUEtDDsRWrJLTmFk_H6M1tkD9NpL7mXac0oVSXdFfjxR5AjcLwGSebOiGBsFzzcw3xKxvyC_6CFFG_%2F%2540dulce_at_hilton%2B-%2BConrad%2BAlgarve.jpg&f=1&nofb=1&ipt=2100054268d5c351126e8ffc690b40f9f3ec13426903564f4d9a8f0f53995947&ipo=images",
@@ -90,7 +110,7 @@ export default function Signup() {
             color={MAIN_COLOR}
             onLogin={login}
             onForgotClick={() => {}}
-            onGoogleSignUp={() => {}}
+            onGoogleSignUp={() => signIn()}
             onSignUp={() => router.replace("/signup")}
             secondaryColor={SECONDARY_COLOR}
             otherLoginsColor={GREEN}
