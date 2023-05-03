@@ -19,12 +19,13 @@ export default function Signup() {
   const { token } = router.query;
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [completed, setCompleted] = useState(false);
   const auth = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
     if (!!auth.logged) {
-      router.replace("/profile");
+      router.push("/profile");
     } else {
       setLoading(false);
     }
@@ -46,7 +47,7 @@ export default function Signup() {
       return;
     }
 
-    router.push("/login");
+    setCompleted(true);
   };
 
   return (
@@ -71,7 +72,8 @@ export default function Signup() {
           <ResetPasswordComponent
             error={error}
             images={images}
-            onBackToLogin={() => router.replace("/login")}
+            completed={completed}
+            onBackToLogin={() => router.push("/login")}
             onSubmit={(password: string) => resetPassword(password)}
             color={MAIN_COLOR}
             secondaryColor={SECONDARY_COLOR}

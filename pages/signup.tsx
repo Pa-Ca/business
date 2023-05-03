@@ -35,7 +35,7 @@ export default function Signup() {
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
     if (!!auth.logged) {
-      router.replace("/profile");
+      router.push("/profile");
     } else {
       setLoading(false);
     }
@@ -171,8 +171,8 @@ export default function Signup() {
               emailErrorMessage,
               passwordErrorMessage,
               validateBusinessData: validateData,
-              onLogin: () => router.replace("/login"),
-              onTermsAndConditionsClick: () => {},
+              onLogin: () => router.push("/login"),
+              onTermsAndConditionsClick: () => router.push("/terms-and-conditions"),
               onBusinessSignUp: signup,
               onGoogleSignUp: () => {},
               color: MAIN_COLOR,

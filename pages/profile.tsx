@@ -2,6 +2,7 @@ import React from "react";
 import { IconType } from "paca-ui";
 import { BranchProfile } from "paca-ui";
 import { useRouter } from "next/router";
+import credentials from "../credentials";
 import { useDispatch } from "react-redux";
 import { MAIN_COLOR } from "../src/config";
 import refresh from "../src/services/refresh";
@@ -57,12 +58,19 @@ export default function Profile() {
     dispatch(logoutBusiness());
     dispatch(logoutUser());
     await logoutUserService(auth.token!, auth.refresh!);
-    router.replace("/login");
+    router.push("/login");
   };
 
   return (
     <BranchProfile
       getUserData={getBusinessData}
+      branchLocationProps={{
+        color: "#EF7A08",
+        lat: 10.42673633648665,
+        lng: -66.87739422453691,
+        location: "El Hatillo, Caracas, Venezuela",
+        apiKey: credentials.maps_key,
+      }}
       getBranchData={() => {
         return {
           businessId: 1,
@@ -260,7 +268,6 @@ export default function Profile() {
         },
       ]}
       onPacaClick={updateToken}
-      locationImage="https://i.postimg.cc/bvdRWcQd/Screenshot-2023-03-31-192810.png"
       color={MAIN_COLOR}
       onProfileClick={logout}
     />

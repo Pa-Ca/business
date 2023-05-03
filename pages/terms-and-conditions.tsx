@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-import { Box, LoginComponent } from "paca-ui";
+import { Box, Terms } from "paca-ui";
 import { useAppSelector } from "../src/context/store";
-import { loginBusiness } from "../src/context/slices/business";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import loginBusinessService from "../src/services/loginBusinessService";
-import { loginUser } from "../src/context/slices/auth";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -17,10 +13,9 @@ const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.thestar.com%2Fcontent%2Fdam%2Fthestar%2Flife%2Ftravel%2F2012%2F03%2F16%2Fbest_hotel_views_a_look_at_our_favourite_rooms_with_a_view_around_the_globe%2Fmarriott_fallsviewniagara.jpeg&f=1&nofb=1&ipt=aaf5e9af11832f67d8af152f1cf5702570a79d358ab2b564789d67d5a28f25a3&ipo=images",
 ];
 
-export default function Signup() {
+export default function TermsAndConditions() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
 
@@ -33,70 +28,16 @@ export default function Signup() {
     }
   }, [auth.logged]);
 
-  const login = async (email: string, password: string) => {
-    setError(false);
-
-    const response = await loginBusinessService(email, password);
-
-    if (!!response.isError) {
-      setError(true);
-      return;
-    }
-
-    dispatch(
-      loginUser({
-        logged: true,
-        userId: response.data!.userId,
-        id: response.data!.id,
-        email: response.data!.email,
-        token: response.data!.token,
-        refresh: response.data!.refresh,
-      })
-    );
-
-    dispatch(
-      loginBusiness({
-        name: response.data!.name,
-        verified: false,
-        tier: "basic",
-      })
-    );
-
-    router.push("/profile");
-  };
-
   return (
-    <Box
-      style={{
-        paddingLeft: "105px",
-        paddingRight: "105px",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-      }}
-    >
-      <Box style={{ width: "100%" }}>
-        {!loading && (
-          <LoginComponent
-            error={error}
-            images={images}
-            color={MAIN_COLOR}
-            onLogin={login}
-            onForgotClick={() => router.push("/recover-password")}
-            onGoogleSignUp={() => {}}
-            onSignUp={() => router.push("/signup")}
-            secondaryColor={SECONDARY_COLOR}
-            otherLoginsColor={GREEN}
-          />
-        )}
-      </Box>
+    <Box style={{ width: "100%" }}>
+      {!loading && (
+        <Terms headerArgs={{
+          logged: false,
+          onPacaClick: () => { !!auth.logged ? router.push("/profile") : router.push("/login") },
+          onLoginClick: () => router.push("/login"),
+          onRegisterClick: () => router.push("/signup")
+        }} />
+      )}
     </Box>
   );
 }
