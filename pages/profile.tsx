@@ -10,6 +10,7 @@ import { setToken } from "../src/context/slices/auth";
 import { logoutUser } from "../src/context/slices/auth";
 import { logoutBusiness } from "../src/context/slices/business";
 import logoutUserService from "../src/services/logoutUserService";
+import {useSession, signOut} from "next-auth/react"
 
 const amenities: { name: string; icon: IconType }[] = [
   { name: "Bar/Salón", icon: "wine" },
@@ -22,6 +23,7 @@ export default function Profile() {
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
   const business = useAppSelector((state) => state.business);
+  const { data: session } = useSession()
 
   const role: "business" = "business";
 
@@ -54,6 +56,7 @@ export default function Profile() {
   };
 
   const logout = async () => {
+    if (session) { signOut() }
     dispatch(logoutBusiness());
     dispatch(logoutUser());
     await logoutUserService(auth.token!, auth.refresh!);
@@ -61,6 +64,8 @@ export default function Profile() {
   };
 
   return (
+    <>
+    <button onClick={() => logout()}>Logout</button>
     <BranchProfile
       getUserData={getBusinessData}
       getBranchData={() => {
@@ -264,5 +269,6 @@ export default function Profile() {
       color={MAIN_COLOR}
       onProfileClick={logout}
     />
+    </>
   );
 }

@@ -8,8 +8,6 @@ import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import loginBusinessService from "../src/services/loginBusinessService";
 import { loginUser } from "../src/context/slices/auth";
 
-import { useSession, signIn, signOut } from "next-auth/react"
-
 /* export default function Component() {
   const { data: session } = useSession()
   if (session) {

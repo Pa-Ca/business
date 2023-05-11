@@ -10,6 +10,7 @@ import validatePassword from "../src/utils/validatePassword";
 import { loginBusiness } from "../src/context/slices/business";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import signUpBusinessService from "../src/services/signUpBusinessService";
+import { useSession, signIn } from "next-auth/react"
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -32,6 +33,9 @@ export default function Signup() {
   const [emailErrorMessage, setEmailErrorMessage] = useState("");
   const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
 
+  // Google Auth
+  const { data: session } = useSession()
+
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
     if (!!auth.logged) {
@@ -39,7 +43,7 @@ export default function Signup() {
     } else {
       setLoading(false);
     }
-  }, [auth.logged]);
+  }, [auth.logged, session]);
 
   const validateData = (name: string, email: string, password: string) => {
     let valid = true;
@@ -174,7 +178,7 @@ export default function Signup() {
               onLogin: () => router.replace("/login"),
               onTermsAndConditionsClick: () => {},
               onBusinessSignUp: signup,
-              onGoogleSignUp: () => {},
+              onGoogleSignUp: () => signIn("google"),
               color: MAIN_COLOR,
               secondaryColor: SECONDARY_COLOR,
               otherLoginsColor: GREEN,
