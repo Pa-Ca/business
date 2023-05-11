@@ -8,6 +8,7 @@ import validateEmail from "../src/utils/validateEmail";
 import { loginUser } from "../src/context/slices/auth";
 import validatePassword from "../src/utils/validatePassword";
 import { loginBusiness } from "../src/context/slices/business";
+import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import signUpBusinessService from "../src/services/signUpBusinessService";
 
@@ -25,12 +26,10 @@ export default function Signup() {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
-  const [nameError, setNameError] = useState(false);
-  const [emailError, setEmailError] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
-  const [nameErrorMessage, setNameErrorMessage] = useState("");
-  const [emailErrorMessage, setEmailErrorMessage] = useState("");
-  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+
+  const name = useInputForm("");
+  const email = useInputForm("");
+  const password = useInputForm("");
 
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
@@ -41,62 +40,63 @@ export default function Signup() {
     }
   }, [auth.logged]);
 
-  const validateData = (name: string, email: string, password: string) => {
+  const validateData = () => {
     let valid = true;
-    setNameError(false);
-    setEmailError(false);
-    setPasswordError(false);
 
     // Name validations
-    const nameValidation = validateName(name);
+    const nameValidation = validateName(name.value);
     if (nameValidation.code !== 0) {
       valid = false;
-      setNameError(true);
+      name.setError(true);
       switch (nameValidation.code) {
         case 1:
-          setNameErrorMessage("El nombre debe tener al menos 8 caracteres.");
+          name.setErrorMessage("El nombre debe tener al menos 8 caracteres.");
           break;
         default:
-          setNameErrorMessage("Nombre inválido.");
+          name.setErrorMessage("Nombre inválido.");
       }
     }
 
     // Email validation
-    const emailValidation = validateEmail(email);
+    const emailValidation = validateEmail(email.value);
     if (emailValidation.code !== 0) {
       valid = false;
-      setEmailError(true);
+      email.setError(true);
       switch (emailValidation.code) {
         case 1:
-          setEmailErrorMessage("Formato de correo inválido.");
+          email.setErrorMessage("Formato de correo inválido.");
           break;
         default:
-          setEmailErrorMessage("Correo inválido.");
+          email.setErrorMessage("Correo inválido.");
       }
     }
 
     // Password validations
-    const passwordValidation = validatePassword(password);
+    const passwordValidation = validatePassword(password.value);
     if (passwordValidation !== 0) {
       valid = false;
-      setPasswordError(true);
+      password.setError(true);
       switch (passwordValidation) {
         case 1:
-          setPasswordErrorMessage(
+          password.setErrorMessage(
             "La contraseña debe tener entre 8 y 64 caracteres."
           );
           break;
         default:
-          setPasswordErrorMessage("Contraseña inválida.");
+          password.setErrorMessage("Contraseña inválida.");
       }
     }
 
     return valid;
-  }
+  };
 
-  const signup = async (name: string, email: string, password: string) => {
-    const response = await signUpBusinessService(name, email, password);
-    console.log(response)
+  const signup = async () => {
+    const response = await signUpBusinessService(
+      name.value,
+      email.value,
+      password.value
+    );
+    console.log(response);
 
     if (response.isError) {
       if (!!response.error) {
@@ -104,12 +104,12 @@ export default function Signup() {
       } else {
         switch (response.exception!.code) {
           case 1:
-            setEmailError(true);
-            setEmailErrorMessage("Correo ya registrado.");
+            email.setError(true);
+            email.setErrorMessage("Correo ya registrado.");
             break;
           default:
-            setEmailError(true);
-            setEmailErrorMessage("Correo inválido.");
+            email.setError(true);
+            email.setErrorMessage("Correo inválido.");
             break;
         }
       }
@@ -129,9 +129,11 @@ export default function Signup() {
 
     dispatch(
       loginBusiness({
+        id: response.data!.id,
         name: response.data!.name,
         verified: false,
         tier: "basic",
+        phoneNumber: "", // [TODO]
       })
     );
 
@@ -158,28 +160,22 @@ export default function Signup() {
       <Box style={{ width: "100%" }}>
         {!loading && (
           <SignUpComponent
-            imagesCarouselProps={{
-              images: images,
-              interval: 3000,
-              color: MAIN_COLOR,
-            }}
-            signUpFormProps={{
-              nameError,
-              emailError,
-              passwordError,
-              nameErrorMessage,
-              emailErrorMessage,
-              passwordErrorMessage,
-              validateBusinessData: validateData,
-              onLogin: () => router.push("/login"),
-              onTermsAndConditionsClick: () => router.push("/terms-and-conditions"),
-              onBusinessSignUp: signup,
-              onGoogleSignUp: () => {},
-              color: MAIN_COLOR,
-              secondaryColor: SECONDARY_COLOR,
-              otherLoginsColor: GREEN,
-              business: true,
-            }}
+            images={images}
+            interval={3000}
+            email={email}
+            businessName={name}
+            password={password}
+            validateBusinessData={validateData}
+            onLogin={() => router.push("/login")}
+            onTermsAndConditionsClick={() =>
+              router.push("/terms-and-conditions")
+            }
+            onBusinessSignUp={signup}
+            onGoogleSignUp={() => {}}
+            color={MAIN_COLOR}
+            secondaryColor={SECONDARY_COLOR}
+            otherLoginsColor={GREEN}
+            business={true}
           />
         )}
       </Box>

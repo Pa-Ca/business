@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Box, ResetPasswordComponent } from "paca-ui";
 import { useAppSelector } from "../src/context/store";
+import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import resetPasswordService from "../src/services/resetPasswordService";
 
@@ -17,6 +18,7 @@ const images = [
 export default function Signup() {
   const router = useRouter();
   const { token } = router.query;
+  const password = useInputForm("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(false);
@@ -71,10 +73,11 @@ export default function Signup() {
         {!loading && (
           <ResetPasswordComponent
             error={error}
+            password={password}
             images={images}
             completed={completed}
             onBackToLogin={() => router.push("/login")}
-            onSubmit={(password: string) => resetPassword(password)}
+            onSubmit={() => resetPassword(password.value)}
             color={MAIN_COLOR}
             secondaryColor={SECONDARY_COLOR}
             otherLoginsColor={GREEN}

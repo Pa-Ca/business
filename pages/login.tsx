@@ -2,11 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { Box, LoginComponent } from "paca-ui";
+import fetchAPI from "../src/services/fetchAPI";
+import getBranches from "../src/services/getBranches";
 import { useAppSelector } from "../src/context/store";
+import { setBranches } from "../src/context/slices/branches";
 import { loginBusiness } from "../src/context/slices/business";
+import { loginUser, setToken } from "../src/context/slices/auth";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import loginBusinessService from "../src/services/loginBusinessService";
-import { loginUser } from "../src/context/slices/auth";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -35,10 +38,25 @@ export default function Signup() {
 
   const login = async (email: string, password: string) => {
     setError(false);
-
     const response = await loginBusinessService(email, password);
 
     if (!!response.isError) {
+      setError(true);
+      return;
+    }
+
+    // Get business branches
+    const branchesResponse = await fetchAPI(
+      response.data!.token,
+      response.data!.refresh,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => getBranches(response.data!.id, token)
+    );
+
+    if (
+      !!branchesResponse.isError ||
+      typeof branchesResponse.data === "string"
+    ) {
       setError(true);
       return;
     }
@@ -56,11 +74,15 @@ export default function Signup() {
 
     dispatch(
       loginBusiness({
+        id: response.data!.id,
         name: response.data!.name,
         verified: false,
         tier: "basic",
+        phoneNumber: "", // [TODO]
       })
     );
+
+    dispatch(setBranches(branchesResponse.data!.branches));
 
     router.push("/profile");
   };
