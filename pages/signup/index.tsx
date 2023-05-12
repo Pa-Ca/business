@@ -2,14 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { Box, SignUpComponent } from "paca-ui";
-import validateName from "../src/utils/validateName";
-import { useAppSelector } from "../src/context/store";
-import validateEmail from "../src/utils/validateEmail";
-import { loginUser } from "../src/context/slices/auth";
-import validatePassword from "../src/utils/validatePassword";
-import { loginBusiness } from "../src/context/slices/business";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import signUpBusinessService from "../src/services/signUpBusinessService";
+import validateName from "../../src/utils/validateName";
+import { useAppSelector } from "../../src/context/store";
+import validateEmail from "../../src/utils/validateEmail";
+import { loginUser } from "../../src/context/slices/auth";
+import validatePassword from "../../src/utils/validatePassword";
+import { loginBusiness } from "../../src/context/slices/business";
+import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../../src/config";
+import signUpBusinessService from "../../src/services/signUpBusinessService";
 import { useSession, signIn } from "next-auth/react"
 
 const images = [
@@ -125,6 +125,7 @@ export default function Signup() {
         logged: true,
         userId: response.data!.userId,
         id: response.data!.id,
+        registrationCompleted: auth.registrationCompleted,
         email: response.data!.email,
         token: response.data!.token,
         refresh: response.data!.refresh,

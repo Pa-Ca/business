@@ -7,6 +7,7 @@ import { loginBusiness } from "../src/context/slices/business";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import loginBusinessService from "../src/services/loginBusinessService";
 import { loginUser } from "../src/context/slices/auth";
+import { useSession, signIn } from "next-auth/react"
 
 /* export default function Component() {
   const { data: session } = useSession()
@@ -35,7 +36,7 @@ const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.thestar.com%2Fcontent%2Fdam%2Fthestar%2Flife%2Ftravel%2F2012%2F03%2F16%2Fbest_hotel_views_a_look_at_our_favourite_rooms_with_a_view_around_the_globe%2Fmarriott_fallsviewniagara.jpeg&f=1&nofb=1&ipt=aaf5e9af11832f67d8af152f1cf5702570a79d358ab2b564789d67d5a28f25a3&ipo=images",
 ];
 
-export default function Signup() {
+export default function Login() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [error, setError] = useState(false);
@@ -65,6 +66,7 @@ export default function Signup() {
       loginUser({
         logged: true,
         userId: response.data!.userId,
+        registrationCompleted: auth.registrationCompleted,
         id: response.data!.id,
         email: response.data!.email,
         token: response.data!.token,
@@ -108,7 +110,7 @@ export default function Signup() {
             color={MAIN_COLOR}
             onLogin={login}
             onForgotClick={() => router.push("/recover-password")}
-            onGoogleSignUp={() => {}}
+            onGoogleSignUp={() => signIn("google")}
             onSignUp={() => router.replace("/signup")}
             secondaryColor={SECONDARY_COLOR}
             otherLoginsColor={GREEN}

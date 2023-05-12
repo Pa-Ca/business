@@ -35,7 +35,7 @@ type GoogleSignUpResponse = {
 export default async (
   token: string | undefined
 ): Promise<FetchResponse<GoogleSignUpResponse>> => {
-  const uri = `${API_ENDPOINT}/google-auth/signup`;
+  const uri = `${API_ENDPOINT}/auth/google/signup`;
 
   try {
     const response = await fetch(uri, {

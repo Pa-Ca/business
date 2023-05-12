@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
-import { Session,  } from 'next-auth';
+import React, { useEffect, useState } from "react";
+import { Session  } from 'next-auth';
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useAppSelector } from "../src/context/store";
 import { loginUser } from "../src/context/slices/auth";
 import googleLoginUserService from '../src/services/googleLoginUserService';
@@ -19,60 +19,75 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
   const auth = useAppSelector((state) => state.auth);
   const idToken = (session as CustomSession)?.idToken;
 
-  useEffect(() => {
-    async function handleAuthentication() {
-        // There is a Google Session but user is not logged in
-        if (session && !auth.logged) {
-
-          if (idToken) {
-            // Try Login
-            const loginResponse = await googleLoginUserService(idToken);
-
-            if (!loginResponse.isError) {
-              dispatch(
-                loginUser({
-                  logged: true,
-                  userId: 1000,
-                  id: loginResponse.data!.id,
-                  email: "",
-                  token: loginResponse.data!.token,
-                  refresh: loginResponse.data!.refresh,
-                })
-              );
-
-              return;
-            }
-
-            // Google Token Verification failed
-            if (!!loginResponse.isError && loginResponse.exception!.code !== 9){
-              console.log("Can't Login");
-              router.replace("/500");
-            }
-
-            // Try SignUp
-            const signupResponse = await googleSignUpUserService(idToken);
-
-            if (!!signupResponse.isError) {
-              console.log("Can't SignUp");
-              router.replace("/500");
-            }
-
-            dispatch(
-              loginUser({
-                logged: true,
-                userId: 1000,
-                id: signupResponse.data!.id,
-                email: "",
-                token: signupResponse.data!.token,
-                refresh: signupResponse.data!.refresh,
-              })
-            );
-
-          }
-        }
+  async function handleAuthentication() {
+    // Logged user redirect
+    if (!!auth.logged) {
+      console.log(auth.registrationCompleted)
+      if (!!auth.registrationCompleted) {
+        router.replace("/profile");
+      }
+      else {
+        router.replace("/signup/register");
+      }
     }
-    handleAuthentication();
-  }, [session]);
+
+    // There is a Google Session but user is not logged in
+    if (session && !auth.logged) {
+
+      if (!idToken) return;
+
+      // Try Login
+      const loginResponse = await googleLoginUserService(idToken);
+
+      if (!loginResponse.isError && loginResponse.data) {
+        dispatch(
+          loginUser({
+            logged: true,
+            registrationCompleted: auth.registrationCompleted,
+            userId: 1000,
+            id: loginResponse.data!.id,
+            email: "",
+            token: loginResponse.data!.token,
+            refresh: loginResponse.data!.refresh,
+          })
+        );
+        
+        return;
+      }
+
+      // Google Token Verification failed
+      if (!!loginResponse.isError || loginResponse.exception?.code !== 9){
+        console.log("Can't Login");
+      }
+
+      // Try SignUp
+      const signupResponse = await googleSignUpUserService(idToken);
+
+      if (!!signupResponse.isError) {
+        console.log("Can't SignUp");
+        //signOut()
+        return;
+      }
+
+      if (signupResponse.data) {
+        dispatch(
+          loginUser({
+            logged: true,
+            userId: 1000,
+            registrationCompleted: auth.registrationCompleted,
+            id: signupResponse.data!.id,
+            email: "",
+            token: signupResponse.data!.token,
+            refresh: signupResponse.data!.refresh,
+          })
+        );
+      }
+    }
+  }
+
+  useEffect(() => {
+    handleAuthentication()
+  }, [session, auth]);
 
   return <>{children}</>;
 }

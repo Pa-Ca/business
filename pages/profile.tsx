@@ -64,8 +64,6 @@ export default function Profile() {
   };
 
   return (
-    <>
-    <button onClick={() => logout()}>Logout</button>
     <BranchProfile
       getUserData={getBusinessData}
       getBranchData={() => {
@@ -269,6 +267,5 @@ export default function Profile() {
       color={MAIN_COLOR}
       onProfileClick={logout}
     />
-    </>
   );
 }
