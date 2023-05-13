@@ -22,12 +22,12 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
   async function handleAuthentication() {
     // Logged user redirect
     if (!!auth.logged) {
-      console.log(auth.registrationCompleted)
       if (!!auth.registrationCompleted) {
-        router.replace("/profile");
+        console.log(!!auth.registrationCompleted)
+        //router.replace("/profile");
       }
       else {
-        router.replace("/signup/register");
+        //router.replace("/signup/register");
       }
     }
 
