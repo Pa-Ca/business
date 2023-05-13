@@ -1,42 +1,8 @@
 import signUpUserService from "./signUpUserService";
-import { API_ENDPOINT } from "../config";
-import FetchResponse from "../objects/FetchResponse";
-import ExceptionResponse from "../objects/ExceptionResponse";
-
-type BusinessSaveResponse = {
-  /**
-   * Business id
-   */
-  id: number;
-  /**
-   * Id of the user that corresponds to the business
-   */
-  userId: number;
-  /**
-   * User token
-   */
-  token: string;
-  /**
-   * User token refresh
-   */
-  refresh: string;
-  /**
-   * Email of the user that corresponds to the Business
-   */
-  email: string;
-  /**
-   * Business name
-   */
-  name: string;
-  /**
-   * Indicates if the business is verified
-   */
-  verified: boolean;
-  /**
-   * Business tier
-   */
-  tier: number;
-};
+import { API_ENDPOINT } from "../../config";
+import FetchResponse from "../../objects/FetchResponse";
+import BusinessDTO from "../../objects/business/BusinessDTO";
+import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
  * @brief Create a new Business
@@ -51,7 +17,7 @@ export default async (
   name: string,
   email: string,
   password: string
-): Promise<FetchResponse<BusinessSaveResponse>> => {
+): Promise<FetchResponse<BusinessDTO>> => {
   // Create the user
   const userResponse = await signUpUserService(email, password);
 
@@ -73,7 +39,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: BusinessSaveResponse = await response.json();
+      const data: BusinessDTO = await response.json();
       data.token = userResponse.data.token;
       data.refresh = userResponse.data.refresh;
       return { data, isError: false };

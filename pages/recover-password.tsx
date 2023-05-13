@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Box, RecoverPasswordComponent } from "paca-ui";
 import { useAppSelector } from "../src/context/store";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import resetPasswordRequestService from "../src/services/resetPasswordRequestService";
+import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",

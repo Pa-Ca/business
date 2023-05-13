@@ -1,6 +1,6 @@
-import { API_ENDPOINT } from "../config";
-import FetchResponse from "../objects/FetchResponse";
-import ExceptionResponse from "../objects/ExceptionResponse";
+import { API_ENDPOINT } from "../../config";
+import FetchResponse from "../../objects/FetchResponse";
+import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
  * @brief Logout current user
