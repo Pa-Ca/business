@@ -1,42 +1,8 @@
 import loginUserService from "./loginUserService";
-import { API_ENDPOINT } from "../config";
-import FetchResponse from "../objects/FetchResponse";
-import ExceptionResponse from "../objects/ExceptionResponse";
-
-type BusinessLoginResponse = {
-  /**
-   * Business id
-   */
-  id: number;
-  /**
-   * Id of the user that corresponds to the business
-   */
-  userId: number;
-  /**
-   * User token
-   */
-  token: string;
-  /**
-   * User token refresh
-   */
-  refresh: string;
-  /**
-   * Email of the user that corresponds to the Business
-   */
-  email: string;
-  /**
-   * Business name
-   */
-  name: string;
-  /**
-   * Indicates if the business is verified
-   */
-  verified: boolean;
-  /**
-   * Business tier
-   */
-  tier: number;
-};
+import { API_ENDPOINT } from "../../config";
+import BusinessDTO from "../../objects/business/BusinessDTO";
+import FetchResponse from "../../objects/FetchResponse";
+import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
  * @brief Create a new Business
@@ -50,7 +16,7 @@ type BusinessLoginResponse = {
 export default async (
   email: string,
   password: string
-): Promise<FetchResponse<BusinessLoginResponse>> => {
+): Promise<FetchResponse<BusinessDTO>> => {
   // Create the user
   const userResponse = await loginUserService(email, password);
 
@@ -75,7 +41,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: BusinessLoginResponse = await response.json();
+      const data: BusinessDTO = await response.json();
       data.token = userResponse.data.token;
       data.refresh = userResponse.data.refresh;
       return { data, isError: false };

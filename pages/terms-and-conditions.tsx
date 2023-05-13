@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, RecoverPasswordComponent } from "paca-ui";
+import { useDispatch } from "react-redux";
+import { Box, Terms } from "paca-ui";
 import { useAppSelector } from "../src/context/store";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -14,11 +13,10 @@ const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.thestar.com%2Fcontent%2Fdam%2Fthestar%2Flife%2Ftravel%2F2012%2F03%2F16%2Fbest_hotel_views_a_look_at_our_favourite_rooms_with_a_view_around_the_globe%2Fmarriott_fallsviewniagara.jpeg&f=1&nofb=1&ipt=aaf5e9af11832f67d8af152f1cf5702570a79d358ab2b564789d67d5a28f25a3&ipo=images",
 ];
 
-export default function Signup() {
+export default function TermsAndConditions() {
   const router = useRouter();
-  const [error, setError] = useState(false);
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const [completed, setCompleted] = useState(false);
   const auth = useAppSelector((state) => state.auth);
 
   useEffect(() => {
@@ -30,52 +28,16 @@ export default function Signup() {
     }
   }, [auth.logged]);
 
-  const sentResetPasswordRequest = async (email: string) => {
-    setError(false);
-
-    const response = await resetPasswordRequestService(email);
-
-    if (!!response.isError) {
-      setError(true);
-      console.log(response)
-      return;
-    }
-
-    setCompleted(true);
-  };
-
   return (
-    <Box
-      style={{
-        paddingLeft: "105px",
-        paddingRight: "105px",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-      }}
-    >
-      <Box style={{ width: "100%" }}>
-        {!loading && (
-          <RecoverPasswordComponent
-            error={error}
-            images={images}
-            completed={completed}
-            onBackToLogin={() => router.push("/login")}
-            onSubmit={sentResetPasswordRequest}
-            onGoogleLogin={() => {}}
-            color={MAIN_COLOR}
-            secondaryColor={SECONDARY_COLOR}
-            otherLoginsColor={GREEN}
-          />
-        )}
-      </Box>
+    <Box style={{ width: "100%" }}>
+      {!loading && (
+        <Terms headerArgs={{
+          logged: false,
+          onPacaClick: () => { !!auth.logged ? router.push("/profile") : router.push("/login") },
+          onLoginClick: () => router.push("/login"),
+          onRegisterClick: () => router.push("/signup")
+        }} />
+      )}
     </Box>
   );
 }

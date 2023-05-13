@@ -1,4 +1,4 @@
-import refresh from "./refresh";
+import refreshService from "./auth/refreshService";
 import FetchResponse from "../objects/FetchResponse";
 
 /**
@@ -23,7 +23,7 @@ export default async function<T>(
       response.exception !== undefined &&
       response.exception.code === 9
     ) {
-      const refreshResponse = await refresh(refreshToken);
+      const refreshResponse = await refreshService(refreshToken);
 
       if (refreshResponse.isError || refreshResponse.data === undefined) {
         return refreshResponse;
