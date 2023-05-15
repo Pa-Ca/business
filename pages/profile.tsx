@@ -179,7 +179,7 @@ export default function Profile() {
       branchType={branchType}
       branchTypeOptions={[]}
       branchLocationOptions={[]}
-      mapsApiKey={credentials.maps_key}
+      mapsApiKey={process.env.GOOGLE_MAPS_API_KEY || ''}
       // [TODO]
       onSaveBranchName={() => {}}
       onSaveBranchDescription={() => {}}

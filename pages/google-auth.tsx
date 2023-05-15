@@ -87,6 +87,7 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     handleAuthentication()
+    console.log(session)
   }, [session, auth]);
 
   return <>{children}</>;
