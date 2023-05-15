@@ -16,6 +16,7 @@ import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import changeNameService from "../src/services/business/changeNameService";
 import updateBranchService from "../src/services/branch/updateBranchService";
 import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
+import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
 
 const amenities: { name: string; icon: IconType }[] = [
@@ -39,6 +40,7 @@ export default function Profile() {
   const [done, setDone] = useState(false);
   const email = useInputForm(auth.email!);
   const name = useInputForm(business.name!);
+  const [emailSent, setEmailSent] = useState(false);
   const phoneNumber = useInputForm(business.phoneNumber!);
 
   // Current branch data
@@ -153,7 +155,6 @@ export default function Profile() {
       (token: string) => dispatch(setToken(token)),
       (token: string) => updateBranchService(getUpdatedBranch(), token)
     );
-    console.log(response);
 
     if (response.isError) {
       if (!!response.exception) {
@@ -161,6 +162,16 @@ export default function Profile() {
     } else {
     }
   };
+
+  const onForgotClick = async () => {
+    const response = await resetPasswordRequestService(auth.email!);
+
+    if (!!response.isError) {
+      return;
+    }
+
+    setEmailSent(true);
+  }
 
   return (
     !!auth.logged && (
@@ -170,10 +181,10 @@ export default function Profile() {
           picture:
             "https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?cs=srgb&dl=pexels-chan-walrus-941861.jpg&fm=jpg",
           name: business.name!,
-          onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router),
+          onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
           userRole: "business",
           logged: true,
-          currentBranch: `${branch.name!} | ${branch.address}`,
+          currentBranch: !!branch ? `${branch.name!} | ${branch.address}` : "",
           branchOptions: branches.map((branch, index) => {
             return {
               name: `${branch.name!} | ${branch.address}`,
@@ -203,12 +214,12 @@ export default function Profile() {
         phoneNumber={phoneNumber}
         password={password}
         newPassword={newPassword}
+        emailSent={emailSent}
         done={done}
         onSaveName={saveName}
         onSavePhoneNumber={savePhoneNumber}
         onChangePassword={saveNewPassword}
-        // [TODO]
-        onForgotPassword={() => {}}
+        onForgotPassword={onForgotClick}
         haveBranch={branch !== undefined}
         branchName={branchName}
         branchDescription={branchDescription}
