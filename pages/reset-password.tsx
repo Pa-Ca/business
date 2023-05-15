@@ -20,18 +20,7 @@ export default function Signup() {
   const { token } = router.query;
   const password = useInputForm("");
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [completed, setCompleted] = useState(false);
-  const auth = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    // If there is already a logged in user, it is redirected to profile
-    if (!!auth.logged) {
-      router.push("/profile");
-    } else {
-      setLoading(false);
-    }
-  }, [auth.logged]);
+  const [completed, setCompleted] = useState(!!router.query.completed);
 
   const resetPassword = async (password: string) => {
     setError(false);
@@ -45,7 +34,6 @@ export default function Signup() {
 
     if (!!response.isError) {
       setError(true);
-      console.log(response)
       return;
     }
 
@@ -70,19 +58,17 @@ export default function Signup() {
       }}
     >
       <Box style={{ width: "100%" }}>
-        {!loading && (
-          <ResetPasswordComponent
-            error={error}
-            password={password}
-            images={images}
-            completed={completed}
-            onBackToLogin={() => router.push("/login")}
-            onSubmit={() => resetPassword(password.value)}
-            color={MAIN_COLOR}
-            secondaryColor={SECONDARY_COLOR}
-            otherLoginsColor={GREEN}
-          />
-        )}
+        <ResetPasswordComponent
+          error={error}
+          password={password}
+          images={images}
+          completed={completed}
+          onBackToLogin={() => router.push("/login")}
+          onSubmit={() => resetPassword(password.value)}
+          color={MAIN_COLOR}
+          secondaryColor={SECONDARY_COLOR}
+          otherLoginsColor={GREEN}
+        />
       </Box>
     </Box>
   );

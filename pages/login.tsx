@@ -7,6 +7,7 @@ import { useAppSelector } from "../src/context/store";
 import { setBranches } from "../src/context/slices/branches";
 import { loginBusiness } from "../src/context/slices/business";
 import { loginUser, setToken } from "../src/context/slices/auth";
+import { setCurrentBranch } from "../src/context/slices/branches";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import getBranchesService from "../src/services/branch/getBranchesService";
 import loginBusinessService from "../src/services/auth/loginBusinessService";
@@ -83,6 +84,9 @@ export default function Signup() {
     );
 
     dispatch(setBranches(branchesResponse.data!.branches));
+    if (branchesResponse.data!.branches.length > 0) {
+      dispatch(setCurrentBranch(0));
+    }
 
     router.push("/profile");
   };

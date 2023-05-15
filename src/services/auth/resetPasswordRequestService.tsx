@@ -19,7 +19,6 @@ export default async (email: string): Promise<FetchResponse<ResetPasswordDTO>> =
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email }),
     });
-      console.log(response)
 
     if (response.status === 200) {
       const data: ResetPasswordDTO = await response.json();
