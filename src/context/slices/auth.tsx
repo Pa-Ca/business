@@ -6,6 +6,10 @@ export interface AuthProps {
    */
   logged: boolean | null;
   /**
+   * Indicates if the user completed the registration process.
+  */
+  registrationCompleted: boolean | null;
+  /**
    * User ID if logged in
    */
   userId: number | null;
@@ -29,6 +33,7 @@ export interface AuthProps {
 
 const initialState: AuthProps = {
   logged: false,
+  registrationCompleted: false,
   userId: null,
   id: null,
   email: null,
@@ -42,6 +47,7 @@ const auth = createSlice({
   reducers: {
     logoutUser: (state: AuthProps) => {
       state.logged = false;
+      state.registrationCompleted = false;
       state.userId = null;
       state.id = null;
       state.email = null;
