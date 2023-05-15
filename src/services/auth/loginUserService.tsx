@@ -1,25 +1,7 @@
-import { API_ENDPOINT } from "../config";
-import FetchResponse from "../objects/FetchResponse";
-import ExceptionResponse from "../objects/ExceptionResponse";
-
-type LoginResponse = {
-  /**
-   * New User ID
-   */
-  id: number;
-  /**
-   * User token
-   */
-  token: string;
-  /**
-   * User token refresh
-   */
-  refresh: string;
-  /**
-   * Indicate if user is "client" or "business"
-   */
-  role: "client" | "business";
-};
+import { API_ENDPOINT } from "../../config";
+import FetchResponse from "../../objects/FetchResponse";
+import ExceptionResponse from "../../objects/ExceptionResponse";
+import LoginResponseDTO from "../../objects/auth/LoginResponseDTO";
 
 /**
  * @brief Create a new user
@@ -32,7 +14,7 @@ type LoginResponse = {
 export default async (
   email: string,
   password: string
-): Promise<FetchResponse<LoginResponse>> => {
+): Promise<FetchResponse<LoginResponseDTO>> => {
   const uri = `${API_ENDPOINT}/auth/login`;
 
   try {
@@ -43,7 +25,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: LoginResponse = await response.json();
+      const data: LoginResponseDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

@@ -1,9 +1,9 @@
-import { API_ENDPOINT } from "../config";
-import FetchResponse from "../objects/FetchResponse";
-import ExceptionResponse from "../objects/ExceptionResponse";
+import { API_ENDPOINT } from "../../config";
+import FetchResponse from "../../objects/FetchResponse";
+import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Change a user's password
+ * @brief Change a user's password usin a JWT token
  *
  * @param password New user password
  * @param token Token that authorizes the user to make the change

@@ -1,13 +1,7 @@
-import { API_ENDPOINT } from "../config";
-import FetchResponse from "../objects/FetchResponse";
-import ExceptionResponse from "../objects/ExceptionResponse";
-
-type ResetPasswordResponse = {
-  /**
-   * Reset password token
-   */
-  token: string;
-};
+import { API_ENDPOINT } from "../../config";
+import FetchResponse from "../../objects/FetchResponse";
+import ExceptionResponse from "../../objects/ExceptionResponse";
+import ResetPasswordDTO from "../../objects/auth/ResetPasswordDTO";
 
 /**
  * @brief Create a password change request
@@ -16,7 +10,7 @@ type ResetPasswordResponse = {
  *
  * @returns API response
  */
-export default async (email: string): Promise<FetchResponse<ResetPasswordResponse>> => {
+export default async (email: string): Promise<FetchResponse<ResetPasswordDTO>> => {
   const uri = `${API_ENDPOINT}/auth/reset-password-request`;
 
   try {
@@ -28,7 +22,7 @@ export default async (email: string): Promise<FetchResponse<ResetPasswordRespons
       console.log(response)
 
     if (response.status === 200) {
-      const data: ResetPasswordResponse = await response.json();
+      const data: ResetPasswordDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

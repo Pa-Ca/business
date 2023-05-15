@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Box, ResetPasswordComponent } from "paca-ui";
 import { useAppSelector } from "../src/context/store";
+import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import resetPasswordService from "../src/services/resetPasswordService";
+import resetPasswordService from "../src/services/auth/resetPasswordWithTokenService";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -17,14 +18,16 @@ const images = [
 export default function Signup() {
   const router = useRouter();
   const { token } = router.query;
+  const password = useInputForm("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [completed, setCompleted] = useState(false);
   const auth = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
     if (!!auth.logged) {
-      router.replace("/profile");
+      router.push("/profile");
     } else {
       setLoading(false);
     }
@@ -46,7 +49,7 @@ export default function Signup() {
       return;
     }
 
-    router.push("/login");
+    setCompleted(true);
   };
 
   return (
@@ -70,9 +73,11 @@ export default function Signup() {
         {!loading && (
           <ResetPasswordComponent
             error={error}
+            password={password}
             images={images}
-            onBackToLogin={() => router.replace("/login")}
-            onSubmit={(password: string) => resetPassword(password)}
+            completed={completed}
+            onBackToLogin={() => router.push("/login")}
+            onSubmit={() => resetPassword(password.value)}
             color={MAIN_COLOR}
             secondaryColor={SECONDARY_COLOR}
             otherLoginsColor={GREEN}

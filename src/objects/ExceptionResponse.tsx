@@ -14,7 +14,7 @@ type ExceptionResponse = {
   /**
    * Exception message
    */
-  rmessage: string;
+  message: string;
 };
 
 export { type ExceptionResponse as default };

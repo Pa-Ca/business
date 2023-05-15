@@ -1,5 +1,6 @@
 import auth from "./slices/auth";
 import business from "./slices/business";
+import branches from "./slices/branches";
 import storage from "redux-persist/lib/storage";
 import { persistReducer, persistStore } from "redux-persist";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
@@ -9,6 +10,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 const reducer = combineReducers({
   auth,
   business,
+  branches
 });
 
 // Create the configuration object for redux-persist
