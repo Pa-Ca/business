@@ -96,7 +96,6 @@ export default function Signup() {
       email.value,
       password.value
     );
-    console.log(response);
 
     if (response.isError) {
       if (!!response.error) {

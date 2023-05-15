@@ -4,7 +4,7 @@ import BusinessDTO from "../../objects/business/BusinessDTO";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Get the branches of a business given its id
+ * @brief Change the phone number of the business
  *
  * @param id Business id
  * @param phoneNumber New business phone number

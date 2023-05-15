@@ -29,9 +29,7 @@ const branches = createSlice({
       state.branches = action.payload;
     },
     setCurrentBranch: (state: BranchesProps, action: PayloadAction<number>) => {
-      state.current = state.branches.findIndex(
-        (branch) => branch.id === action.payload
-      );
+      state.current = action.payload;
     },
   },
 });

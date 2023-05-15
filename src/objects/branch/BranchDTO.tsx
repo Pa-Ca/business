@@ -24,11 +24,11 @@ type BranchDTO = {
    */
   overview: string;
   /**
-   * Branch phone number. [TODO] agregar al back
+   * Branch phone number
    */
   phoneNumber: string;
   /**
-   * Branch type. [TODO] agregar al back
+   * Branch type
    */
   type: string;
   /**
