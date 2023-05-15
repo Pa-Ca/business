@@ -7,6 +7,6 @@ npm install
 npm run build
 
 # Run production app
-# npm run start
+npm run start
 # Run development app
-npm run dev
+#npm run dev
