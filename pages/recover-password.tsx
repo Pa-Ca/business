@@ -37,7 +37,6 @@ export default function Signup() {
 
     if (!!response.isError) {
       setError(true);
-      console.log(response)
       return;
     }
 

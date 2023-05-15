@@ -3,35 +3,32 @@ import BranchDTO from "../../objects/branch/BranchDTO";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
-type BranchesResponse = {
-  branches: BranchDTO[];
-};
-
 /**
- * @brief Get the branches of a business given its id
+ * @brief Change the data of a branch. Undefined variables will be ignored
  *
- * @param id Business id
+ * @param dto Branch data
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
-  id: number,
+  dto: BranchDTO,
   token: string
-): Promise<FetchResponse<BranchesResponse>> => {
-  const uri = `${API_ENDPOINT}/business/${id}/branches`;
+): Promise<FetchResponse<BranchDTO>> => {
+  const uri = `${API_ENDPOINT}/branch/${dto.id}`;
 
   try {
     const response = await fetch(uri, {
-      method: "GET",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      const data: BranchesResponse = await response.json();
+      const data: BranchDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();
