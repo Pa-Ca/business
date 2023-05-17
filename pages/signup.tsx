@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { Box, SignUpComponent } from "paca-ui";
+import { useSession, signIn } from "next-auth/react"
 import validateName from "../src/utils/validateName";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
@@ -31,6 +32,9 @@ export default function Signup() {
   const email = useInputForm("");
   const password = useInputForm("");
 
+  // Google Auth
+  const { data: session } = useSession()
+
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
     if (!!auth.logged) {
@@ -38,7 +42,7 @@ export default function Signup() {
     } else {
       setLoading(false);
     }
-  }, [auth.logged]);
+  }, [auth.logged, session]);
 
   const validateData = () => {
     let valid = true;
@@ -120,6 +124,7 @@ export default function Signup() {
         logged: true,
         userId: response.data!.userId,
         id: response.data!.id,
+        registrationCompleted: auth.registrationCompleted,
         email: response.data!.email,
         token: response.data!.token,
         refresh: response.data!.refresh,
@@ -170,7 +175,7 @@ export default function Signup() {
               router.push("/terms-and-conditions")
             }
             onBusinessSignUp={signup}
-            onGoogleSignUp={() => {}}
+            onGoogleSignUp={() => signIn("google")}
             color={MAIN_COLOR}
             secondaryColor={SECONDARY_COLOR}
             otherLoginsColor={GREEN}
