@@ -5,11 +5,30 @@ import { Box, BranchReserves } from "paca-ui";
 import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
+import { useAppSelector } from "../src/context/store";
 
 export default function BranchReservations() {
 
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const branches = useAppSelector((state) => state.branches).branches;
+  const branch = branches[useAppSelector((state) => state.branches).current];
+
+  const updateBranch = async () => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => updateBranchService(getUpdatedBranch(), token)
+    );
+
+    if (response.isError) {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
 
   // Reservation data
   const date = useInputForm<Date >(new Date());
