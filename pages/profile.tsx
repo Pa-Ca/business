@@ -282,6 +282,8 @@ export default function Profile() {
             "https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg",
           name: business.name!,
           onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
+          onEditProfile: () => router.push("/profile"),
+          onRightSectionClick: () => router.push("/branch-reservations"),
           userRole: "business",
           logged: true,
           currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
@@ -297,7 +299,6 @@ export default function Profile() {
           // [TODO] Fix onClicks
           onLeftSectionClick: () => {},
           onPacaClick: () => router.reload(),
-          onRightSectionClick: () => router.reload(),
           onProfileClick: () => {},
           color: MAIN_COLOR,
         }}

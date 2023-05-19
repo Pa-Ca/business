@@ -20,7 +20,7 @@ export default async (
   date: string,
   token: string
 ): Promise<FetchResponse<ReservationResponse>> => {
-  const uri = `${API_ENDPOINT}/business/${id}/reservation/${date}`;
+  const uri = `${API_ENDPOINT}/branch/${id}/reservation`;
 
   try {
     const response = await fetch(uri, {
