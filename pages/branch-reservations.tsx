@@ -13,6 +13,7 @@ import fetchAPI from "../src/services/fetchAPI";
 import { setToken } from "../src/context/slices/auth";
 import ReservationDTO from "../src/objects/reservations/ReservationDTO";
 import { error } from "console";
+import logout from "../src/utils/logout";
 
 export default function BranchReservations() {
 
@@ -39,8 +40,9 @@ export default function BranchReservations() {
   const [showModal, setshowModal] = useState(false);
 
   const addDatePlusHour = (date : Date, hour : string) => {
-    // 2023-05-18T18:48:58
-    return date.toString() + hour;
+    const [hours, minutes, seconds] = hour.split(":").map(Number);
+    date.setHours(hours, minutes, seconds);
+    return  date.toISOString();
   }
 
   const getUpdatedReservation = (): ReservationDTO => {
@@ -51,7 +53,7 @@ export default function BranchReservations() {
     id: 69,
     branchId: branch.id,
     guestId: 69,
-    requestDate: new Date(),
+    requestDate: new Date().toISOString(),
     reservationDate: addDatePlusHour(date.value, hourIn.value.value),
     clientNumber: parseInt(persons.value),
     payment: "",
@@ -129,11 +131,13 @@ export default function BranchReservations() {
 
     // Persons validation
     if (!persons.value || persons.value === ""){
+      valid = false;
       persons.setError(true);
       persons.setErrorMessage("Indique el número de personas");
     }  
     // Hour In validation
     if (!hourIn.value.value || hourIn.value.value === ""){
+      valid = false;
       hourIn.setError(true);
       hourIn.setErrorMessage("Indique la hora de llegada");
     } 
@@ -350,7 +354,7 @@ export default function BranchReservations() {
     },
   ];
   const validHoursIn = [
-    { value: '1', name: '9:00 am' },
+    { value: '09:00:00', name: '9:00 am' },
     { value: '2', name: '9:30 am' },
     { value: '3', name: '10:00 am' },
     { value: '4', name: '10:30 am' },
@@ -392,6 +396,9 @@ export default function BranchReservations() {
   const header={
     logged: true,
     onPacaClick: () => {},
+    onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
+    onEditProfile: () => router.push("/profile"),
+    onRightSectionClick: () => router.push("/branch-reservations"),
     picture: "https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?cs=srgb&dl=pexels-chan-walrus-941861.jpg&fm=jpg",
     name: "Sempre Dritto",
     color: "#EF7A08",
