@@ -3,6 +3,7 @@ import acceptReservationService from "../src/services/reservations/acceptReserva
 import cancelReservationService from "../src/services/reservations/cancelReservationService";
 import rejectReservationService from "../src/services/reservations/rejectReservationService";
 import getReservationService from "../src/services/reservations/getReservationService";
+import closeReservationService from "../src/services/reservations/closeReservationService";
 
 import { useDispatch } from "react-redux";
 import { setToken } from "../src/context/slices/auth";
@@ -124,6 +125,28 @@ export default function TestBrachActions () {
         }
     }
 
+    const onCloseReservation = async () => {
+        if (auth) {
+            setLoading(true)
+            setError(false);
+
+            const response = await fetchAPI(
+                auth.token!,
+                auth.refresh!,
+                (token: string) => dispatch(setToken(token)),
+                (token: string) => closeReservationService(1, auth.token || '')
+            );
+
+            if (!!response.isError) {
+                console.log(response)
+                setError(true);
+                return;
+            }
+
+            fetchReservation()
+        }
+    }
+
     if (loading) return <>Loading...</>
 
     if (error) return <>Error</>
@@ -133,6 +156,7 @@ export default function TestBrachActions () {
             <button onClick={onAcceptReservation}>Accept reservation</button>
             <button onClick={onRejectReservation}>Reject reservation</button>
             <button onClick={onCancelReservation}>Cancel reservation</button>
+            <button onClick={onCloseReservation}>Close reservation</button>
 
             <h2>Reservation</h2> <button onClick={onAcceptReservation}>refresh</button>
             <br/><br/>
