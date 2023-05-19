@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-import { Box, BranchReserves, ReservationProps } from "paca-ui";
+import { BranchReserves, ReservationProps } from "paca-ui";
 import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
-import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
+import { setCurrentBranch } from "../src/context/slices/branches";
 import { useAppSelector } from "../src/context/store";
 import postReservationService from "../src/services/reservations/postReservationService";
 import getReservationsService from "../src/services/reservations/getReservationsService";
+import acceptReservationService from "../src/services/reservations/acceptReservationService";
+import cancelReservationService from "../src/services/reservations/cancelReservationService";
 import validateName from "../src/utils/validateName";
 import validateEmail from "../src/utils/validateEmail";
 import fetchAPI from "../src/services/fetchAPI";
 import { setToken } from "../src/context/slices/auth";
 import ReservationDTO from "../src/objects/reservations/ReservationDTO";
-import { error } from "console";
 import logout from "../src/utils/logout";
 import generateValidHours from "../src/utils/generateValidHours";
 import validatePhone from "../src/utils/validatePhone";
+import rejectReservationService from "../src/services/reservations/rejectReservationService";
 
 export default function BranchReservations() {
 
@@ -183,6 +184,54 @@ export default function BranchReservations() {
     }
   };
 
+  const acceptReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => acceptReservationService(id, token)
+    );
+
+    
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
+
+  const rejectReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => rejectReservationService(id, token)
+    );
+
+    
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
+
+  const cancelReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => cancelReservationService(id, token)
+    );
+
+    
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
+
   const onSubmit = () => {
     if (validateData()){
       console.log("Data is VALID")
@@ -195,46 +244,6 @@ export default function BranchReservations() {
     }
     
   };
-
-  const reservations2 = [
-    ...new Array(13).fill({
-      start: "6:00 PM",
-      date: "2021-10-10",
-      owner: "Ivan Tortolero",
-      ownerPhone: "0414-8732414",
-      persons: 6,
-      tables: 6,
-      state: 1,
-}),
-    ...new Array(5).fill({
-      start: "6:00 PM",
-      date: "2021-10-11",
-      owner: "Ivan Tortolero",
-      ownerPhone: "0414-8732414",
-      persons: 6,
-      tables: 6,
-      state: 0,
-    }),
-    ...new Array(8).fill({
-      start: "6:00 PM",
-      date: "2021-10-12",
-      owner: "Ivan Tortolero",
-      ownerPhone: "0414-8732414",
-      persons: 6,
-      tables: 6,
-      state: 0,
-    }),
-    ...new Array(12).fill({
-      start: "6:00 PM",
-      date: "2021-10-13",
-      owner: "Ivan Tortolero",
-      ownerPhone: "0414-8732414",
-      persons: 6,
-      tables: 6,
-      state: 1,
-    }),
-  ];
-  
   
   const validHoursIn = generateValidHours(branch.hourIn,branch.hourOut).map(x => {return {value: x, name: x}});
   const validHoursOut = validHoursIn.slice(1);
@@ -263,6 +272,7 @@ export default function BranchReservations() {
     color: "#EF7A08",
   };
 
+
   useEffect(()=> {
     const getReservations_ = async () => {
 
@@ -277,12 +287,13 @@ export default function BranchReservations() {
           persons: r.clientNumber,
           tables: 1,
           state: r.status,
-          date: r.reservationDate
+          date: r.reservationDate,
+          onCloseReservation: () => cancelReservation(r.id),
+          onReject: () => rejectReservation(r.id),
+          onAccept: () => acceptReservation(r.id),
         }}
       );
       setReservations(aux);
-
-      console.log(aux);
     }
     getReservations_();
   }, []);
