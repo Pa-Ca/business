@@ -13,11 +13,13 @@ export default async (
   dispatch: Dispatch<AnyAction>,
   router: NextRouter,
   nextPage: string = "/login",
-  parameters: ParsedUrlQueryInput = {}
+  parameters: ParsedUrlQueryInput = {},
+  callback: () => void
 ) => {
   router.push({ pathname: nextPage, query: parameters });
   dispatch(logoutBusiness());
   dispatch(logoutUser());
   dispatch(unsetBranches());
+  callback();
   await logoutUserService(token, refresh);
 };
