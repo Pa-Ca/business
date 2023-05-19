@@ -15,7 +15,7 @@ export default async (
   dto: ReservationDTO,
   token: string
 ): Promise<FetchResponse<ReservationDTO>> => {
-  const uri = `${API_ENDPOINT}/branch/${dto.id}`;
+  const uri = `${API_ENDPOINT}/reservation`;
 
   try {
     const response = await fetch(uri, {

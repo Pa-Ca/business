@@ -14,7 +14,7 @@ type ReservationDTO = {
     /**
      * Date the Reservation was requested
      */
-    requestDate: Date;
+    requestDate: string;
     /**
      * Date the Reservation occurs
      */
