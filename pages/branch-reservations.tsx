@@ -10,6 +10,7 @@ import postReservationService from "../src/services/reservations/postReservation
 import getReservationsService from "../src/services/reservations/getReservationsService";
 import acceptReservationService from "../src/services/reservations/acceptReservationService";
 import cancelReservationService from "../src/services/reservations/cancelReservationService";
+import closeReservationService from "../src/services/reservations/closeReservationService";
 import validateName from "../src/utils/validateName";
 import validateEmail from "../src/utils/validateEmail";
 import fetchAPI from "../src/services/fetchAPI";
@@ -232,6 +233,22 @@ export default function BranchReservations() {
     }
   };
 
+  const closeReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => closeReservationService(id, token)
+    );
+
+    
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
+
   const onSubmit = () => {
     if (validateData()){
       console.log("Data is VALID")
@@ -288,7 +305,7 @@ export default function BranchReservations() {
           tables: 1,
           state: r.status,
           date: r.reservationDate,
-          onCloseReservation: () => cancelReservation(r.id),
+          onCloseReservation: () => closeReservation(r.id),
           onReject: () => rejectReservation(r.id),
           onAccept: () => acceptReservation(r.id),
         }}
