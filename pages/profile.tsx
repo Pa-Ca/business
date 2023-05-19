@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import logout from "../src/utils/logout";
-import credentials from "../credentials";
-import { BusinessProfile } from "paca-ui";
+import { BusinessProfile, IconType } from "paca-ui";
 import { useDispatch } from "react-redux";
 import cousines from "../src/utils/cousines";
 import locations from "../src/utils/locations";
 import fetchAPI from "../src/services/fetchAPI";
 import formatTime from "../src/utils/formatTime";
+import {useSession, signOut} from "next-auth/react"
 import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
 import { setName } from "../src/context/slices/business";
@@ -28,11 +28,18 @@ import changePhoneNumberService from "../src/services/business/changePhoneNumber
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
 
+const amenities: { name: string; icon: IconType }[] = [
+  { name: "Bar/Salón", icon: "wine" },
+  { name: "Wifi libre", icon: "wifi" },
+  { name: "Parking", icon: "parking" },
+];
+
 export default function Profile() {
   const router = useRouter();
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
   const business = useAppSelector((state) => state.business);
+  const { data: session } = useSession()
   const branches = useAppSelector((state) => state.branches).branches;
   const branchIndex = useAppSelector((state) => state.branches).current;
   const branch = branches[branchIndex];
@@ -174,7 +181,7 @@ export default function Profile() {
       setDone(true);
       logout(auth.token!, auth.refresh!, dispatch, router, "/reset-password", {
         completed: true,
-      });
+      }, () => { if (session) signOut() });
     }
   };
 
@@ -274,7 +281,7 @@ export default function Profile() {
           picture:
             "https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg",
           name: business.name!,
-          onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router),
+          onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
           userRole: "business",
           logged: true,
           currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
@@ -331,7 +338,7 @@ export default function Profile() {
         // [TODO] Options
         branchTypeOptions={cousines}
         branchLocationOptions={locations}
-        mapsApiKey={credentials.maps_key}
+        mapsApiKey={process.env.GOOGLE_MAPS_API_KEY || ''}
         onSaveBranchName={() => updateBranch()}
         onSaveBranchDescription={() => updateBranch()}
         onSaveBranchLocation={() => updateBranch()}
