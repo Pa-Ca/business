@@ -278,5 +278,5 @@ export default function BranchReservations() {
       setShowModal={setshowModal}
       onSubmit={onsubmit}
     />
-    );
+  );
 }
