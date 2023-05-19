@@ -2,7 +2,16 @@ import auth from "./slices/auth";
 import business from "./slices/business";
 import branches from "./slices/branches";
 import storage from "redux-persist/lib/storage";
-import { persistReducer, persistStore } from "redux-persist";
+import {
+  persistReducer,
+  persistStore,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
@@ -10,7 +19,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 const reducer = combineReducers({
   auth,
   business,
-  branches
+  branches,
 });
 
 // Create the configuration object for redux-persist
@@ -23,6 +32,12 @@ const persistedReducer = persistReducer(persistConfig, reducer);
 // Create the Redux store using configureStore and the persisted reducer
 const store = configureStore({
   reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
 // Infer the RootState and AppDispatch types from the store itself

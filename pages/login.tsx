@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
 import { Box, LoginComponent } from "paca-ui";
 import fetchAPI from "../src/services/fetchAPI";
-import { useSession, signIn } from "next-auth/react"
 import { useAppSelector } from "../src/context/store";
 import { setBranches } from "../src/context/slices/branches";
 import { loginBusiness } from "../src/context/slices/business";
