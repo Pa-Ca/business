@@ -1,0 +1,50 @@
+import { OptionType } from "paca-ui/src/stories/organisms/branchEditForm/BranchEditForm";
+
+const cousines = [
+  "Alemana",
+  "Americana",
+  "Arabe",
+  "Argentina",
+  "Caribeña",
+  "Carnes",
+  "Casera",
+  "China",
+  "Colombiana",
+  "Comida Rápida",
+  "Coreana",
+  "De Autor",
+  "Española",
+  "Francesa",
+  "Fusión",
+  "Gourmet",
+  "Griega",
+  "Internacional",
+  "Italiana",
+  "Japonesa",
+  "Libanesa",
+  "Marroquí",
+  "Mediterránea",
+  "Mexicana",
+  "Parrillada",
+  "Peruana",
+  "Pescados y Mariscos",
+  "Pizzería",
+  "Pollo en Brasas",
+  "Portuguesa",
+  "Rodizio",
+  "Saludable",
+  "Sandwiches",
+  "Suiza",
+  "Tailandesa",
+  "Tapas",
+  "Vasca",
+  "Vegetariana",
+  "Venezolana",
+];
+const sorted = cousines.sort();
+const result: OptionType[] = sorted.map((item) => ({
+  label: item,
+  value: item,
+}));
+
+export default result;

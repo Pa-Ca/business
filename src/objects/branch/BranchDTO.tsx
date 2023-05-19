@@ -1,3 +1,6 @@
+export type Duration = `PT${number}H${number}M${number}S`;
+export type LocalTime = `${number}:${number}:${number}`;
+
 type BranchDTO = {
   /**
    * Branch id
@@ -8,13 +11,13 @@ type BranchDTO = {
    */
   businessId: number;
   /**
-   * Branch address
+   * Branch location
    */
-  address: string;
+  location: string;
   /**
-   * Exact location of the branch
+   * Branch Google Maps URL
    */
-  coordinates: string;
+  mapsLink: string;
   /**
    * Branch name
    */
@@ -23,14 +26,6 @@ type BranchDTO = {
    * Branch overview
    */
   overview: string;
-  /**
-   * Branch phone number
-   */
-  phoneNumber: string;
-  /**
-   * Branch type
-   */
-  type: string;
   /**
    * Branch score given by users
    */
@@ -50,11 +45,27 @@ type BranchDTO = {
   /**
    * Average time a reservation lasts
    */
-  averageReserveTime: number;
+  averageReserveTime: Duration;
   /**
    * Indicates if the branch will be publicly visible
    */
   visibility: boolean;
+  /**
+   * Indicates if the branch will be publicly visible
+   */
+  phoneNumber: string;
+  /**
+   * Branch type
+   */
+  type: string;
+  /**
+   * Branch hour in which it opens
+   */
+  hourIn: LocalTime;
+  /**
+   * Branch hour in which it closes
+   */
+  hourOut: LocalTime;
 };
 
 export { type BranchDTO as default };
