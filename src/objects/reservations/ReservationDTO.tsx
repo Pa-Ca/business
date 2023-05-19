@@ -14,7 +14,7 @@ type ReservationDTO = {
     /**
      * Date the Reservation was requested
      */
-    requestDate: string;
+    requestDate: Date;
     /**
      * Date the Reservation occurs
      */
@@ -30,7 +30,7 @@ type ReservationDTO = {
     /**
      * Reservation status
      */
-    status: string;
+    status: number;
     /**
      * Date when it was payed
      */
@@ -43,7 +43,6 @@ type ReservationDTO = {
      * Reservation occasion
      */
     occasion: string;
-    petition: string;
     /**
      * If reservation was created by client or business
      */

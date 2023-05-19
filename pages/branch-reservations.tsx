@@ -6,29 +6,23 @@ import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import { useAppSelector } from "../src/context/store";
+import postReservationService from "../src/services/reservations/postReservationService";
+import validateName from "../src/utils/validateName";
+import validateEmail from "../src/utils/validateEmail";
+import fetchAPI from "../src/services/fetchAPI";
+import { setToken } from "../src/context/slices/auth";
+import ReservationDTO from "../src/objects/reservations/ReservationDTO";
+import { error } from "console";
 
 export default function BranchReservations() {
 
   const router = useRouter();
   const dispatch = useDispatch();
+  const auth = useAppSelector((state) => state.auth);
 
   const branches = useAppSelector((state) => state.branches).branches;
   const branch = branches[useAppSelector((state) => state.branches).current];
 
-  const updateBranch = async () => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => updateBranchService(getUpdatedBranch(), token)
-    );
-
-    if (response.isError) {
-      if (!!response.exception) {
-      }
-    } else {
-    }
-  };
 
   // Reservation data
   const date = useInputForm<Date >(new Date());
@@ -43,6 +37,135 @@ export default function BranchReservations() {
   const phone = useInputForm("");
   const email = useInputForm("");
   const [showModal, setshowModal] = useState(false);
+
+  const addDatePlusHour = (date : Date, hour : string) => {
+    // 2023-05-18T18:48:58
+    return date.toString() + hour;
+  }
+
+  const getUpdatedReservation = (): ReservationDTO => {
+    if (typeof hourIn.value.value === "number"){
+      throw new Error("hourIn must be string");
+    }
+    return {
+    id: 69,
+    branchId: branch.id,
+    guestId: 69,
+    requestDate: new Date(),
+    reservationDate: addDatePlusHour(date.value, hourIn.value.value),
+    clientNumber: parseInt(persons.value),
+    payment: "",
+    status: 4,
+    payDate: "",
+    price: 0,
+    occasion: occasion.value,
+    byClient: false,
+    haveGuest: true,
+    name: firstName.value,
+    surname: lastName.value,
+    email: email.value,
+    phoneNumber: phone.value,
+    };
+  };
+
+  const validateData = () => {
+    let valid = true;
+
+    // firstName validations
+    const firstNameValidation = validateName(firstName.value);
+    if (firstNameValidation.code !== 0) {
+      valid = false;
+      firstName.setError(true);
+      switch (firstNameValidation.code) {
+        case 1:
+          firstName.setErrorMessage("El nombre debe tener al menos 2 caracteres.");
+          break;
+        default:
+          firstName.setErrorMessage("Nombre inválido.");
+      }
+    }
+
+    // lastName validations
+    const lastNameValidation = validateName(lastName.value);
+    if (lastNameValidation.code !== 0) {
+      valid = false;
+      lastName.setError(true);
+      switch (lastNameValidation.code) {
+        case 1:
+          lastName.setErrorMessage("El apellido debe tener al menos 2 caracteres.");
+          break;
+        default:
+          lastName.setErrorMessage("Apellido inválido.");
+      }
+    }
+
+    // Email validation
+    const emailValidation = validateEmail(email.value);
+    if (emailValidation.code !== 0) {
+      valid = false;
+      email.setError(true);
+      switch (emailValidation.code) {
+        case 1:
+          email.setErrorMessage("Formato de correo inválido.");
+          break;
+        default:
+          email.setErrorMessage("Correo inválido.");
+      }
+    }
+
+    // Email validation
+    // const phoneValidation = validateEmail(phone.value);
+    // if (phoneValidation.code !== 0) {
+    //   valid = false;
+    //   phone.setError(true);
+    //   switch (phoneValidation.code) {
+    //     case 1:
+    //       phone.setErrorMessage("Formato de teléfono inválido.");
+    //       break;
+    //     default:
+    //       phone.setErrorMessage("Teléfono inválido.");
+    //   }
+    // }
+
+    // Persons validation
+    if (!persons.value || persons.value === ""){
+      persons.setError(true);
+      persons.setErrorMessage("Indique el número de personas");
+    }  
+    // Hour In validation
+    if (!hourIn.value.value || hourIn.value.value === ""){
+      hourIn.setError(true);
+      hourIn.setErrorMessage("Indique la hora de llegada");
+    } 
+    return valid;
+  };
+
+  const createReservation = async () => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => postReservationService(getUpdatedReservation(), token)
+    );
+
+    if (response.isError) {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
+
+  const onSubmit = () => {
+    if (validateData()){
+      console.log("Data is VALID")
+      console.log(getUpdatedReservation())
+      createReservation();
+    }
+    else{
+      console.log("INVALID RESERVATION")
+    }
+    
+  };
 
   const reservations = [
     {
@@ -274,8 +397,6 @@ export default function BranchReservations() {
     color: "#EF7A08",
   };
 
-  const onsubmit = () => {};
-
   return (
     <BranchReserves
       reservations={reservations}
@@ -293,9 +414,10 @@ export default function BranchReservations() {
       lastName={lastName}
       phone={phone}
       email={email}
+      haveBranch={branch !== undefined}
       showModal={showModal}
       setShowModal={setshowModal}
-      onSubmit={onsubmit}
+      onSubmit={onSubmit}
     />
     );
 }
