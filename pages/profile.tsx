@@ -1,20 +1,29 @@
 import React, { useEffect, useState } from "react";
+import moment from "moment";
 import { useRouter } from "next/router";
 import logout from "../src/utils/logout";
 import { BusinessProfile, IconType } from "paca-ui";
 import { useDispatch } from "react-redux";
+import cousines from "../src/utils/cousines";
+import locations from "../src/utils/locations";
 import fetchAPI from "../src/services/fetchAPI";
+import formatTime from "../src/utils/formatTime";
 import {useSession, signOut} from "next-auth/react"
 import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
-import BranchDTO from "../src/objects/branch/BranchDTO";
 import { setName } from "../src/context/slices/business";
 import { MAIN_COLOR, SECONDARY_COLOR } from "../src/config";
 import { setPhoneNumber } from "../src/context/slices/business";
-import { setCurrentBranch } from "../src/context/slices/branches";
 import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
+import BranchDTO, {
+  Duration as BranchDuration,
+  LocalTime,
+} from "../src/objects/branch/BranchDTO";
 import changeNameService from "../src/services/business/changeNameService";
+import getBranchesService from "../src/services/branch/getBranchesService";
+import createBranchService from "../src/services/branch/createBranchService";
 import updateBranchService from "../src/services/branch/updateBranchService";
+import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
 import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
@@ -32,7 +41,8 @@ export default function Profile() {
   const business = useAppSelector((state) => state.business);
   const { data: session } = useSession()
   const branches = useAppSelector((state) => state.branches).branches;
-  const branch = branches[useAppSelector((state) => state.branches).current];
+  const branchIndex = useAppSelector((state) => state.branches).current;
+  const branch = branches[branchIndex];
 
   // Business data
   const password = useInputForm("");
@@ -46,21 +56,42 @@ export default function Profile() {
   // Current branch data
   const branchName = useInputForm(branch?.name!);
   const branchType = useInputForm(branch?.type!);
-  const branchLocation = useInputForm(branch?.address!);
+  const branchLocation = useInputForm(branch?.location!);
   const branchPhone = useInputForm(branch?.phoneNumber!);
   const branchDescription = useInputForm(branch?.overview!);
-  const branchMapsLink = useInputForm(branch?.coordinates!);
+  const branchMapsLink = useInputForm(branch?.mapsLink!);
   const branchCapacity = useInputForm(`${branch?.capacity}`);
   const branchPrice = useInputForm(`${branch?.reservationPrice}`);
-  const branchAverageReserveTime = useInputForm(
-    `${branch?.averageReserveTime}`
+
+  const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
+  const currentOpeningTime = moment(branch?.hourIn, "HH:mm:ss");
+  const currentClosingTime = moment(branch?.hourOut, "HH:mm:ss");
+
+  const branchAverageReserveTimeHours = useInputForm(
+    formatTime(currenAverageReserveTime.hours().toString())
   );
+  const branchAverageReserveTimeMinutes = useInputForm(
+    formatTime(currenAverageReserveTime.minutes().toString())
+  );
+  const branchOpeningTimeHour = useInputForm(
+    formatTime(currentOpeningTime.hours().toString())
+  );
+  const branchOpeningTimeMinute = useInputForm(
+    formatTime(currentOpeningTime.minutes().toString())
+  );
+  const branchClosingTimeHour = useInputForm(
+    formatTime(currentClosingTime.hours().toString())
+  );
+  const branchClosingTimeMinute = useInputForm(
+    formatTime(currentClosingTime.minutes().toString())
+  );
+
   const getUpdatedBranch = (): BranchDTO => {
-    return {
+    const dto: BranchDTO = {
       id: branch.id,
       businessId: branch.businessId,
-      address: branchLocation.value,
-      coordinates: branchMapsLink.value,
+      location: branchLocation.value,
+      mapsLink: branchMapsLink.value,
       name: branchName.value,
       overview: branchDescription.value,
       phoneNumber: phoneNumber.value,
@@ -69,9 +100,15 @@ export default function Profile() {
       capacity: parseInt(branchCapacity.value),
       reservationPrice: parseFloat(branchPrice.value),
       reserveOff: branch.reserveOff,
-      averageReserveTime: parseFloat(branchAverageReserveTime.value),
+      averageReserveTime:
+        `PT${branchAverageReserveTimeHours.value}H${branchAverageReserveTimeMinutes.value}M` as BranchDuration,
       visibility: branch.visibility,
+      hourIn:
+        `${branchOpeningTimeHour.value}:${branchOpeningTimeMinute.value}:00` as LocalTime,
+      hourOut:
+        `${branchClosingTimeHour.value}:${branchClosingTimeMinute.value}:00` as LocalTime,
     };
+    return dto;
   };
 
   useEffect(() => {
@@ -156,10 +193,17 @@ export default function Profile() {
       (token: string) => updateBranchService(getUpdatedBranch(), token)
     );
 
-    if (response.isError) {
+    if (response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
     } else {
+      dispatch(
+        setBranches([
+          ...branches.slice(0, branchIndex),
+          response.data!,
+          ...branches.slice(branchIndex + 1, branches.length),
+        ])
+      );
     }
   };
 
@@ -171,7 +215,63 @@ export default function Profile() {
     }
 
     setEmailSent(true);
-  }
+  };
+
+  // Create new branch
+  const onCreateBranch = async () => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) =>
+        createBranchService(
+          {
+            id: 0,
+            businessId: business.id!,
+            location: "",
+            mapsLink: "",
+            name: "Nuevo local",
+            overview: "",
+            phoneNumber: "",
+            type: "",
+            score: 0,
+            capacity: 1,
+            reservationPrice: 0,
+            reserveOff: false,
+            averageReserveTime: "PT0H0M0S",
+            visibility: true,
+            hourIn: "00:00:00",
+            hourOut: "23:59:59",
+          },
+          token
+        )
+    );
+
+    if (response.isError) {
+      if (!!response.exception) {
+      }
+    } else {
+      // Get business branches
+      const branchesResponse = await fetchAPI(
+        auth.token!,
+        auth.refresh!,
+        (token: string) => dispatch(setToken(token)),
+        (token: string) => getBranchesService(auth.id!, token)
+      );
+
+      if (
+        !!branchesResponse.isError ||
+        typeof branchesResponse.data === "string"
+      ) {
+        return;
+      }
+
+      dispatch(setBranches(branchesResponse.data!.branches));
+      dispatch(setCurrentBranch(branchesResponse.data!.branches.length - 1));
+
+      router.reload();
+    }
+  };
 
   return (
     !!auth.logged && (
@@ -179,15 +279,15 @@ export default function Profile() {
         header={{
           // [TODO] Fix header picture
           picture:
-            "https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?cs=srgb&dl=pexels-chan-walrus-941861.jpg&fm=jpg",
+            "https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg",
           name: business.name!,
           onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
           userRole: "business",
           logged: true,
-          currentBranch: !!branch ? `${branch.name!} | ${branch.address}` : "",
+          currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
           branchOptions: branches.map((branch, index) => {
             return {
-              name: `${branch.name!} | ${branch.address}`,
+              name: `${branch.name!} | ${branch.location}`,
               func: () => {
                 dispatch(setCurrentBranch(index));
                 router.reload();
@@ -199,13 +299,13 @@ export default function Profile() {
           onPacaClick: () => router.reload(),
           onRightSectionClick: () => router.reload(),
           onProfileClick: () => {},
+          color: MAIN_COLOR,
         }}
         // [TODO] Fix main business image
         mainImage="https://i.pinimg.com/originals/55/00/d3/5500d308acf37ec5c31cc2e5c7785921.jpg"
         // [TODO] Fix business profile image
         profilePicture="https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg"
-        // [TODO]
-        onCreateBranch={() => {}}
+        onCreateBranch={onCreateBranch}
         // [TODO]
         onPictureClick={() => {}}
         // Business data
@@ -226,13 +326,18 @@ export default function Profile() {
         branchLocation={branchLocation}
         branchPhone={branchPhone}
         branchCapacity={branchCapacity}
-        branchAverageReserveTime={branchAverageReserveTime}
+        branchAverageReserveTimeHours={branchAverageReserveTimeHours}
+        branchAverageReserveTimeMinutes={branchAverageReserveTimeMinutes}
         branchPrice={branchPrice}
         branchMapsLink={branchMapsLink}
         branchType={branchType}
+        branchOpeningTimeHour={branchOpeningTimeHour}
+        branchOpeningTimeMinute={branchOpeningTimeMinute}
+        branchClosingTimeHour={branchClosingTimeHour}
+        branchClosingTimeMinute={branchClosingTimeMinute}
         // [TODO] Options
-        branchTypeOptions={[]}
-        branchLocationOptions={[]}
+        branchTypeOptions={cousines}
+        branchLocationOptions={locations}
         mapsApiKey={process.env.GOOGLE_MAPS_API_KEY || ''}
         onSaveBranchName={() => updateBranch()}
         onSaveBranchDescription={() => updateBranch()}
@@ -243,6 +348,8 @@ export default function Profile() {
         onSaveBranchPrice={() => updateBranch()}
         onSaveBranchType={() => updateBranch()}
         onSaveBranchMapsLink={() => updateBranch()}
+        onSaveBranchClosingTime={() => updateBranch()}
+        onSaveBranchOpeningTime={() => updateBranch()}
         color={MAIN_COLOR}
         secondaryColor={SECONDARY_COLOR}
       />

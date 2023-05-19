@@ -24,6 +24,7 @@
     "copy-webpack-plugin": "6.4.1",
     "eslint": "8.31.0",
     "eslint-config-next": "13.1.1",
+    "moment": "^2.29.4",
     "next": "13.1.1",
     "next-auth": "^4.22.1",
     "paca-ui": "github:Pa-Ca/ui#develop",
