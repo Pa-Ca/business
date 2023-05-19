@@ -18,10 +18,9 @@ export default (hourIn: LocalTime, hourOut: LocalTime) => {
     if (currentHour == 24) currentHour = 0
 
     if (endMinute > 30) {
-    endHour += 1;
-    endMinute = 0;
-    } else if (endMinute > 0) {
     endMinute = 30;
+    } else if (endMinute > 0) {
+    endMinute = 0;
     }
     if (endHour == 24) endHour = 0;
 
@@ -36,5 +35,6 @@ export default (hourIn: LocalTime, hourOut: LocalTime) => {
         }
         if (currentHour === 24) currentHour = 0;
     }
+    result.push(`${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}:00`);
     return result;
 }

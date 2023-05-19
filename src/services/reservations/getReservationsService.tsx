@@ -1,5 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import ReservationDTO from "../../objects/branch/BranchDTO";
+import ReservationDTO from "../../objects/reservations/ReservationDTO";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
@@ -17,7 +17,6 @@ type ReservationResponse = {
  */
 export default async (
   id: number,
-  date: string,
   token: string
 ): Promise<FetchResponse<ReservationResponse>> => {
   const uri = `${API_ENDPOINT}/branch/${id}/reservation`;
