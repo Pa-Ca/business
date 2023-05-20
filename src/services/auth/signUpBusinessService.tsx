@@ -29,6 +29,7 @@ export default async (
   // Create the Business
   const uri = `${API_ENDPOINT}/business`;
   try {
+    console.log(uri)
     const response = await fetch(uri, {
       method: "POST",
       headers: {
