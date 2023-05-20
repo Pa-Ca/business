@@ -106,3 +106,7 @@ dist
 
 .vscode
 credentials.tsx
+
+
+# removing fucking branch images
+public/images/branch-listing-resources/
