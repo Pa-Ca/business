@@ -51,7 +51,7 @@ type BranchDTO = {
    */
   visibility: boolean;
   /**
-   * Indicates if the branch will be publicly visible
+   * Branch phone number
    */
   phoneNumber: string;
   /**
