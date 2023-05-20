@@ -65,7 +65,7 @@ export default function BranchReservations() {
     reservationDate: addDatePlusHour(date.value, hourIn.value.value),
     clientNumber: parseInt(persons.value),
     payment: "",
-    status: 0,
+    status: 1,
     payDate: "",
     price: 0,
     occasion: occasion.value,
@@ -192,12 +192,18 @@ export default function BranchReservations() {
       (token: string) => dispatch(setToken(token)),
       (token: string) => acceptReservationService(id, token)
     );
-
-    
-    if (!!response.isError || typeof response.data === "string") {
+        
+    if (!!response.isError) {
       if (!!response.exception) {
       }
     } else {
+      // for (let i = 0; i < reservations.length; i++) {
+      //   console.log("reserv i", reservations[i]);
+      //   if (reservations[i].id == id){
+      //     console.log("ENTRO");
+      //     reservations[i].state = 2;
+      //   }
+      // }
     }
   };
 
@@ -209,7 +215,6 @@ export default function BranchReservations() {
       (token: string) => rejectReservationService(id, token)
     );
 
-    
     if (!!response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
@@ -252,7 +257,6 @@ export default function BranchReservations() {
   const onSubmit = () => {
     if (validateData()){
       console.log("Data is VALID")
-      console.log(getUpdatedReservation())
       createReservation();
       setshowModal(false);
     }
@@ -292,9 +296,11 @@ export default function BranchReservations() {
 
   useEffect(()=> {
     const getReservations_ = async () => {
-
+      
       const aux = (await getReservations()).map(
-        r => {return {
+        r => {
+          return {
+          id: r.id,
           start : r.reservationDate.substring(
             r.reservationDate.indexOf("T") + 1, 
             r.reservationDate.lastIndexOf(".")
