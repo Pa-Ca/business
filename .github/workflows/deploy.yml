@@ -41,4 +41,4 @@ jobs:
         if: ${{ always() }}
         run: |
           docker rm -f paca-business; 
-          docker run -e NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID}} -e NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{secrets.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET}} -e NEXT_PUBLIC_NEXTAUTH_URL=${{secrets.NEXT_PUBLIC_NEXTAUTH_URL}} -e NEXT_PUBLIC_JWT_SECRET=${{secrets.NEXT_PUBLIC_JWT_SECRET}} -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}} -v "$(pwd)":/app -d --network host --name paca-business ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
+          docker run -e NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID}} -e NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=${{secrets.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET}} -e NEXT_PUBLIC_NEXTAUTH_URL=${{secrets.NEXT_PUBLIC_NEXTAUTH_URL}} -e NEXT_PUBLIC_JWT_SECRET=${{secrets.NEXT_PUBLIC_JWT_SECRET}} -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}} -e NEXT_PUBLIC_API_ENDPOINT=${{secrets.NEXT_PUBLIC_API_ENDPOINT}} -v "$(pwd)":/app -d --network host --name paca-business ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
