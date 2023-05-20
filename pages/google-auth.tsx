@@ -23,7 +23,7 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
     // Logged user redirect
     if (!!auth.logged) {
       if (!!auth.registrationCompleted) {
-        //console.log(!!auth.registrationCompleted)
+        // console.log(!!auth.registrationCompleted)
         //router.replace("/profile");
       }
       else {
@@ -87,7 +87,7 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     handleAuthentication()
-    //console.log(session)
+    // console.log(session)
   }, [session, auth]);
 
   return <>{children}</>;
