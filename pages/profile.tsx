@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import logout from "../src/utils/logout";
-import { BusinessProfile, IconType } from "paca-ui";
+import { BusinessProfile } from "paca-ui";
 import { useDispatch } from "react-redux";
 import cousines from "../src/utils/cousines";
 import locations from "../src/utils/locations";
@@ -12,27 +12,21 @@ import {useSession, signOut} from "next-auth/react"
 import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
 import { setName } from "../src/context/slices/business";
-import { MAIN_COLOR, SECONDARY_COLOR } from "../src/config";
 import { setPhoneNumber } from "../src/context/slices/business";
 import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
-import BranchDTO, {
-  Duration as BranchDuration,
-  LocalTime,
-} from "../src/objects/branch/BranchDTO";
 import changeNameService from "../src/services/business/changeNameService";
 import getBranchesService from "../src/services/branch/getBranchesService";
 import createBranchService from "../src/services/branch/createBranchService";
 import updateBranchService from "../src/services/branch/updateBranchService";
 import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
+import { GOOGLE_MAPS_API_KEY, MAIN_COLOR, SECONDARY_COLOR } from "../src/config";
 import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
-
-const amenities: { name: string; icon: IconType }[] = [
-  { name: "Bar/Salón", icon: "wine" },
-  { name: "Wifi libre", icon: "wifi" },
-  { name: "Parking", icon: "parking" },
-];
+import BranchDTO, {
+  Duration as BranchDuration,
+  LocalTime,
+} from "../src/objects/branch/BranchDTO";
 
 export default function Profile() {
   const router = useRouter();
@@ -94,7 +88,7 @@ export default function Profile() {
       mapsLink: branchMapsLink.value,
       name: branchName.value,
       overview: branchDescription.value,
-      phoneNumber: phoneNumber.value,
+      phoneNumber: branchPhone.value,
       type: branchType.value,
       score: branch.score,
       capacity: parseInt(branchCapacity.value),
@@ -339,7 +333,7 @@ export default function Profile() {
         // [TODO] Options
         branchTypeOptions={cousines}
         branchLocationOptions={locations}
-        mapsApiKey={process.env.GOOGLE_MAPS_API_KEY || ''}
+        mapsApiKey={GOOGLE_MAPS_API_KEY || ''}
         onSaveBranchName={() => updateBranch()}
         onSaveBranchDescription={() => updateBranch()}
         onSaveBranchLocation={() => updateBranch()}
