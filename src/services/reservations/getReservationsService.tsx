@@ -35,7 +35,6 @@ export default async (
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();
-      console.log(exception)
       return { exception, isError: true };
     }
   } catch (e) {
