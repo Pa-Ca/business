@@ -1,6 +1,7 @@
 import NextAuth, { Session } from 'next-auth';
 import { JWT } from 'next-auth/jwt';
 import GoogleProvider from 'next-auth/providers/google';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET } from '../../../src/config';
 
 interface CustomSession extends Session {
   idToken?: string;
@@ -13,11 +14,11 @@ interface CustomJWT extends JWT {
 export default NextAuth({
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || ''
+      clientId: GOOGLE_CLIENT_ID || '',
+      clientSecret: GOOGLE_CLIENT_SECRET || ''
     }),
   ],
-  secret: process.env.JWT_SECRET,
+  secret: JWT_SECRET,
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
