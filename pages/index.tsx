@@ -5,6 +5,10 @@ import { Box, Text } from 'paca-ui';
 import logo from '../public/images/pa-ca-icon.png';
 
 export default function Home() {
+  
+  console.log(process.env.NEXT_PUBLIC_API_ENDPOINT)
+  console.log(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)
+
   return (
     <Box>
       {/* <div id='progress-bar'> <div></div></div> */}
