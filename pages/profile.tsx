@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import logout from "../src/utils/logout";
-import { BusinessProfile } from "paca-ui";
 import { useDispatch } from "react-redux";
 import cousines from "../src/utils/cousines";
 import locations from "../src/utils/locations";
 import fetchAPI from "../src/services/fetchAPI";
+import PageProps from "../src/objects/PageProps";
 import formatTime from "../src/utils/formatTime";
-import {useSession, signOut} from "next-auth/react"
+import { useSession, signOut } from "next-auth/react";
 import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
+import { BusinessProfile, HeaderProps } from "paca-ui";
 import { setName } from "../src/context/slices/business";
 import { setPhoneNumber } from "../src/context/slices/business";
 import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
@@ -19,7 +20,6 @@ import getBranchesService from "../src/services/branch/getBranchesService";
 import createBranchService from "../src/services/branch/createBranchService";
 import updateBranchService from "../src/services/branch/updateBranchService";
 import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
-import { GOOGLE_MAPS_API_KEY, MAIN_COLOR, SECONDARY_COLOR } from "../src/config";
 import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
@@ -27,13 +27,18 @@ import BranchDTO, {
   Duration as BranchDuration,
   LocalTime,
 } from "../src/objects/branch/BranchDTO";
+import {
+  GOOGLE_MAPS_API_KEY,
+  MAIN_COLOR,
+  SECONDARY_COLOR,
+} from "../src/config";
 
-export default function Profile() {
+export default function Profile({ header }: PageProps) {
   const router = useRouter();
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
   const business = useAppSelector((state) => state.business);
-  const { data: session } = useSession()
+  const { data: session } = useSession();
   const branches = useAppSelector((state) => state.branches).branches;
   const branchIndex = useAppSelector((state) => state.branches).current;
   const branch = branches[branchIndex];
@@ -173,9 +178,19 @@ export default function Profile() {
       password.setValue("");
       newPassword.setValue("");
       setDone(true);
-      logout(auth.token!, auth.refresh!, dispatch, router, "/reset-password", {
-        completed: true,
-      }, () => { if (session) signOut() });
+      logout(
+        auth.token!,
+        auth.refresh!,
+        dispatch,
+        router,
+        "/reset-password",
+        {
+          completed: true,
+        },
+        () => {
+          if (session) signOut();
+        }
+      );
     }
   };
 
@@ -270,32 +285,7 @@ export default function Profile() {
   return (
     !!auth.logged && (
       <BusinessProfile
-        header={{
-          // [TODO] Fix header picture
-          picture:
-            "https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg",
-          name: business.name!,
-          onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
-          onEditProfile: () => router.push("/profile"),
-          onRightSectionClick: () => router.push("/branch-reservations"),
-          userRole: "business",
-          logged: true,
-          currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
-          branchOptions: branches.map((branch, index) => {
-            return {
-              name: `${branch.name!} | ${branch.location}`,
-              func: () => {
-                dispatch(setCurrentBranch(index));
-                router.reload();
-              },
-            };
-          }),
-          // [TODO] Fix onClicks
-          onLeftSectionClick: () => {},
-          onPacaClick: () => router.reload(),
-          onProfileClick: () => {},
-          color: MAIN_COLOR,
-        }}
+        header={header}
         // [TODO] Fix main business image
         mainImage="https://i.pinimg.com/originals/55/00/d3/5500d308acf37ec5c31cc2e5c7785921.jpg"
         // [TODO] Fix business profile image
@@ -333,7 +323,7 @@ export default function Profile() {
         // [TODO] Options
         branchTypeOptions={cousines}
         branchLocationOptions={locations}
-        mapsApiKey={GOOGLE_MAPS_API_KEY || ''}
+        mapsApiKey={GOOGLE_MAPS_API_KEY || ""}
         onSaveBranchName={() => updateBranch()}
         onSaveBranchDescription={() => updateBranch()}
         onSaveBranchLocation={() => updateBranch()}

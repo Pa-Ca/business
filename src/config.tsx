@@ -1,7 +1,7 @@
 /**
  * Pa'ca backend endpoint
  */
-export const API_ENDPOINT = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+export const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 /**
  * Google client secret
  */

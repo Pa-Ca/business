@@ -23,7 +23,6 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
     // Logged user redirect
     if (!!auth.logged) {
       if (!!auth.registrationCompleted) {
-        // console.log(!!auth.registrationCompleted)
         //router.replace("/profile");
       }
       else {
@@ -57,14 +56,12 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
 
       // Google Token Verification failed
       if (!!loginResponse.isError || loginResponse.exception?.code !== 9){
-        //console.log("Can't Login");
       }
 
       // Try SignUp
       const signupResponse = await googleSignUpUserService(idToken);
 
       if (!!signupResponse.isError) {
-        //console.log("Can't SignUp");
         //signOut()
         return;
       }
@@ -87,7 +84,6 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     handleAuthentication()
-    // console.log(session)
   }, [session, auth]);
 
   return <>{children}</>;

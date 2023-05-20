@@ -1,45 +1,40 @@
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
+import fetchAPI from "../src/services/fetchAPI";
+import PageProps from "../src/objects/PageProps";
+import validateName from "../src/utils/validateName";
+import { setToken } from "../src/context/slices/auth";
+import { useAppSelector } from "../src/context/store";
+import validateEmail from "../src/utils/validateEmail";
+import validatePhone from "../src/utils/validatePhone";
 import { BranchReserves, ReservationProps } from "paca-ui";
+import generateValidHours from "../src/utils/generateValidHours";
 import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
-import { setCurrentBranch } from "../src/context/slices/branches";
-import { useAppSelector } from "../src/context/store";
 import postReservationService from "../src/services/reservations/postReservationService";
 import getReservationsService from "../src/services/reservations/getReservationsService";
+import closeReservationService from "../src/services/reservations/closeReservationService";
 import acceptReservationService from "../src/services/reservations/acceptReservationService";
 import cancelReservationService from "../src/services/reservations/cancelReservationService";
-import closeReservationService from "../src/services/reservations/closeReservationService";
-import validateName from "../src/utils/validateName";
-import validateEmail from "../src/utils/validateEmail";
-import fetchAPI from "../src/services/fetchAPI";
-import { setToken } from "../src/context/slices/auth";
-import ReservationDTO from "../src/objects/reservations/ReservationDTO";
-import logout from "../src/utils/logout";
-import generateValidHours from "../src/utils/generateValidHours";
-import validatePhone from "../src/utils/validatePhone";
 import rejectReservationService from "../src/services/reservations/rejectReservationService";
+import ReservationDTO, {
+  toReservationProps,
+} from "../src/objects/reservations/ReservationDTO";
 
-export default function BranchReservations() {
-
-  const router = useRouter();
+export default function BranchReservations({ header }: PageProps) {
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
-
   const branches = useAppSelector((state) => state.branches).branches;
   const branch = branches[useAppSelector((state) => state.branches).current];
-
-  const [reservations, setReservations] = useState<ReservationProps[]>([]);  
-
+  const [reservations, setReservations] = useState<ReservationProps[]>([]);
 
   // Reservation data
-  const date = useInputForm<Date >(new Date());
-  const hourIn = useInputForm<OptionObject >({ value: "", name: "" });
-  const hourOut = useInputForm<OptionObject >({ value: "", name: "" });
-  const persons = useInputForm<string >("");
-  const occasion = useInputForm<string >("");
-  
+  const persons = useInputForm<string>("");
+  const occasion = useInputForm<string>("");
+  const date = useInputForm<Date>(new Date());
+  const hourIn = useInputForm<OptionObject>({ value: "", name: "" });
+  const hourOut = useInputForm<OptionObject>({ value: "", name: "" });
+
   // Client data
   const firstName = useInputForm("");
   const lastName = useInputForm("");
@@ -47,34 +42,34 @@ export default function BranchReservations() {
   const email = useInputForm("");
   const [showModal, setshowModal] = useState(false);
 
-  const addDatePlusHour = (date : Date, hour : string) => {
+  const addDatePlusHour = (date: Date, hour: string) => {
     const [hours, minutes, seconds] = hour.split(":").map(Number);
     date.setHours(hours, minutes, seconds);
-    return  date.toISOString();
-  }
+    return date.toISOString();
+  };
 
   const getUpdatedReservation = (): ReservationDTO => {
-    if (typeof hourIn.value.value === "number"){
+    if (typeof hourIn.value.value === "number") {
       throw new Error("hourIn must be string");
     }
     return {
-    id: 69,
-    branchId: branch.id,
-    guestId: 69,
-    requestDate: new Date().toISOString(),
-    reservationDate: addDatePlusHour(date.value, hourIn.value.value),
-    clientNumber: parseInt(persons.value),
-    payment: "",
-    status: 1,
-    payDate: "",
-    price: 0,
-    occasion: occasion.value,
-    byClient: false,
-    haveGuest: true,
-    name: firstName.value,
-    surname: lastName.value,
-    email: email.value,
-    phoneNumber: phone.value,
+      id: 69,
+      branchId: branch.id,
+      guestId: 69,
+      requestDate: new Date().toISOString(),
+      reservationDate: addDatePlusHour(date.value, hourIn.value.value),
+      clientNumber: parseInt(persons.value),
+      payment: "",
+      status: 1,
+      payDate: "",
+      price: 0,
+      occasion: occasion.value,
+      byClient: false,
+      haveGuest: true,
+      name: firstName.value,
+      surname: lastName.value,
+      email: email.value,
+      phoneNumber: phone.value,
     };
   };
 
@@ -88,7 +83,9 @@ export default function BranchReservations() {
       firstName.setError(true);
       switch (firstNameValidation.code) {
         case 1:
-          firstName.setErrorMessage("El nombre debe tener al menos 2 caracteres.");
+          firstName.setErrorMessage(
+            "El nombre debe tener al menos 2 caracteres."
+          );
           break;
         default:
           firstName.setErrorMessage("Nombre inválido.");
@@ -102,7 +99,9 @@ export default function BranchReservations() {
       lastName.setError(true);
       switch (lastNameValidation.code) {
         case 1:
-          lastName.setErrorMessage("El apellido debe tener al menos 2 caracteres.");
+          lastName.setErrorMessage(
+            "El apellido debe tener al menos 2 caracteres."
+          );
           break;
         default:
           lastName.setErrorMessage("Apellido inválido.");
@@ -138,17 +137,17 @@ export default function BranchReservations() {
     }
 
     // Persons validation
-    if (!persons.value || persons.value === ""){
+    if (!persons.value || persons.value === "") {
       valid = false;
       persons.setError(true);
       persons.setErrorMessage("Indique el número de personas");
-    }  
+    }
     // Hour In validation
-    if (!hourIn.value.value || hourIn.value.value === ""){
+    if (!hourIn.value.value || hourIn.value.value === "") {
       valid = false;
       hourIn.setError(true);
       hourIn.setErrorMessage("Indique la hora de llegada");
-    } 
+    }
     return valid;
   };
 
@@ -160,10 +159,20 @@ export default function BranchReservations() {
       (token: string) => postReservationService(getUpdatedReservation(), token)
     );
 
-    if (response.isError) {
+    if (response.isError || typeof response.data! === "string") {
       if (!!response.exception) {
       }
     } else {
+      const id = response.data!.id;
+      setReservations([
+        ...reservations,
+        {
+          ...toReservationProps(response.data!),
+          onCloseReservation: () => closeReservation(id),
+          onReject: () => rejectReservation(id),
+          onAccept: () => acceptReservation(id),
+        },
+      ]);
     }
   };
 
@@ -175,7 +184,6 @@ export default function BranchReservations() {
       (token: string) => getReservationsService(branch.id, token)
     );
 
-    
     if (!!response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
@@ -192,18 +200,23 @@ export default function BranchReservations() {
       (token: string) => dispatch(setToken(token)),
       (token: string) => acceptReservationService(id, token)
     );
-        
+
     if (!!response.isError) {
       if (!!response.exception) {
       }
     } else {
-      // for (let i = 0; i < reservations.length; i++) {
-      //   console.log("reserv i", reservations[i]);
-      //   if (reservations[i].id == id){
-      //     console.log("ENTRO");
-      //     reservations[i].state = 2;
-      //   }
-      // }
+      // Change state of reservation
+      setReservations((reservations) => {
+        return reservations.map((reservation) => {
+          if (reservation.id === id) {
+            return {
+              ...reservation,
+              state: 2,
+            };
+          }
+          return reservation;
+        });
+      });
     }
   };
 
@@ -219,6 +232,18 @@ export default function BranchReservations() {
       if (!!response.exception) {
       }
     } else {
+      // Change state of reservation
+      setReservations((reservations) => {
+        return reservations.map((reservation) => {
+          if (reservation.id === id) {
+            return {
+              ...reservation,
+              state: 3,
+            };
+          }
+          return reservation;
+        });
+      });
     }
   };
 
@@ -230,7 +255,6 @@ export default function BranchReservations() {
       (token: string) => cancelReservationService(id, token)
     );
 
-    
     if (!!response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
@@ -246,78 +270,53 @@ export default function BranchReservations() {
       (token: string) => closeReservationService(id, token)
     );
 
-    
     if (!!response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
     } else {
+      // Change state of reservation
+      setReservations((reservations) => {
+        return reservations.map((reservation) => {
+          if (reservation.id === id) {
+            return {
+              ...reservation,
+              state: 4,
+            };
+          }
+          return reservation;
+        });
+      });
     }
   };
 
   const onSubmit = () => {
-    if (validateData()){
-      console.log("Data is VALID")
+    if (validateData()) {
       createReservation();
       setshowModal(false);
+    } else {
     }
-    else{
-      console.log("INVALID RESERVATION")
-    }
-    
   };
-  
-  const validHoursIn = generateValidHours(branch.hourIn,branch.hourOut).map(x => {return {value: x, name: x}});
+
+  const validHoursIn = generateValidHours(branch.hourIn, branch.hourOut).map(
+    (x) => {
+      return { value: x, name: x };
+    }
+  );
   const validHoursOut = validHoursIn.slice(1);
   validHoursIn.pop();
 
-  const userRole: "business" = "business";
-  const header={
-    logged: true,
-    onPacaClick: () => {},
-    onLogout: () => logout(auth.token!, auth.refresh!, dispatch, router, undefined, undefined, () => {}),
-    onEditProfile: () => router.push("/profile"),
-    onRightSectionClick: () => router.push("/branch-reservations"),
-    userRole: userRole,
-    currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
-    branchOptions: branches.map((branch, index) => {
-      return {
-        name: `${branch.name!} | ${branch.location}`,
-        func: () => {
-          dispatch(setCurrentBranch(index));
-          router.reload();
-        },
-      };
-    }),
-    picture: "https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg?cs=srgb&dl=pexels-chan-walrus-941861.jpg&fm=jpg",
-    name: "Sempre Dritto",
-    color: "#EF7A08",
-  };
-
-
-  useEffect(()=> {
+  useEffect(() => {
     const getReservations_ = async () => {
-      
-      const aux = (await getReservations()).map(
-        r => {
-          return {
-          id: r.id,
-          start : r.reservationDate.substring(
-            r.reservationDate.indexOf("T") + 1, 
-            r.reservationDate.lastIndexOf(".")
-          ),
-          owner: r.name + "" + r.surname,
-          ownerPhone: r.phoneNumber,
-          persons: r.clientNumber,
-          tables: 1,
-          state: r.status,
-          date: r.reservationDate,
+      const aux = (await getReservations()).map((r) => {
+        return {
+          ...toReservationProps(r),
           onCloseReservation: () => closeReservation(r.id),
           onReject: () => rejectReservation(r.id),
           onAccept: () => acceptReservation(r.id),
-        }}
-      );
+        };
+      });
       setReservations(aux);
-    }
+    };
     getReservations_();
   }, []);
 
@@ -344,5 +343,5 @@ export default function BranchReservations() {
       setShowModal={setshowModal}
       onSubmit={onSubmit}
     />
-    );
+  );
 }
