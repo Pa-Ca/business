@@ -65,6 +65,8 @@ export default function Profile({ header }: PageProps) {
   const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
   const currentOpeningTime = moment(branch?.hourIn, "HH:mm:ss");
   const currentClosingTime = moment(branch?.hourOut, "HH:mm:ss");
+  const currentOpeningHour = branch?.hourIn.split(":")[0];
+  const currentClosingHour = branch?.hourOut.split(":")[0];
 
   const branchAverageReserveTimeHours = useInputForm(
     formatTime(currenAverageReserveTime.hours().toString())
@@ -72,20 +74,27 @@ export default function Profile({ header }: PageProps) {
   const branchAverageReserveTimeMinutes = useInputForm(
     formatTime(currenAverageReserveTime.minutes().toString())
   );
-  const branchOpeningTimeHour = useInputForm(
-    formatTime(currentOpeningTime.hours().toString())
-  );
+  const branchOpeningTimeHour = useInputForm(currentOpeningHour);
   const branchOpeningTimeMinute = useInputForm(
     formatTime(currentOpeningTime.minutes().toString())
   );
-  const branchClosingTimeHour = useInputForm(
-    formatTime(currentClosingTime.hours().toString())
-  );
+  const branchClosingTimeHour = useInputForm(currentClosingHour);
   const branchClosingTimeMinute = useInputForm(
     formatTime(currentClosingTime.minutes().toString())
   );
 
   const getUpdatedBranch = (): BranchDTO => {
+    const hourIn =
+      branchOpeningTimeHour.value === "24"
+        ? "23:59:59"
+        : `${branchOpeningTimeHour.value}:${branchOpeningTimeMinute.value}:00`;
+    const hourOut =
+      branchClosingTimeHour.value === "24"
+        ? "23:59:59"
+        : `${branchClosingTimeHour.value}:${branchClosingTimeMinute.value}:00`;
+    const averageReserveTime =
+      `PT${branchAverageReserveTimeHours.value}H${branchAverageReserveTimeMinutes.value}M` as BranchDuration;
+
     const dto: BranchDTO = {
       id: branch.id,
       businessId: branch.businessId,
@@ -99,13 +108,10 @@ export default function Profile({ header }: PageProps) {
       capacity: parseInt(branchCapacity.value),
       reservationPrice: parseFloat(branchPrice.value),
       reserveOff: branch.reserveOff,
-      averageReserveTime:
-        `PT${branchAverageReserveTimeHours.value}H${branchAverageReserveTimeMinutes.value}M` as BranchDuration,
+      averageReserveTime: averageReserveTime as BranchDuration,
       visibility: branch.visibility,
-      hourIn:
-        `${branchOpeningTimeHour.value}:${branchOpeningTimeMinute.value}:00` as LocalTime,
-      hourOut:
-        `${branchClosingTimeHour.value}:${branchClosingTimeMinute.value}:00` as LocalTime,
+      hourIn: hourIn as LocalTime,
+      hourOut: hourOut as LocalTime,
     };
     return dto;
   };

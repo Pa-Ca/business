@@ -22,18 +22,17 @@ export default (hourIn: LocalTime, hourOut: LocalTime) => {
     } else if (endMinute > 0) {
     endMinute = 0;
     }
-    if (endHour == 24) endHour = 0;
 
     const result = [""];
 
     while (currentHour != endHour || currentMinute != endMinute) {
+        if (currentHour === 24) currentHour = 0;
         result.push(`${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}:00`);
         currentMinute += 30;
         if (currentMinute === 60) {
             currentHour += 1;
             currentMinute = 0;
         }
-        if (currentHour === 24) currentHour = 0;
     }
     result.push(`${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}:00`);
     return result;

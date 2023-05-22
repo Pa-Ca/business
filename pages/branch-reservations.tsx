@@ -165,10 +165,10 @@ export default function BranchReservations({ header }: PageProps) {
       const [hourOutHours, hourOutMinutes] = hourOut.value.value
         .split(":")
         .map(Number);
-      if (hourInHours > hourOutHours || (hourInHours === hourOutHours && hourInMinutes >= hourOutMinutes)) {
+      if (hourInHours === hourOutHours &&  hourInMinutes === hourOutMinutes) {
         valid = false;
         hourIn.setError(true);
-        hourIn.setErrorMessage("La llegada debe ser antes que la salida");
+        hourIn.setErrorMessage("La llegada no puede ser igual a la salida");
       }
     }
 
