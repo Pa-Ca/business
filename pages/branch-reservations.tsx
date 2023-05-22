@@ -44,7 +44,7 @@ export default function BranchReservations({ header }: PageProps) {
 
   const addDatePlusHour = (date: Date, hour: string) => {
     const [hours, minutes, seconds] = hour.split(":").map(Number);
-    date.setHours(hours, minutes, seconds);
+    date.setHours(hours, minutes, seconds, 0);
     return date.toISOString();
   };
 
