@@ -3,21 +3,9 @@
  */
 export const API_ENDPOINT = process.env.NEXT_PUBLIC_API_ENDPOINT;
 /**
- * Google client secret
- */
-export const GOOGLE_CLIENT_SECRET = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_SECRET;
-/**
  * Google maps API key
  */
 export const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-/**
- * Google client id
- */
-export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
-/**
- * JWT secret token
- */
-export const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET;
 /**
  * App main color
  */
