@@ -322,7 +322,7 @@ const locations = [
   "La Unión",
   "Sartanejas",
   "Hoyo de la Puerta",
-  "La Trinidad",
+  "Lomas de La Trinidad",
   "Guaicay",
   "La Ciudadela",
   "Sorocaima",
