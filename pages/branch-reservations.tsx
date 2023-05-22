@@ -75,6 +75,12 @@ export default function BranchReservations({ header }: PageProps) {
 
   const validateData = () => {
     let valid = true;
+    firstName.setError(false);
+    lastName.setError(false);
+    email.setError(false);
+    phone.setError(false);
+    persons.setError(false);
+    hourIn.setError(false);
 
     // firstName validations
     const firstNameValidation = validateName(firstName.value);
@@ -148,6 +154,24 @@ export default function BranchReservations({ header }: PageProps) {
       hourIn.setError(true);
       hourIn.setErrorMessage("Indique la hora de llegada");
     }
+
+    // Check that hourIn is less than hourOut
+    if (!!hourOut.value.value || hourOut.value.value !== "") {
+      if (typeof hourIn.value.value === "number") return false;
+      if (typeof hourOut.value.value === "number") return false;
+      const [hourInHours, hourInMinutes] = hourIn.value.value
+        .split(":")
+        .map(Number);
+      const [hourOutHours, hourOutMinutes] = hourOut.value.value
+        .split(":")
+        .map(Number);
+      if (hourInHours > hourOutHours || (hourInHours === hourOutHours && hourInMinutes >= hourOutMinutes)) {
+        valid = false;
+        hourIn.setError(true);
+        hourIn.setErrorMessage("La llegada debe ser antes que la salida");
+      }
+    }
+
     return valid;
   };
 
@@ -302,7 +326,7 @@ export default function BranchReservations({ header }: PageProps) {
       return { value: x, name: x };
     }
   );
-  const validHoursOut = validHoursIn.slice(1);
+  const validHoursOut = [validHoursIn[0], ...validHoursIn.slice(2)];
   validHoursIn.pop();
 
   useEffect(() => {

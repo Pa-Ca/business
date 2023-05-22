@@ -24,7 +24,7 @@ export default (hourIn: LocalTime, hourOut: LocalTime) => {
     }
     if (endHour == 24) endHour = 0;
 
-    const result = [];
+    const result = [""];
 
     while (currentHour != endHour || currentMinute != endMinute) {
         result.push(`${currentHour.toString().padStart(2, "0")}:${currentMinute.toString().padStart(2, "0")}:00`);
