@@ -87,7 +87,6 @@ export default function Login() {
 
     // Change hourIn and hourOut from 23:59:59 to 24:00:00
     branchesResponse.data!.branches.forEach((branch) => {
-      console.log(branch)
       if (branch.hourIn === "23:59:59") {
         branch.hourIn = "24:00:00";
       }
@@ -95,8 +94,12 @@ export default function Login() {
         branch.hourOut = "24:00:00";
       }
     });
-    dispatch(setBranches(branchesResponse.data!.branches));
-    if (branchesResponse.data!.branches.length > 0) {
+
+    const branchList = branchesResponse.data!.branches.filter(
+      (branch) => !branch.deleted
+    );
+    dispatch(setBranches(branchList));
+    if (branchList.length > 0) {
       dispatch(setCurrentBranch(0));
     }
 

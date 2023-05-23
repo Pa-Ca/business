@@ -112,6 +112,7 @@ export default function Profile({ header }: PageProps) {
       visibility: branch.visibility,
       hourIn: hourIn as LocalTime,
       hourOut: hourOut as LocalTime,
+      deleted: false,
     };
     return dto;
   };
@@ -200,25 +201,39 @@ export default function Profile({ header }: PageProps) {
     }
   };
 
-  const updateBranch = async () => {
+  const updateBranch = async (deleted: boolean = false) => {
+    const dto = getUpdatedBranch();
+    dto.deleted = deleted;
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
       (token: string) => dispatch(setToken(token)),
-      (token: string) => updateBranchService(getUpdatedBranch(), token)
+      (token: string) => updateBranchService(dto, token)
     );
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
     } else {
-      dispatch(
-        setBranches([
+      if (!deleted) {
+        dispatch(
+          setBranches([
+            ...branches.slice(0, branchIndex),
+            response.data!,
+            ...branches.slice(branchIndex + 1, branches.length),
+          ])
+        );
+      } else {
+        const branchList = [
           ...branches.slice(0, branchIndex),
-          response.data!,
           ...branches.slice(branchIndex + 1, branches.length),
-        ])
-      );
+        ];
+        dispatch(setBranches(branchList));
+        if (branchList.length > 0) {
+          dispatch(setCurrentBranch(0));
+        }
+        router.reload();
+      }
     }
   };
 
@@ -257,6 +272,7 @@ export default function Profile({ header }: PageProps) {
             visibility: true,
             hourIn: "00:00:00",
             hourOut: "23:59:59",
+            deleted: false,
           },
           token
         )
@@ -281,8 +297,11 @@ export default function Profile({ header }: PageProps) {
         return;
       }
 
-      dispatch(setBranches(branchesResponse.data!.branches));
-      dispatch(setCurrentBranch(branchesResponse.data!.branches.length - 1));
+      const branchList = branchesResponse.data!.branches.filter(
+        (branch) => !branch.deleted
+      );
+      dispatch(setBranches(branchList));
+      dispatch(setCurrentBranch(branchList.length - 1));
 
       router.reload();
     }
@@ -341,6 +360,7 @@ export default function Profile({ header }: PageProps) {
         onSaveBranchMapsLink={() => updateBranch()}
         onSaveBranchClosingTime={() => updateBranch()}
         onSaveBranchOpeningTime={() => updateBranch()}
+        onDeleteBranch={() => updateBranch(true)}
         color={MAIN_COLOR}
         secondaryColor={SECONDARY_COLOR}
       />
