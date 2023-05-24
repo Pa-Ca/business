@@ -148,6 +148,13 @@ export default function BranchReservations({ header }: PageProps) {
       persons.setError(true);
       persons.setErrorMessage("Indique el número de personas");
     }
+    else{
+      if (parseInt(persons.value) < 1){
+        valid = false;
+        persons.setError(true);
+        persons.setErrorMessage("Indique al menos una persona");
+      }
+    }
     // Hour In validation
     if (!hourIn.value.value || hourIn.value.value === "") {
       valid = false;
