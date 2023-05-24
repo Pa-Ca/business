@@ -51,7 +51,7 @@ export default function Signup() {
     const nameValidation = validateName(name.value);
     if (nameValidation.code !== 0) {
       valid = false;
-      name.setError(true);
+      name.setError(1);
       switch (nameValidation.code) {
         case 1:
           name.setErrorMessage("El nombre debe tener al menos 8 caracteres.");
@@ -65,7 +65,7 @@ export default function Signup() {
     const emailValidation = validateEmail(email.value);
     if (emailValidation.code !== 0) {
       valid = false;
-      email.setError(true);
+      email.setError(1);
       switch (emailValidation.code) {
         case 1:
           email.setErrorMessage("Formato de correo inválido.");
@@ -79,7 +79,7 @@ export default function Signup() {
     const passwordValidation = validatePassword(password.value);
     if (passwordValidation !== 0) {
       valid = false;
-      password.setError(true);
+      password.setError(1);
       switch (passwordValidation) {
         case 1:
           password.setErrorMessage(
@@ -107,11 +107,11 @@ export default function Signup() {
       } else {
         switch (response.exception!.code) {
           case 1:
-            email.setError(true);
+            email.setError(1);
             email.setErrorMessage("Correo ya registrado.");
             break;
           default:
-            email.setError(true);
+            email.setError(1);
             email.setErrorMessage("Correo inválido.");
             break;
         }

@@ -134,7 +134,7 @@ export default function Profile({ header }: PageProps) {
     );
 
     if (response.isError) {
-      name.setError(true);
+      name.setError(1);
       name.setErrorMessage("Error guardando el nombre.");
     } else {
       dispatch(setName(name.value));
@@ -151,7 +151,7 @@ export default function Profile({ header }: PageProps) {
     );
 
     if (response.isError) {
-      phoneNumber.setError(true);
+      phoneNumber.setError(1);
       phoneNumber.setErrorMessage("Error guardando el numero de telefono.");
     } else {
       dispatch(setPhoneNumber(phoneNumber.value));
@@ -173,11 +173,11 @@ export default function Profile({ header }: PageProps) {
             newPassword.setErrorMessage(
               "La contraseña debe tener entre 8 y 64 caracteres."
             );
-            newPassword.setError(true);
+            newPassword.setError(1);
             break;
           case 9:
             password.setErrorMessage("Contraseña incorrecta");
-            password.setError(true);
+            password.setError(1);
             break;
         }
       }

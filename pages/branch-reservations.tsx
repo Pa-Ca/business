@@ -75,18 +75,18 @@ export default function BranchReservations({ header }: PageProps) {
 
   const validateData = () => {
     let valid = true;
-    firstName.setError(false);
-    lastName.setError(false);
-    email.setError(false);
-    phone.setError(false);
-    persons.setError(false);
-    hourIn.setError(false);
+    firstName.setError(0);
+    lastName.setError(0);
+    email.setError(0);
+    phone.setError(0);
+    persons.setError(0);
+    hourIn.setError(0);
 
     // firstName validations
     const firstNameValidation = validateName(firstName.value);
     if (firstNameValidation.code !== 0) {
       valid = false;
-      firstName.setError(true);
+      firstName.setError(1);
       switch (firstNameValidation.code) {
         case 1:
           firstName.setErrorMessage(
@@ -102,7 +102,7 @@ export default function BranchReservations({ header }: PageProps) {
     const lastNameValidation = validateName(lastName.value);
     if (lastNameValidation.code !== 0) {
       valid = false;
-      lastName.setError(true);
+      lastName.setError(1);
       switch (lastNameValidation.code) {
         case 1:
           lastName.setErrorMessage(
@@ -118,7 +118,7 @@ export default function BranchReservations({ header }: PageProps) {
     const emailValidation = validateEmail(email.value);
     if (emailValidation.code !== 0) {
       valid = false;
-      email.setError(true);
+      email.setError(1);
       switch (emailValidation.code) {
         case 1:
           email.setErrorMessage("Formato de correo inválido.");
@@ -132,7 +132,7 @@ export default function BranchReservations({ header }: PageProps) {
     const phoneValidation = validatePhone(phone.value);
     if (phoneValidation.code !== 0) {
       valid = false;
-      phone.setError(true);
+      phone.setError(1);
       switch (phoneValidation.code) {
         case 1:
           phone.setErrorMessage("Formato de teléfono inválido.");
@@ -145,20 +145,28 @@ export default function BranchReservations({ header }: PageProps) {
     // Persons validation
     if (!persons.value || persons.value === "") {
       valid = false;
-      persons.setError(true);
+      persons.setError(1);
       persons.setErrorMessage("Indique el número de personas");
     }
     else{
+      try {
+        parseInt(persons.value)
+      } catch (error) {
+        valid = false;
+        persons.setError(1);
+        persons.setErrorMessage("Indique un número postivo");
+      }
       if (parseInt(persons.value) < 1){
         valid = false;
-        persons.setError(true);
+        persons.setError(1);
         persons.setErrorMessage("Indique al menos una persona");
       }
     }
+
     // Hour In validation
     if (!hourIn.value.value || hourIn.value.value === "") {
       valid = false;
-      hourIn.setError(true);
+      hourIn.setError(1);
       hourIn.setErrorMessage("Indique la hora de llegada");
     }
 
@@ -174,7 +182,7 @@ export default function BranchReservations({ header }: PageProps) {
         .map(Number);
       if (hourInHours === hourOutHours &&  hourInMinutes === hourOutMinutes) {
         valid = false;
-        hourIn.setError(true);
+        hourIn.setError(1);
         hourIn.setErrorMessage("La llegada no puede ser igual a la salida");
       }
     }
@@ -349,7 +357,20 @@ export default function BranchReservations({ header }: PageProps) {
       setReservations(aux);
     };
     getReservations_();
-  }, []);
+
+    // Warning Persons
+    try {
+      parseInt(persons.value)
+      if (parseInt(persons.value) > branch.capacity){
+        persons.setError(2);
+        persons.setErrorMessage("Excede la capacidad del local");
+      }
+      else {
+        if (persons.error != 1) persons.setError(0);
+      }
+    } catch (error) {
+    }
+  }, [persons]);
 
   return (
     <BranchReserves
