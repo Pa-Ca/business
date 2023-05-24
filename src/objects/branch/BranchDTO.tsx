@@ -66,6 +66,10 @@ type BranchDTO = {
    * Branch hour in which it closes
    */
   hourOut: LocalTime;
+  /**
+   * Indicate if the branch is deleted
+   */
+  deleted: boolean;
 };
 
 export { type BranchDTO as default };
