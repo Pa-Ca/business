@@ -32,8 +32,8 @@ export default function BranchReservations({ header }: PageProps) {
   const persons = useInputForm<string>("");
   const occasion = useInputForm<string>("");
   const date = useInputForm<Date>(new Date());
-  const hourIn = useInputForm<OptionObject>({ value: "", name: "" });
-  const hourOut = useInputForm<OptionObject>({ value: "", name: "" });
+  const hourIn = useInputForm<OptionObject>({ text: "", label: "" });
+  const hourOut = useInputForm<OptionObject>({ text: "", label: "" });
 
   // Client data
   const firstName = useInputForm("");
@@ -49,7 +49,7 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const getUpdatedReservation = (): ReservationDTO => {
-    if (typeof hourIn.value.value === "number") {
+    if (typeof hourIn.value.text === "number") {
       throw new Error("hourIn must be string");
     }
     return {
@@ -57,7 +57,7 @@ export default function BranchReservations({ header }: PageProps) {
       branchId: branch.id,
       guestId: 69,
       requestDate: new Date().toISOString(),
-      reservationDate: addDatePlusHour(date.value, hourIn.value.value),
+      reservationDate: addDatePlusHour(date.value, hourIn.value.text!),
       clientNumber: parseInt(persons.value),
       payment: "",
       status: 1,
@@ -164,20 +164,20 @@ export default function BranchReservations({ header }: PageProps) {
     }
 
     // Hour In validation
-    if (!hourIn.value.value || hourIn.value.value === "") {
+    if (!hourIn.value.text || hourIn.value.text === "") {
       valid = false;
       hourIn.setError(1);
       hourIn.setErrorMessage("Indique la hora de llegada");
     }
 
     // Check that hourIn is less than hourOut
-    if (!!hourOut.value.value || hourOut.value.value !== "") {
-      if (typeof hourIn.value.value === "number") return false;
-      if (typeof hourOut.value.value === "number") return false;
-      const [hourInHours, hourInMinutes] = hourIn.value.value
+    if (!!hourOut.value.text || hourOut.value.text !== "") {
+      if (typeof hourIn.value.text === "number") return false;
+      if (typeof hourOut.value.text === "number") return false;
+      const [hourInHours, hourInMinutes] = hourIn.value.text!
         .split(":")
         .map(Number);
-      const [hourOutHours, hourOutMinutes] = hourOut.value.value
+      const [hourOutHours, hourOutMinutes] = hourOut.value.text!
         .split(":")
         .map(Number);
       if (hourInHours === hourOutHours &&  hourInMinutes === hourOutMinutes) {
@@ -338,7 +338,7 @@ export default function BranchReservations({ header }: PageProps) {
 
   const validHoursIn = generateValidHours(branch.hourIn, branch.hourOut).map(
     (x) => {
-      return { value: x, name: x };
+      return { text: x, label: x };
     }
   );
   const validHoursOut = [validHoursIn[0], ...validHoursIn.slice(2)];
@@ -372,8 +372,13 @@ export default function BranchReservations({ header }: PageProps) {
     }
   }, [persons]);
 
+  const durationHour = parseInt(branch.averageReserveTime.substring(2,4));
+  const durationMin = parseInt(branch.averageReserveTime.substring(4,6));
+
   return (
     <BranchReserves
+      durationHour={durationHour}
+      durationMin={durationMin}
       reservations={reservations}
       color={"#EF7A08"}
       submitButtonColor="#EF7A08"
