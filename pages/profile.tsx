@@ -2,24 +2,28 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import logout from "../src/utils/logout";
+import { BusinessProfile } from "paca-ui";
 import { useDispatch } from "react-redux";
 import cousines from "../src/utils/cousines";
 import locations from "../src/utils/locations";
 import fetchAPI from "../src/services/fetchAPI";
 import PageProps from "../src/objects/PageProps";
 import formatTime from "../src/utils/formatTime";
+import validateName from "../src/utils/validateName";
 import { useSession, signOut } from "next-auth/react";
 import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
-import { BusinessProfile, HeaderProps } from "paca-ui";
+import validatePhone from "../src/utils/validatePhone";
 import { setName } from "../src/context/slices/business";
 import { setPhoneNumber } from "../src/context/slices/business";
-import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import changeNameService from "../src/services/business/changeNameService";
 import getBranchesService from "../src/services/branch/getBranchesService";
 import createBranchService from "../src/services/branch/createBranchService";
 import updateBranchService from "../src/services/branch/updateBranchService";
 import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
+import useInputForm, {
+  InputFormHook,
+} from "paca-ui/src/stories/hooks/useInputForm";
 import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
@@ -32,6 +36,7 @@ import {
   MAIN_COLOR,
   SECONDARY_COLOR,
 } from "../src/config";
+import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
 
 export default function Profile({ header }: PageProps) {
   const router = useRouter();
@@ -248,34 +253,167 @@ export default function Profile({ header }: PageProps) {
   };
 
   // Create new branch
-  const onCreateBranch = async () => {
+  const onCreateBranch = async (
+    name: InputFormHook<string>,
+    phoneNumber: InputFormHook<string>,
+    price: InputFormHook<string>,
+    type: InputFormHook<OptionObject>,
+    capacity: InputFormHook<string>,
+    location: InputFormHook<OptionObject>,
+    averageReserveTimeHours: InputFormHook<string>,
+    averageReserveTimeMinutes: InputFormHook<string>,
+    openingTimeHour: InputFormHook<string>,
+    openingTimeMinute: InputFormHook<string>,
+    closingTimeHour: InputFormHook<string>,
+    closingTimeMinute: InputFormHook<string>,
+    description: InputFormHook<string>,
+    mapsLink: InputFormHook<string>
+  ) => {
+    let error = false;
+    let validation;
+
+    // Verify that the name have at least 3 characters
+    validation = validateName(name.value);
+    if (validation.code !== 0) {
+      name.setValue(validation.processedName);
+      name.setError(1);
+      name.setErrorMessage("El nombre debe tener al menos 3 caracteres.");
+      error = true;
+    }
+
+    // Verify that capacity is positive
+    if (parseInt(capacity.value) <= 0) {
+      capacity.setError(1);
+      capacity.setErrorMessage("La capacidad debe ser mayor a 0.");
+      error = true;
+    }
+
+    // Verify that the average reserve time hours is valid
+    if (averageReserveTimeHours.value === "") {
+      averageReserveTimeHours.setError(1);
+      averageReserveTimeHours.setErrorMessage(
+        "Debe ingresar la cantidad de horas."
+      );
+      error = true;
+    }
+
+    // Verify that the average reserve time minutes is valid
+    if (averageReserveTimeMinutes.value === "") {
+      averageReserveTimeMinutes.setError(1);
+      averageReserveTimeMinutes.setErrorMessage(
+        "Debe ingresar la cantidad de minutos."
+      );
+      error = true;
+    }
+
+    // Verify that the type is not empty
+    if (type.value.text === null || type.value.text === "") {
+      type.setError(1);
+      type.setErrorMessage("Debe seleccionar un tipo.");
+      error = true;
+    }
+
+    // Verify that the cost is not empty nor zero
+    if (price.value === "" || parseFloat(price.value) <= 0) {
+      price.setError(1);
+      price.setErrorMessage("Debe ingresar un precio mayor a 0.");
+      error = true;
+    }
+
+    // Verify that the opening time hour is valid
+    if (openingTimeHour.value === "") {
+      openingTimeHour.setError(1);
+      openingTimeHour.setErrorMessage("Debe ingresar la hora de apertura.");
+      error = true;
+    }
+
+    // Verify that the opening time minute is valid
+    if (openingTimeMinute.value === "") {
+      openingTimeMinute.setError(1);
+      openingTimeMinute.setErrorMessage(
+        "Debe ingresar los minutos de apertura."
+      );
+      error = true;
+    }
+
+    // Verify that the closing time hour is valid
+    if (closingTimeHour.value === "") {
+      closingTimeHour.setError(1);
+      closingTimeHour.setErrorMessage("Debe ingresar la hora de cierre.");
+      error = true;
+    }
+
+    // Verify that the closing time minute is valid
+    if (closingTimeMinute.value === "") {
+      closingTimeMinute.setError(1);
+      closingTimeMinute.setErrorMessage("Debe ingresar los minutos de cierre.");
+      error = true;
+    }
+
+    // Verify that the phone number is valid
+    validation = validatePhone(phoneNumber.value);
+    if (validation.code !== 0) {
+      phoneNumber.setValue(validation.processedPhone);
+      phoneNumber.setError(1);
+      phoneNumber.setErrorMessage("El número de teléfono no es válido.");
+    }
+
+    // Verify that the location is not empty
+    if (location.value.text === null || location.value.text === "") {
+      location.setError(1);
+      location.setErrorMessage("Debe seleccionar una ubicación.");
+      error = true;
+    }
+
+    if (error) {
+      return;
+    }
+
+    const hourIn: LocalTime =
+      openingTimeHour.value === "24"
+        ? "23:59:59"
+        : (`${parseInt(openingTimeHour.value)
+            .toString()
+            .padStart(2, "0")}:${parseInt(openingTimeMinute.value)
+            .toString()
+            .padStart(2, "0")}:00` as LocalTime);
+    const hourOut: LocalTime =
+      closingTimeHour.value === "24"
+        ? "23:59:59"
+        : (`${parseInt(closingTimeHour.value)
+            .toString()
+            .padStart(2, "0")}:${parseInt(closingTimeMinute.value)
+            .toString()
+            .padStart(2, "0")}:00` as LocalTime);
+
+    const dto: BranchDTO = {
+      id: 0,
+      businessId: business.id!,
+      location: location.value.text!,
+      mapsLink: mapsLink.value,
+      name: name.value,
+      overview: description.value,
+      phoneNumber: phoneNumber.value,
+      type: type.value.text!,
+      score: 0,
+      capacity: parseInt(capacity.value),
+      reservationPrice: parseFloat(price.value),
+      reserveOff: false,
+      averageReserveTime: `PT${parseInt(
+        averageReserveTimeHours.value
+      )}H${parseInt(averageReserveTimeMinutes.value)}M0S`,
+      visibility: true,
+      hourIn,
+      hourOut,
+      deleted: false,
+    };
+    console.log(dto);
+
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
       (token: string) => dispatch(setToken(token)),
-      (token: string) =>
-        createBranchService(
-          {
-            id: 0,
-            businessId: business.id!,
-            location: "",
-            mapsLink: "",
-            name: "Nuevo local",
-            overview: "",
-            phoneNumber: "",
-            type: "",
-            score: 0,
-            capacity: 1,
-            reservationPrice: 0,
-            reserveOff: false,
-            averageReserveTime: "PT0H0M0S",
-            visibility: true,
-            hourIn: "00:00:00",
-            hourOut: "23:59:59",
-            deleted: false,
-          },
-          token
-        )
+      (token: string) => createBranchService(dto, token)
     );
 
     if (response.isError) {

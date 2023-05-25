@@ -1,5 +1,3 @@
-import { OptionType } from "paca-ui/src/stories/organisms/branchEditForm/BranchEditForm";
-
 const cousines = [
   "Alemana",
   "Americana",
@@ -42,9 +40,9 @@ const cousines = [
   "Venezolana",
 ];
 const sorted = cousines.sort();
-const result: OptionType[] = sorted.map((item) => ({
+const result = sorted.map((item) => ({
   label: item,
-  value: item,
+  text: item,
 }));
 
 export default result;

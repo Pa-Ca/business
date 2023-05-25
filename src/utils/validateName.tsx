@@ -1,4 +1,4 @@
-const MIN_NAME_LENGTH = 2;
+const MIN_NAME_LENGTH = 3;
 
 export default (name: string) => {
   const result: { processedName: string; code: number } = {
