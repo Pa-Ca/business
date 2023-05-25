@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import moment from "moment";
 import { useDispatch } from "react-redux";
 import fetchAPI from "../src/services/fetchAPI";
+import formatTime from "../src/utils/formatTime";
 import PageProps from "../src/objects/PageProps";
 import validateName from "../src/utils/validateName";
 import { setToken } from "../src/context/slices/auth";
@@ -17,6 +19,7 @@ import closeReservationService from "../src/services/reservations/closeReservati
 import acceptReservationService from "../src/services/reservations/acceptReservationService";
 import cancelReservationService from "../src/services/reservations/cancelReservationService";
 import rejectReservationService from "../src/services/reservations/rejectReservationService";
+
 import ReservationDTO, {
   toReservationProps,
 } from "../src/objects/reservations/ReservationDTO";
@@ -357,7 +360,9 @@ export default function BranchReservations({ header }: PageProps) {
       setReservations(aux);
     };
     getReservations_();
+  }, []);
 
+  useEffect(() => {
     // Warning Persons
     try {
       parseInt(persons.value)
@@ -370,15 +375,20 @@ export default function BranchReservations({ header }: PageProps) {
       }
     } catch (error) {
     }
-  }, [persons]);
+  }, [persons.value]);
 
-  const durationHour = parseInt(branch.averageReserveTime.substring(2,4));
-  const durationMin = parseInt(branch.averageReserveTime.substring(4,6));
+  const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
+  const branchAverageReserveTimeHours = (
+    parseInt(formatTime(currenAverageReserveTime.hours().toString()))
+  );
+  const branchAverageReserveTimeMinutes = (
+    parseInt(formatTime(currenAverageReserveTime.minutes().toString()))
+  );
 
   return (
     <BranchReserves
-      durationHour={durationHour}
-      durationMin={durationMin}
+      durationHour={branchAverageReserveTimeHours}
+      durationMin={branchAverageReserveTimeMinutes}
       reservations={reservations}
       color={"#EF7A08"}
       submitButtonColor="#EF7A08"
