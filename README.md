@@ -1,5 +1,17 @@
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
+## Instalation
+Run this command to initialize paca-ui submodule
+
+```bash
+git submodule update --init
+```
+
+If you want to use the develop branch of paca-ui
+```bash
+cd src/paca-ui/
+git checkout develop
+```
 ## Getting Started
 
 First, run the development server:
