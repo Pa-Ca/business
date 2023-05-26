@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
+import { OptionObject } from "paca-ui";
 import { useRouter } from "next/router";
 import logout from "../src/utils/logout";
 import { BusinessProfile } from "paca-ui";
@@ -13,6 +14,7 @@ import validateName from "../src/utils/validateName";
 import { useSession, signOut } from "next-auth/react";
 import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
+import { useInputForm, InputFormHook } from "paca-ui";
 import validatePhone from "../src/utils/validatePhone";
 import { setName } from "../src/context/slices/business";
 import { setPhoneNumber } from "../src/context/slices/business";
@@ -21,9 +23,6 @@ import getBranchesService from "../src/services/branch/getBranchesService";
 import createBranchService from "../src/services/branch/createBranchService";
 import updateBranchService from "../src/services/branch/updateBranchService";
 import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
-import useInputForm, {
-  InputFormHook,
-} from "paca-ui/src/stories/hooks/useInputForm";
 import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
@@ -36,7 +35,6 @@ import {
   MAIN_COLOR,
   SECONDARY_COLOR,
 } from "../src/config";
-import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
 
 export default function Profile({ header }: PageProps) {
   const router = useRouter();
@@ -483,7 +481,6 @@ export default function Profile({ header }: PageProps) {
         branchOpeningTimeMinute={branchOpeningTimeMinute}
         branchClosingTimeHour={branchClosingTimeHour}
         branchClosingTimeMinute={branchClosingTimeMinute}
-        // [TODO] Options
         branchTypeOptions={cousines}
         branchLocationOptions={locations}
         mapsApiKey={GOOGLE_MAPS_API_KEY || ""}
@@ -499,6 +496,7 @@ export default function Profile({ header }: PageProps) {
         onSaveBranchClosingTime={() => updateBranch()}
         onSaveBranchOpeningTime={() => updateBranch()}
         onDeleteBranch={() => updateBranch(true)}
+        onSaveProfilePicture={() => {}} // [TODO]
         color={MAIN_COLOR}
         secondaryColor={SECONDARY_COLOR}
       />

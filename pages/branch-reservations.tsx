@@ -9,20 +9,22 @@ import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
 import validatePhone from "../src/utils/validatePhone";
-import { BranchReserves, ReservationProps } from "paca-ui";
 import generateValidHours from "../src/utils/generateValidHours";
-import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
-import OptionObject from "paca-ui/src/stories/utils/objects/OptionObject";
 import postReservationService from "../src/services/reservations/postReservationService";
 import getReservationsService from "../src/services/reservations/getReservationsService";
 import closeReservationService from "../src/services/reservations/closeReservationService";
 import acceptReservationService from "../src/services/reservations/acceptReservationService";
 import cancelReservationService from "../src/services/reservations/cancelReservationService";
 import rejectReservationService from "../src/services/reservations/rejectReservationService";
-
 import ReservationDTO, {
   toReservationProps,
 } from "../src/objects/reservations/ReservationDTO";
+import {
+  BranchReserves,
+  ReservationProps,
+  useInputForm,
+  OptionObject,
+} from "paca-ui";
 
 export default function BranchReservations({ header }: PageProps) {
   const dispatch = useDispatch();
@@ -150,16 +152,15 @@ export default function BranchReservations({ header }: PageProps) {
       valid = false;
       persons.setError(1);
       persons.setErrorMessage("Indique el número de personas");
-    }
-    else{
+    } else {
       try {
-        parseInt(persons.value)
+        parseInt(persons.value);
       } catch (error) {
         valid = false;
         persons.setError(1);
         persons.setErrorMessage("Indique un número postivo");
       }
-      if (parseInt(persons.value) < 1){
+      if (parseInt(persons.value) < 1) {
         valid = false;
         persons.setError(1);
         persons.setErrorMessage("Indique al menos una persona");
@@ -177,13 +178,13 @@ export default function BranchReservations({ header }: PageProps) {
     if (!!hourOut.value.text || hourOut.value.text !== "") {
       if (typeof hourIn.value.text === "number") return false;
       if (typeof hourOut.value.text === "number") return false;
-      const [hourInHours, hourInMinutes] = hourIn.value.text!
-        .split(":")
+      const [hourInHours, hourInMinutes] = hourIn.value
+        .text!.split(":")
         .map(Number);
-      const [hourOutHours, hourOutMinutes] = hourOut.value.text!
-        .split(":")
+      const [hourOutHours, hourOutMinutes] = hourOut.value
+        .text!.split(":")
         .map(Number);
-      if (hourInHours === hourOutHours &&  hourInMinutes === hourOutMinutes) {
+      if (hourInHours === hourOutHours && hourInMinutes === hourOutMinutes) {
         valid = false;
         hourIn.setError(1);
         hourIn.setErrorMessage("La llegada no puede ser igual a la salida");
@@ -365,24 +366,22 @@ export default function BranchReservations({ header }: PageProps) {
   useEffect(() => {
     // Warning Persons
     try {
-      parseInt(persons.value)
-      if (parseInt(persons.value) > branch.capacity){
+      parseInt(persons.value);
+      if (parseInt(persons.value) > branch.capacity) {
         persons.setError(2);
         persons.setErrorMessage("Excede la capacidad del local");
-      }
-      else {
+      } else {
         if (persons.error != 1) persons.setError(0);
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   }, [persons.value]);
 
   const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
-  const branchAverageReserveTimeHours = (
-    parseInt(formatTime(currenAverageReserveTime.hours().toString()))
+  const branchAverageReserveTimeHours = parseInt(
+    formatTime(currenAverageReserveTime.hours().toString())
   );
-  const branchAverageReserveTimeMinutes = (
-    parseInt(formatTime(currenAverageReserveTime.minutes().toString()))
+  const branchAverageReserveTimeMinutes = parseInt(
+    formatTime(currenAverageReserveTime.minutes().toString())
   );
 
   return (

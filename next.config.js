@@ -10,7 +10,7 @@ const nextConfig = {
       new CopyPlugin({
         patterns: [
           {
-            from: path.resolve(__dirname, "./node_modules/paca-ui/src/stories/assets/images/"),
+            from: path.resolve(__dirname, "./src/paca-ui/src/stories/assets/images/"),
             to: path.resolve(__dirname, "./public/images/"),
           },
         ],

@@ -13,7 +13,8 @@
     "dev": "next dev -p 3001",
     "build": "next build",
     "start": "next start -p 3001",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "cd src/paca-ui/ && npm ci"
   },
   "dependencies": {
     "@next/font": "13.1.1",
@@ -27,7 +28,6 @@
     "moment": "^2.29.4",
     "next": "13.1.1",
     "next-auth": "^4.22.1",
-    "paca-ui": "github:Pa-Ca/ui#develop",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-redux": "8.0.5",
