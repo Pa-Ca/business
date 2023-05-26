@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-import { Box, SignUpComponent } from "paca-ui";
-import { useSession, signIn } from "next-auth/react"
+import { useSession, signIn } from "next-auth/react";
 import validateName from "../src/utils/validateName";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
 import { loginUser } from "../src/context/slices/auth";
+import { Box, SignUpComponent, useInputForm } from "paca-ui";
 import validatePassword from "../src/utils/validatePassword";
 import { loginBusiness } from "../src/context/slices/business";
-import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import signUpBusinessService from "../src/services/auth/signUpBusinessService";
 
@@ -33,7 +32,7 @@ export default function Signup() {
   const password = useInputForm("");
 
   // Google Auth
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   useEffect(() => {
     // If there is already a logged in user, it is redirected to profile
@@ -68,7 +67,7 @@ export default function Signup() {
       email.setError(1);
       switch (emailValidation.code) {
         case 1:
-          email.setErrorMessage("Formato de correo inválido.");
+          email.setErrorMessage("Correo inválido.");
           break;
         default:
           email.setErrorMessage("Correo inválido.");
@@ -147,23 +146,19 @@ export default function Signup() {
   return (
     <Box
       style={{
-        paddingLeft: "105px",
-        paddingRight: "105px",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        height: "100%",
-        width: "100%",
+        paddingRight: "5vw",
+        paddingLeft: "5vw",
+        paddingTop: "7vh",
+        paddingBottom: "7vh",
+        height: "100vh",
         display: "flex",
-        flexDirection: "row",
         alignItems: "center",
       }}
     >
       <Box style={{ width: "100%" }}>
         {!loading && (
           <SignUpComponent
+            height="90vh"
             images={images}
             interval={3000}
             email={email}

@@ -109,23 +109,19 @@ export default function Login() {
   return (
     <Box
       style={{
-        paddingLeft: "105px",
-        paddingRight: "105px",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        height: "100%",
-        width: "100%",
+        paddingRight: "5vw",
+        paddingLeft: "5vw",
+        paddingTop: "7vh",
+        paddingBottom: "7vh",
+        height: "100vh",
         display: "flex",
-        flexDirection: "row",
         alignItems: "center",
       }}
     >
       <Box style={{ width: "100%" }}>
         {!loading && (
           <LoginComponent
+            height="90vh"
             error={error}
             images={images}
             color={MAIN_COLOR}

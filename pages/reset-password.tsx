@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { Box, ResetPasswordComponent } from "paca-ui";
-import { useAppSelector } from "../src/context/store";
-import useInputForm from "paca-ui/src/stories/hooks/useInputForm";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
+import { Box, ResetPasswordComponent, useInputForm } from "paca-ui";
 import resetPasswordService from "../src/services/auth/resetPasswordWithTokenService";
 
 const images = [
@@ -42,23 +40,19 @@ export default function Signup() {
 
   return (
     <Box
-      style={{
-        paddingLeft: "105px",
-        paddingRight: "105px",
-        position: "absolute",
-        top: 0,
-        right: 0,
-        bottom: 0,
-        left: 0,
-        height: "100%",
-        width: "100%",
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "center",
-      }}
+    style={{
+      paddingRight: "5vw",
+      paddingLeft: "5vw",
+      paddingTop: "7vh",
+      paddingBottom: "7vh",
+      height: "100vh",
+      display: "flex",
+      alignItems: "center",
+    }}
     >
       <Box style={{ width: "100%" }}>
         <ResetPasswordComponent
+          height="90vh"
           error={error}
           password={password}
           images={images}

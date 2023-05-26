@@ -31,6 +31,8 @@ export default function BranchReservations({ header }: PageProps) {
   const auth = useAppSelector((state) => state.auth);
   const branches = useAppSelector((state) => state.branches).branches;
   const branch = branches[useAppSelector((state) => state.branches).current];
+  const [validHoursIn, setValidHoursIn] = useState<OptionObject[]>([]);
+  const [validHoursOut, setValidHoursOut] = useState<OptionObject[]>([]);
   const [reservations, setReservations] = useState<ReservationProps[]>([]);
 
   // Reservation data
@@ -340,13 +342,19 @@ export default function BranchReservations({ header }: PageProps) {
     }
   };
 
-  const validHoursIn = generateValidHours(branch.hourIn, branch.hourOut).map(
-    (x) => {
-      return { text: x, label: x };
-    }
-  );
-  const validHoursOut = [validHoursIn[0], ...validHoursIn.slice(2)];
-  validHoursIn.pop();
+  useEffect(() => {
+    if (!branch) return;
+    const validHoursIn_ = generateValidHours(branch.hourIn, branch.hourOut).map(
+      (x) => {
+        return { text: x, label: x };
+      }
+    );
+    const validHoursOut_ = [validHoursIn_[0], ...validHoursIn_.slice(2)];
+    validHoursIn_.pop();
+
+    setValidHoursIn(validHoursIn_);
+    setValidHoursOut(validHoursOut_);
+  }, [])
 
   useEffect(() => {
     const getReservations_ = async () => {
