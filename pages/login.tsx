@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
-import { Box, LoginComponent } from "paca-ui";
 import fetchAPI from "../src/services/fetchAPI";
 import { useAppSelector } from "../src/context/store";
+import { Box, Login as LoginComponent } from "paca-ui";
 import { setBranches } from "../src/context/slices/branches";
 import { loginBusiness } from "../src/context/slices/business";
 import { loginUser, setToken } from "../src/context/slices/auth";
@@ -107,33 +107,20 @@ export default function Login() {
   };
 
   return (
-    <Box
-      style={{
-        paddingRight: "5vw",
-        paddingLeft: "5vw",
-        paddingTop: "7vh",
-        paddingBottom: "7vh",
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Box style={{ width: "100%" }}>
-        {!loading && (
-          <LoginComponent
-            height="90vh"
-            error={error}
-            images={images}
-            color={MAIN_COLOR}
-            onLogin={login}
-            onForgotClick={() => router.push("/recover-password")}
-            onGoogleSignUp={() => signIn("google")}
-            onSignUp={() => router.replace("/signup")}
-            secondaryColor={SECONDARY_COLOR}
-            otherLoginsColor={GREEN}
-          />
-        )}
-      </Box>
+    <Box>
+      {!loading && (
+        <LoginComponent
+          error={error}
+          images={images}
+          color={MAIN_COLOR}
+          onLogin={login}
+          onForgotClick={() => router.push("/recover-password")}
+          onGoogleSignUp={() => signIn("google")}
+          onSignUp={() => router.replace("/signup")}
+          secondaryColor={SECONDARY_COLOR}
+          otherLoginsColor={GREEN}
+        />
+      )}
     </Box>
   );
 }

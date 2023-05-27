@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { useAppSelector } from "../src/context/store";
-import { Box, RecoverPasswordComponent } from "paca-ui";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
+import { Box, RecoverPassword as RecoverPasswordComponent } from "paca-ui";
 import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
 
 const images = [
@@ -44,33 +44,20 @@ export default function Signup() {
   };
 
   return (
-    <Box
-    style={{
-      paddingRight: "5vw",
-      paddingLeft: "5vw",
-      paddingTop: "7vh",
-      paddingBottom: "7vh",
-      height: "100vh",
-      display: "flex",
-      alignItems: "center",
-    }}
-    >
-      <Box style={{ width: "100%" }}>
-        {!loading && (
-          <RecoverPasswordComponent
-            height="90vh"
-            error={error}
-            images={images}
-            completed={completed}
-            onBackToLogin={() => router.push("/login")}
-            onSubmit={sentResetPasswordRequest}
-            onGoogleLogin={() => {}}
-            color={MAIN_COLOR}
-            secondaryColor={SECONDARY_COLOR}
-            otherLoginsColor={GREEN}
-          />
-        )}
-      </Box>
+    <Box>
+      {!loading && (
+        <RecoverPasswordComponent
+          error={error}
+          images={images}
+          completed={completed}
+          onBackToLogin={() => router.push("/login")}
+          onSubmit={sentResetPasswordRequest}
+          onGoogleLogin={() => {}}
+          color={MAIN_COLOR}
+          secondaryColor={SECONDARY_COLOR}
+          otherLoginsColor={GREEN}
+        />
+      )}
     </Box>
   );
 }

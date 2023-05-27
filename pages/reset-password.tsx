@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import { Box, ResetPasswordComponent, useInputForm } from "paca-ui";
+import {
+  Box,
+  ResetPassword as ResetPasswordComponent,
+  useInputForm,
+} from "paca-ui";
 import resetPasswordService from "../src/services/auth/resetPasswordWithTokenService";
 
 const images = [
@@ -39,31 +43,18 @@ export default function Signup() {
   };
 
   return (
-    <Box
-    style={{
-      paddingRight: "5vw",
-      paddingLeft: "5vw",
-      paddingTop: "7vh",
-      paddingBottom: "7vh",
-      height: "100vh",
-      display: "flex",
-      alignItems: "center",
-    }}
-    >
-      <Box style={{ width: "100%" }}>
-        <ResetPasswordComponent
-          height="90vh"
-          error={error}
-          password={password}
-          images={images}
-          completed={completed}
-          onBackToLogin={() => router.push("/login")}
-          onSubmit={() => resetPassword(password.value)}
-          color={MAIN_COLOR}
-          secondaryColor={SECONDARY_COLOR}
-          otherLoginsColor={GREEN}
-        />
-      </Box>
+    <Box>
+      <ResetPasswordComponent
+        error={error}
+        password={password}
+        images={images}
+        completed={completed}
+        onBackToLogin={() => router.push("/login")}
+        onSubmit={() => resetPassword(password.value)}
+        color={MAIN_COLOR}
+        secondaryColor={SECONDARY_COLOR}
+        otherLoginsColor={GREEN}
+      />
     </Box>
   );
 }

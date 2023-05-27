@@ -6,10 +6,10 @@ import validateName from "../src/utils/validateName";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
 import { loginUser } from "../src/context/slices/auth";
-import { Box, SignUpComponent, useInputForm } from "paca-ui";
 import validatePassword from "../src/utils/validatePassword";
 import { loginBusiness } from "../src/context/slices/business";
 import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
+import { Box, SignUp as SignUpComponent, useInputForm } from "paca-ui";
 import signUpBusinessService from "../src/services/auth/signUpBusinessService";
 
 const images = [
@@ -144,40 +144,25 @@ export default function Signup() {
   };
 
   return (
-    <Box
-      style={{
-        paddingRight: "5vw",
-        paddingLeft: "5vw",
-        paddingTop: "7vh",
-        paddingBottom: "7vh",
-        height: "100vh",
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Box style={{ width: "100%" }}>
-        {!loading && (
-          <SignUpComponent
-            height="90vh"
-            images={images}
-            interval={3000}
-            email={email}
-            businessName={name}
-            password={password}
-            validateBusinessData={validateData}
-            onLogin={() => router.push("/login")}
-            onTermsAndConditionsClick={() =>
-              router.push("/terms-and-conditions")
-            }
-            onBusinessSignUp={signup}
-            onGoogleSignUp={() => signIn("google")}
-            color={MAIN_COLOR}
-            secondaryColor={SECONDARY_COLOR}
-            otherLoginsColor={GREEN}
-            business={true}
-          />
-        )}
-      </Box>
+    <Box>
+      {!loading && (
+        <SignUpComponent
+          images={images}
+          interval={3000}
+          email={email}
+          businessName={name}
+          password={password}
+          validateBusinessData={validateData}
+          onLogin={() => router.push("/login")}
+          onTermsAndConditionsClick={() => router.push("/terms-and-conditions")}
+          onBusinessSignUp={signup}
+          onGoogleSignUp={() => signIn("google")}
+          color={MAIN_COLOR}
+          secondaryColor={SECONDARY_COLOR}
+          otherLoginsColor={GREEN}
+          business={true}
+        />
+      )}
     </Box>
   );
 }
