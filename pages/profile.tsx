@@ -275,7 +275,7 @@ export default function Profile({ header }: PageProps) {
     if (validation.code !== 0) {
       name.setValue(validation.processedName);
       name.setError(1);
-      name.setErrorMessage("El nombre debe tener al menos 3 caracteres.");
+      name.setErrorMessage("Debe tener al menos 3 caracteres.");
       error = true;
     }
 

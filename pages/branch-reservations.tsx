@@ -97,7 +97,7 @@ export default function BranchReservations({ header }: PageProps) {
       switch (firstNameValidation.code) {
         case 1:
           firstName.setErrorMessage(
-            "El nombre debe tener al menos 2 caracteres."
+            "Debe tener al menos 2 caracteres."
           );
           break;
         default:
@@ -113,7 +113,7 @@ export default function BranchReservations({ header }: PageProps) {
       switch (lastNameValidation.code) {
         case 1:
           lastName.setErrorMessage(
-            "El apellido debe tener al menos 2 caracteres."
+            "Debe tener al menos 2 caracteres."
           );
           break;
         default:

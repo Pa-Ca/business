@@ -53,7 +53,7 @@ export default function Signup() {
       name.setError(1);
       switch (nameValidation.code) {
         case 1:
-          name.setErrorMessage("El nombre debe tener al menos 8 caracteres.");
+          name.setErrorMessage("Debe tener al menos 8 caracteres.");
           break;
         default:
           name.setErrorMessage("Nombre inválido.");
@@ -82,7 +82,7 @@ export default function Signup() {
       switch (passwordValidation) {
         case 1:
           password.setErrorMessage(
-            "La contraseña debe tener entre 8 y 64 caracteres."
+            "Debe tener entre 8 y 64 caracteres."
           );
           break;
         default:
