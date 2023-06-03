@@ -72,5 +72,10 @@ export default function HeaderWrapper({
     color: MAIN_COLOR,
   };
 
-  return (profilePictureUrl && (<Component header={header} {...pageProps} />));
+  if (profilePictureUrl) {
+    return <Component header={header} {...pageProps} />;
+  } else {
+    return <>Loading...</>
+  }
+
 }
