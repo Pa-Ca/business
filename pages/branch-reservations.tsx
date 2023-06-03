@@ -33,7 +33,7 @@ export default function BranchReservations({ header }: PageProps) {
   const branch = branches[useAppSelector((state) => state.branches).current];
   const [validHoursIn, setValidHoursIn] = useState<OptionObject[]>([]);
   const [validHoursOut, setValidHoursOut] = useState<OptionObject[]>([]);
-  const [reservations, setReservations] = useState<ReservationProps[]>([]);
+  const [reservationsList, setReservationsList] = useState<ReservationProps[]>([]);
 
   // Reservation data
   const persons = useInputForm<string>("");
@@ -97,7 +97,7 @@ export default function BranchReservations({ header }: PageProps) {
       switch (firstNameValidation.code) {
         case 1:
           firstName.setErrorMessage(
-            "El nombre debe tener al menos 2 caracteres."
+            "Debe tener al menos 2 caracteres."
           );
           break;
         default:
@@ -113,7 +113,7 @@ export default function BranchReservations({ header }: PageProps) {
       switch (lastNameValidation.code) {
         case 1:
           lastName.setErrorMessage(
-            "El apellido debe tener al menos 2 caracteres."
+            "Debe tener al menos 2 caracteres."
           );
           break;
         default:
@@ -209,8 +209,8 @@ export default function BranchReservations({ header }: PageProps) {
       }
     } else {
       const id = response.data!.id;
-      setReservations([
-        ...reservations,
+      setReservationsList([
+        ...reservationsList,
         {
           ...toReservationProps(response.data!),
           onCloseReservation: () => closeReservation(id),
@@ -251,15 +251,15 @@ export default function BranchReservations({ header }: PageProps) {
       }
     } else {
       // Change state of reservation
-      setReservations((reservations) => {
-        return reservations.map((reservation) => {
-          if (reservation.id === id) {
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
             return {
-              ...reservation,
+              ...r,
               state: 2,
             };
           }
-          return reservation;
+          return r;
         });
       });
     }
@@ -278,15 +278,15 @@ export default function BranchReservations({ header }: PageProps) {
       }
     } else {
       // Change state of reservation
-      setReservations((reservations) => {
-        return reservations.map((reservation) => {
-          if (reservation.id === id) {
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
             return {
-              ...reservation,
+              ...r,
               state: 3,
             };
           }
-          return reservation;
+          return r;
         });
       });
     }
@@ -320,15 +320,15 @@ export default function BranchReservations({ header }: PageProps) {
       }
     } else {
       // Change state of reservation
-      setReservations((reservations) => {
-        return reservations.map((reservation) => {
-          if (reservation.id === id) {
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
             return {
-              ...reservation,
+              ...r,
               state: 4,
             };
           }
-          return reservation;
+          return r;
         });
       });
     }
@@ -366,7 +366,7 @@ export default function BranchReservations({ header }: PageProps) {
           onAccept: () => acceptReservation(r.id),
         };
       });
-      setReservations(aux);
+      setReservationsList(aux);
     };
     getReservations_();
   }, []);
@@ -396,7 +396,7 @@ export default function BranchReservations({ header }: PageProps) {
     <BranchReserves
       durationHour={branchAverageReserveTimeHours}
       durationMin={branchAverageReserveTimeMinutes}
-      reservations={reservations}
+      reservations={reservationsList}
       color={"#EF7A08"}
       submitButtonColor="#EF7A08"
       header={header}
