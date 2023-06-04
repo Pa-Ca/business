@@ -416,6 +416,7 @@ export default function BranchReservations({ header }: PageProps) {
       showModal={showModal}
       setShowModal={setshowModal}
       onSubmit={onSubmit}
+      cancelButtonColor="Cancel"
     />
   );
 }
