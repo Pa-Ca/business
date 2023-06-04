@@ -54,9 +54,9 @@ jobs:
           -e JWT_SECRET=${{secrets.JWT_SECRET}} \
           -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}} \
           -e NEXT_PUBLIC_API_ENDPOINT=${{secrets.NEXT_PUBLIC_API_ENDPOINT}} \
-          -e NEXT_PUBLIC_S3_ENDPOINT=${{ secrets.NEXT_PUBLIC_S3_ENDPOINT }}
-          -e NEXT_PUBLIC_S3_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_S3_ACCESS_KEY_ID }}
-          -e NEXT_PUBLIC_S3_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY }}
-          -e NEXT_PUBLIC_S3_BUCKET=${{ secrets.NEXT_PUBLIC_S3_BUCKET }}
+          -e NEXT_PUBLIC_S3_ENDPOINT=${{ secrets.NEXT_PUBLIC_S3_ENDPOINT }} \
+          -e NEXT_PUBLIC_S3_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_S3_ACCESS_KEY_ID }} \
+          -e NEXT_PUBLIC_S3_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY }} \
+          -e NEXT_PUBLIC_S3_BUCKET=${{ secrets.NEXT_PUBLIC_S3_BUCKET }} \
           -v "$(pwd)":/app -d --network host \
           --name paca-business ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
