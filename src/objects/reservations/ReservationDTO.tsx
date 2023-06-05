@@ -82,7 +82,7 @@ export const toReservationProps = (
     second: "2-digit",
   });
 
-  const statusColor = statusDict[reservation.status -1].color;
+  const statusColor = statusDict[reservation.status].color;
   return {
     id: reservation.id,
     start: start,
