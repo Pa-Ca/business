@@ -6,6 +6,7 @@ import logout from "../src/utils/logout";
 import { BusinessProfile } from "paca-ui";
 import { useDispatch } from "react-redux";
 import cousines from "../src/utils/cousines";
+import upload from "../src/services/s3/upload";
 import locations from "../src/utils/locations";
 import fetchAPI from "../src/services/fetchAPI";
 import PageProps from "../src/objects/PageProps";
@@ -18,6 +19,7 @@ import { useInputForm, InputFormHook } from "paca-ui";
 import validatePhone from "../src/utils/validatePhone";
 import { setName } from "../src/context/slices/business";
 import { setPhoneNumber } from "../src/context/slices/business";
+import getProfilePictureUrl from "../src/utils/getProfilePictureUrl";
 import changeNameService from "../src/services/business/changeNameService";
 import getBranchesService from "../src/services/branch/getBranchesService";
 import createBranchService from "../src/services/branch/createBranchService";
@@ -54,6 +56,7 @@ export default function Profile({ header }: PageProps) {
   const name = useInputForm(business.name!);
   const [emailSent, setEmailSent] = useState(false);
   const phoneNumber = useInputForm(business.phoneNumber!);
+  const [profilePictureUrl, setProfilePictureUrl] = useState("");
 
   // Current branch data
   const branchName = useInputForm(branch?.name!);
@@ -159,6 +162,12 @@ export default function Profile({ header }: PageProps) {
     } else {
       dispatch(setPhoneNumber(phoneNumber.value));
     }
+  };
+
+  const onProfileUploadImage = async (file: File) => {
+    const res = await upload(file, `business-${business.id}-profile.jpeg`);
+
+    if (!res.data || res.isError) return;
   };
 
   const saveNewPassword = async () => {
@@ -405,7 +414,6 @@ export default function Profile({ header }: PageProps) {
       hourOut,
       deleted: false,
     };
-    console.log(dto);
 
     const response = await fetchAPI(
       auth.token!,
@@ -443,14 +451,20 @@ export default function Profile({ header }: PageProps) {
     }
   };
 
+  useEffect(() => {
+    getProfilePictureUrl(business.id).then((url) => {
+      setProfilePictureUrl(url);
+    });
+  }, []);
+
   return (
-    !!auth.logged && (
+    !!auth.logged &&
+    profilePictureUrl && (
       <BusinessProfile
         header={header}
         // [TODO] Fix main business image
         mainImage="https://i.pinimg.com/originals/55/00/d3/5500d308acf37ec5c31cc2e5c7785921.jpg"
-        // [TODO] Fix business profile image
-        profilePicture="https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg"
+        profilePicture={profilePictureUrl}
         onCreateBranch={onCreateBranch}
         // [TODO]
         onPictureClick={() => {}}
@@ -496,8 +510,8 @@ export default function Profile({ header }: PageProps) {
         onSaveBranchClosingTime={() => updateBranch()}
         onSaveBranchOpeningTime={() => updateBranch()}
         onDeleteBranch={() => updateBranch(true)}
-        onSaveProfilePicture={() => { }} // [TODO]
-        uploadProfilePicture={() => { }} // [TODO]
+        onSaveProfilePicture={() => {}} // [TODO]
+        uploadProfilePicture={onProfileUploadImage}
         color={MAIN_COLOR}
         secondaryColor={SECONDARY_COLOR}
       />

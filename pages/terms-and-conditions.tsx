@@ -35,7 +35,8 @@ export default function TermsAndConditions() {
           logged: false,
           onPacaClick: () => { !!auth.logged ? router.push("/profile") : router.push("/login") },
           onLoginClick: () => router.push("/login"),
-          onRegisterClick: () => router.push("/signup")
+          onRegisterClick: () => router.push("/signup"),
+          branchOptions: []
         }} />
       )}
     </Box>

@@ -35,6 +35,10 @@ type BusinessDTO = {
    * Business phone number
    */
   phoneNumber: string;
+  /**
+   * Business profile picture url
+   */
+  profilePictureUrl: string;
 };
 
 export { type BusinessDTO as default };

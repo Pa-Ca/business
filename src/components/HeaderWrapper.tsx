@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import logout from "../utils/logout";
 import { MAIN_COLOR } from "../config";
@@ -5,6 +6,7 @@ import type { AppProps } from "next/app";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../context/store";
 import { setCurrentBranch } from "../context/slices/branches";
+import getProfilePictureUrl from "../utils/getProfilePictureUrl";
 
 interface HeaderWrapperProps {
   /**
@@ -27,12 +29,17 @@ export default function HeaderWrapper({
   const business = useAppSelector((state) => state.business);
   const branches = useAppSelector((state) => state.branches).branches;
   const branchIndex = useAppSelector((state) => state.branches).current;
+  const [profilePictureUrl, setProfilePictureUrl] = useState('');
 
   const branch = branches[branchIndex];
 
+  useEffect(() => {
+    getProfilePictureUrl(business.id).then(url => setProfilePictureUrl(url))
+  }, [])
+
   const header = {
     // [TODO] Fix header picture
-    picture: "https://wallpapers.com/images/featured/4co57dtwk64fb7lv.jpg",
+    picture: profilePictureUrl,
     name: business.name!,
     onLogout: () =>
       logout(
@@ -68,5 +75,10 @@ export default function HeaderWrapper({
     color: MAIN_COLOR,
   };
 
-  return <Component header={header} {...pageProps} />;
+  if (profilePictureUrl) {
+    return <Component header={header} {...pageProps} />;
+  } else {
+    return <>Loading...</>
+  }
+
 }

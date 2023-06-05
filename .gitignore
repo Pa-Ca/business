@@ -107,6 +107,5 @@ dist
 .vscode
 credentials.tsx
 
-
-# removing fucking branch images
-public/images/branch-listing-resources/
+# Images imported from Pa'Ca UI
+public/images/*
