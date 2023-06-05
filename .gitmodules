@@ -1,3 +1,4 @@
 [submodule "src/paca-ui"]
 	path = src/paca-ui
 	url = https://github.com/Pa-Ca/ui
+	branch = develop
