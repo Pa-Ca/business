@@ -496,7 +496,8 @@ export default function Profile({ header }: PageProps) {
         onSaveBranchClosingTime={() => updateBranch()}
         onSaveBranchOpeningTime={() => updateBranch()}
         onDeleteBranch={() => updateBranch(true)}
-        onSaveProfilePicture={() => {}} // [TODO]
+        onSaveProfilePicture={() => { }} // [TODO]
+        uploadProfilePicture={() => { }} // [TODO]
         color={MAIN_COLOR}
         secondaryColor={SECONDARY_COLOR}
       />

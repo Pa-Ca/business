@@ -30,9 +30,9 @@ export default function Login() {
   const auth = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    // If there is already a logged in user, it is redirected to profile
+    // If there is already a logged in user, it is redirected to branch-reservations
     if (!!auth.logged) {
-      router.push("/profile");
+      router.push("/branch-reservations");
     } else {
       setLoading(false);
     }
@@ -103,7 +103,7 @@ export default function Login() {
       dispatch(setCurrentBranch(0));
     }
 
-    router.push("/profile");
+    router.push("/branch-reservations");
   };
 
   return (

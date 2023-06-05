@@ -35,9 +35,9 @@ export default function Signup() {
   const { data: session } = useSession();
 
   useEffect(() => {
-    // If there is already a logged in user, it is redirected to profile
+    // If there is already a logged in user, it is redirected to branch-reservations
     if (!!auth.logged) {
-      router.push("/profile");
+      router.push("/branch-reservations");
     } else {
       setLoading(false);
     }

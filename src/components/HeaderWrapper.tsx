@@ -44,10 +44,8 @@ export default function HeaderWrapper({
         undefined,
         () => {}
       ),
-    onEditProfile: () => router.push("/profile"),
-    onRightSectionClick: () => router.push("/branch-reservations"),
-    userRole: "business",
-    logged: true,
+      userRole: "business",
+      logged: true,
     currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
     branchOptions: branches.map((branch, index) => {
       return {
@@ -58,9 +56,14 @@ export default function HeaderWrapper({
         },
       };
     }),
-    // [TODO] Fix onClicks
+    onEditProfile: () => router.push("/profile"),
+    onReserveClick: () => { },
+    onReservationsClick: () => router.push("/branch-reservations"),
+    onFavoritesClick: () => { },
     onLeftSectionClick: () => {},
     onPacaClick: () => router.reload(),
+    onLoginClick: () => router.push("/login"),
+    onRegisterClick: () => router.push("/signup"),
     onProfileClick: () => {},
     color: MAIN_COLOR,
   };
