@@ -7,7 +7,7 @@ export interface AuthProps {
   logged: boolean | null;
   /**
    * Indicates if the user completed the registration process.
-  */
+   */
   registrationCompleted: boolean | null;
   /**
    * User ID if logged in

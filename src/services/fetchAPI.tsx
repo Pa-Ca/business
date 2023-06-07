@@ -1,3 +1,7 @@
+import { Dispatch } from "react";
+import { AnyAction } from "redux";
+import logout from "../utils/logout";
+import { NextRouter } from "next/router";
 import refreshService from "./auth/refreshService";
 import FetchResponse from "../objects/FetchResponse";
 
@@ -11,6 +15,8 @@ import FetchResponse from "../objects/FetchResponse";
 export default async function<T>(
   token: string,
   refreshToken: string,
+  router: NextRouter,
+  dispatch: Dispatch<AnyAction>,
   setToken: (token: string) => void,
   fetchFunction: (token: string) => Promise<FetchResponse<T>>
 ): Promise<FetchResponse<T | string>> {
@@ -26,6 +32,7 @@ export default async function<T>(
       const refreshResponse = await refreshService(refreshToken);
 
       if (refreshResponse.isError || refreshResponse.data === undefined) {
+        logout(token, refreshToken, dispatch, router, "/login", {}, () => {});
         return refreshResponse;
       }
 

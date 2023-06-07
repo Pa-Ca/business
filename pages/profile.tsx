@@ -123,18 +123,12 @@ export default function Profile({ header }: PageProps) {
     return dto;
   };
 
-  useEffect(() => {
-    // If there is already a logged in user, it is redirected to profile
-    if (!auth.logged) {
-      router.push("/login");
-    } else {
-    }
-  }, []);
-
   const saveName = async (newName: string) => {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => changeNameService(auth.id!, newName, token)
     );
@@ -151,6 +145,8 @@ export default function Profile({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) =>
         changePhoneNumberService(auth.id!, newPhoneNumber, token)
@@ -219,6 +215,8 @@ export default function Profile({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => updateBranchService(dto, token)
     );
@@ -418,6 +416,8 @@ export default function Profile({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => createBranchService(dto, token)
     );
@@ -430,6 +430,8 @@ export default function Profile({ header }: PageProps) {
       const branchesResponse = await fetchAPI(
         auth.token!,
         auth.refresh!,
+        router,
+        dispatch,
         (token: string) => dispatch(setToken(token)),
         (token: string) => getBranchesService(auth.id!, token)
       );
