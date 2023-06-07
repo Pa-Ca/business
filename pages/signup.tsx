@@ -24,24 +24,11 @@ const images = [
 export default function Signup() {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
 
   const name = useInputForm("");
   const email = useInputForm("");
   const password = useInputForm("");
-
-  // Google Auth
-  const { data: session } = useSession();
-
-  useEffect(() => {
-    // If there is already a logged in user, it is redirected to branch-reservations
-    if (!!auth.logged) {
-      router.push("/branch-reservations");
-    } else {
-      setLoading(false);
-    }
-  }, [auth.logged, session]);
 
   const validateData = () => {
     let valid = true;
@@ -81,9 +68,7 @@ export default function Signup() {
       password.setError(1);
       switch (passwordValidation) {
         case 1:
-          password.setErrorMessage(
-            "Debe tener entre 8 y 64 caracteres."
-          );
+          password.setErrorMessage("Debe tener entre 8 y 64 caracteres.");
           break;
         default:
           password.setErrorMessage("Contraseña inválida.");
@@ -145,24 +130,22 @@ export default function Signup() {
 
   return (
     <Box>
-      {!loading && (
-        <SignUpComponent
-          images={images}
-          interval={3000}
-          email={email}
-          businessName={name}
-          password={password}
-          validateBusinessData={validateData}
-          onLogin={() => router.push("/login")}
-          onTermsAndConditionsClick={() => router.push("/terms-and-conditions")}
-          onBusinessSignUp={signup}
-          onGoogleSignUp={() => signIn("google")}
-          color={MAIN_COLOR}
-          secondaryColor={SECONDARY_COLOR}
-          otherLoginsColor={GREEN}
-          business={true}
-        />
-      )}
+      <SignUpComponent
+        images={images}
+        interval={3000}
+        email={email}
+        businessName={name}
+        password={password}
+        validateBusinessData={validateData}
+        onLogin={() => router.push("/login")}
+        onTermsAndConditionsClick={() => router.push("/terms-and-conditions")}
+        onBusinessSignUp={signup}
+        onGoogleSignUp={() => signIn("google")}
+        color={MAIN_COLOR}
+        secondaryColor={SECONDARY_COLOR}
+        otherLoginsColor={GREEN}
+        business={true}
+      />
     </Box>
   );
 }

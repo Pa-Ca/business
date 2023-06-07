@@ -17,18 +17,8 @@ const images = [
 export default function Signup() {
   const router = useRouter();
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [completed, setCompleted] = useState(false);
   const auth = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    // If there is already a logged in user, it is redirected to branch-reservations
-    if (!!auth.logged) {
-      router.push("/branch-reservations");
-    } else {
-      setLoading(false);
-    }
-  }, [auth.logged]);
 
   const sentResetPasswordRequest = async (email: string) => {
     setError(false);
@@ -45,19 +35,17 @@ export default function Signup() {
 
   return (
     <Box>
-      {!loading && (
-        <RecoverPasswordComponent
-          error={error}
-          images={images}
-          completed={completed}
-          onBackToLogin={() => router.push("/login")}
-          onSubmit={sentResetPasswordRequest}
-          onGoogleLogin={() => {}}
-          color={MAIN_COLOR}
-          secondaryColor={SECONDARY_COLOR}
-          otherLoginsColor={GREEN}
-        />
-      )}
+      <RecoverPasswordComponent
+        error={error}
+        images={images}
+        completed={completed}
+        onBackToLogin={() => router.push("/login")}
+        onSubmit={sentResetPasswordRequest}
+        onGoogleLogin={() => {}}
+        color={MAIN_COLOR}
+        secondaryColor={SECONDARY_COLOR}
+        otherLoginsColor={GREEN}
+      />
     </Box>
   );
 }

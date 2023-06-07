@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
+import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import fetchAPI from "../src/services/fetchAPI";
 import formatTime from "../src/utils/formatTime";
@@ -27,6 +28,7 @@ import {
 } from "paca-ui";
 
 export default function BranchReservations({ header }: PageProps) {
+  const router = useRouter();
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
   const branches = useAppSelector((state) => state.branches).branches;
@@ -200,6 +202,8 @@ export default function BranchReservations({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => postReservationService(getUpdatedReservation(), token)
     );
@@ -225,6 +229,8 @@ export default function BranchReservations({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => getReservationsService(branch.id, token)
     );
@@ -242,6 +248,8 @@ export default function BranchReservations({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => acceptReservationService(id, token)
     );
@@ -269,6 +277,8 @@ export default function BranchReservations({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => rejectReservationService(id, token)
     );
@@ -296,6 +306,8 @@ export default function BranchReservations({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => cancelReservationService(id, token)
     );
@@ -311,6 +323,8 @@ export default function BranchReservations({ header }: PageProps) {
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => closeReservationService(id, token)
     );

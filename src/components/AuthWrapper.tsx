@@ -1,38 +1,32 @@
 import React, { useEffect, useState } from "react";
-import { Session  } from 'next-auth';
+import { Session } from "next-auth";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
-import { useSession, signOut } from 'next-auth/react';
-import { useAppSelector } from "../src/context/store";
-import { loginUser } from "../src/context/slices/auth";
-import googleLoginUserService from '../src/services/googleAuth/googleLoginUserService';
-import googleSignUpUserService from '../src/services/googleAuth/googleSignUpUserService';
+import { useSession } from "next-auth/react";
+import { useAppSelector } from "../context/store";
+import { loginUser } from "../context/slices/auth";
+import googleLoginUserService from "../services/googleAuth/googleLoginUserService";
+import googleSignUpUserService from "../services/googleAuth/googleSignUpUserService";
 
 interface CustomSession extends Session {
   idToken?: string;
 }
 
-export default function GoogleAuth({ children }: { children: React.ReactNode }) {
+export default function AuthWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const dispatch = useDispatch();
   const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
   const idToken = (session as CustomSession)?.idToken;
 
   async function handleAuthentication() {
-    // Logged user redirect
-    if (!!auth.logged) {
-      if (!!auth.registrationCompleted) {
-        //router.replace("/profile");
-      }
-      else {
-        //router.replace("/signup/register");
-      }
-    }
-
     // There is a Google Session but user is not logged in
     if (session && !auth.logged) {
-
       if (!idToken) return;
 
       // Try Login
@@ -50,12 +44,12 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
             refresh: loginResponse.data!.refresh,
           })
         );
-        
+
         return;
       }
 
       // Google Token Verification failed
-      if (!!loginResponse.isError || loginResponse.exception?.code !== 9){
+      if (!!loginResponse.isError || loginResponse.exception?.code !== 9) {
       }
 
       // Try SignUp
@@ -79,12 +73,36 @@ export default function GoogleAuth({ children }: { children: React.ReactNode }) 
           })
         );
       }
+    } else if (auth.logged) {
+      // User is logged in, so redirect to branch-reservations in case user is
+      // in login or signup page
+      switch (router.pathname) {
+        case "/":
+        case "/login":
+        case "/signup":
+          router.push("/branch-reservations").then(() => setLoading(false));
+          break;
+        default:
+          setLoading(false);
+      }
+    } else {
+      // User is not logged in, so redirect to login page in case user is in
+      // branch-reservations or profile page
+      switch (router.pathname) {
+        case "/":
+        case "/branch-reservations":
+        case "/profile":
+          router.push("/login").then(() => setLoading(false));
+          break;
+        default:
+          setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    handleAuthentication()
+    handleAuthentication();
   }, [session, auth]);
 
-  return <>{children}</>;
+  return <>{!loading && children}</>;
 }

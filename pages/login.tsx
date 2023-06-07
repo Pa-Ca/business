@@ -26,17 +26,7 @@ export default function Login() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    // If there is already a logged in user, it is redirected to branch-reservations
-    if (!!auth.logged) {
-      router.push("/branch-reservations");
-    } else {
-      setLoading(false);
-    }
-  }, [auth.logged]);
 
   const login = async (email: string, password: string) => {
     setError(false);
@@ -51,6 +41,8 @@ export default function Login() {
     const branchesResponse = await fetchAPI(
       response.data!.token,
       response.data!.refresh,
+      router,
+      dispatch,
       (token: string) => dispatch(setToken(token)),
       (token: string) => getBranchesService(response.data!.id, token)
     );
@@ -108,19 +100,17 @@ export default function Login() {
 
   return (
     <Box>
-      {!loading && (
-        <LoginComponent
-          error={error}
-          images={images}
-          color={MAIN_COLOR}
-          onLogin={login}
-          onForgotClick={() => router.push("/recover-password")}
-          onGoogleSignUp={() => signIn("google")}
-          onSignUp={() => router.replace("/signup")}
-          secondaryColor={SECONDARY_COLOR}
-          otherLoginsColor={GREEN}
-        />
-      )}
+      <LoginComponent
+        error={error}
+        images={images}
+        color={MAIN_COLOR}
+        onLogin={login}
+        onForgotClick={() => router.push("/recover-password")}
+        onGoogleSignUp={() => signIn("google")}
+        onSignUp={() => router.replace("/signup")}
+        secondaryColor={SECONDARY_COLOR}
+        otherLoginsColor={GREEN}
+      />
     </Box>
   );
 }

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { useDispatch } from "react-redux";
+import React, { useEffect } from "react";
 import { Box, Terms } from "paca-ui";
+import { useRouter } from "next/router";
 import { useAppSelector } from "../src/context/store";
 
 const images = [
@@ -15,30 +14,21 @@ const images = [
 
 export default function TermsAndConditions() {
   const router = useRouter();
-  const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
   const auth = useAppSelector((state) => state.auth);
-
-  useEffect(() => {
-    // If there is already a logged in user, it is redirected to profile
-    if (!!auth.logged) {
-      router.push("/profile");
-    } else {
-      setLoading(false);
-    }
-  }, [auth.logged]);
 
   return (
     <Box style={{ width: "100%" }}>
-      {!loading && (
-        <Terms headerArgs={{
+      <Terms
+        headerArgs={{
           logged: false,
-          onPacaClick: () => { !!auth.logged ? router.push("/profile") : router.push("/login") },
+          onPacaClick: () => {
+            !!auth.logged ? router.push("/profile") : router.push("/login");
+          },
           onLoginClick: () => router.push("/login"),
           onRegisterClick: () => router.push("/signup"),
-          branchOptions: []
-        }} />
-      )}
+          branchOptions: [],
+        }}
+      />
     </Box>
   );
 }
