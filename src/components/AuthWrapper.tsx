@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Session } from "next-auth";
+import logout from "../utils/logout";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { useSession } from "next-auth/react";
 import { useAppSelector } from "../context/store";
-import { loginUser } from "../context/slices/auth";
+import refreshService from "../services/auth/refreshService";
+import { loginUser, setToken } from "../context/slices/auth";
 import googleLoginUserService from "../services/googleAuth/googleLoginUserService";
 import googleSignUpUserService from "../services/googleAuth/googleSignUpUserService";
 
@@ -74,6 +76,14 @@ export default function AuthWrapper({
         );
       }
     } else if (auth.logged) {
+      // Verify that the user token its active
+      const refreshResponse = await refreshService(auth.refresh!);
+      if (!!refreshResponse.isError) {
+        logout(auth.token!, auth.refresh!, dispatch, router, "/login", {}, () => { });
+        return;
+      }
+      dispatch(setToken(refreshResponse.data!));
+
       // User is logged in, so redirect to branch-reservations in case user is
       // in login or signup page
       switch (router.pathname) {
