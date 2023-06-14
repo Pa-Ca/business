@@ -23,6 +23,5 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
-        run: |
-          npm ci
-          npm run build
+      - run: npm ci
+      - run: npm run build
