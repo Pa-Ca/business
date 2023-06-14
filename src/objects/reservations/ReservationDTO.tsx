@@ -93,6 +93,9 @@ export const toReservationProps = (
     state: reservation.status,
     statusColor: statusColor,
     date: reservation.reservationDate,
+    end: "",
+    ownerEmail: "",
+    ownerOccasion: ""
   };
 };
 

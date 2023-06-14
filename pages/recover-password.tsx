@@ -42,9 +42,6 @@ export default function Signup() {
         onBackToLogin={() => router.push("/login")}
         onSubmit={sentResetPasswordRequest}
         onGoogleLogin={() => {}}
-        color={MAIN_COLOR}
-        secondaryColor={SECONDARY_COLOR}
-        otherLoginsColor={GREEN}
       />
     </Box>
   );
