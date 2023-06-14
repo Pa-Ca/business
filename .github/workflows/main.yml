@@ -60,3 +60,4 @@ jobs:
           -e NEXT_PUBLIC_S3_BUCKET=${{ secrets.NEXT_PUBLIC_S3_BUCKET }} \
           -v "$(pwd)":/app -d --network host \
           --name paca-business ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
+          docker logs paca-business

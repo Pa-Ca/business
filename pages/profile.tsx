@@ -514,8 +514,6 @@ export default function Profile({ header }: PageProps) {
         onDeleteBranch={() => updateBranch(true)}
         onSaveProfilePicture={() => {}} // [TODO]
         uploadProfilePicture={onProfileUploadImage}
-        color={MAIN_COLOR}
-        secondaryColor={SECONDARY_COLOR}
       />
     )
   );
