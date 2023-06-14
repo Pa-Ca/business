@@ -9,7 +9,25 @@ on:
       - develop
 
 jobs:
-  build:
+  npm-build:
+    name: Build App
+    runs-on: [self-hosted]
+    steps:
+      - name: Git SubModule Update
+        run: git submodule update --init --recursive
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Build App
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - run: npm ci
+      - run: npm run build
+
+  
+  docker-build:
     name: Build Image
     runs-on: [self-hosted]
     outputs:
