@@ -79,9 +79,3 @@ jobs:
           -e NEXT_PUBLIC_S3_BUCKET=${{ secrets.NEXT_PUBLIC_S3_BUCKET }} \
           -v "$(pwd)":/app -d --network host \
           --name paca-business ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
-          if [ $? -ne 0 ]; then
-            echo "Docker container exited with error"
-            echo "Check log file for more information: /app/project_runner.log"
-          else
-            echo "Docker container exited successfully"
-          fi

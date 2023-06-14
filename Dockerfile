@@ -4,7 +4,6 @@ FROM node:16
 WORKDIR /app
 
 COPY project_runner.sh .
-COPY entrypoint.sh .
 
 EXPOSE 3001
-ENTRYPOINT [ "/bin/bash", "-c", "bash entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "project_runner.sh" ]
