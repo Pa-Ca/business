@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: Build Image
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted]
     steps:
       - name: Git SubModule Update
         run: git submodule update --init --recursive
