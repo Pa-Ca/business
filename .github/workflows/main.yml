@@ -29,6 +29,7 @@ jobs:
   
   docker-build:
     name: Build Image
+    needs: npm-build
     runs-on: [self-hosted]
     outputs:
       BUILD_NUMBER: ${{steps.build-number.outputs.BUILD_NUMBER}}
@@ -58,7 +59,7 @@ jobs:
 
   cd:
     name: Deployment into server
-    needs: build
+    needs: docker-build
     runs-on: [self-hosted]
     steps:
       - name: deploy new business app image
