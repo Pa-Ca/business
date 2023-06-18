@@ -3,15 +3,17 @@ name: Business Frontend Deployment
 on:
   push:
     branches:
+      - main
       - develop
   pull_request:
     branches:
+      - main
       - develop
 
 jobs:
   npm-build:
     name: Build App
-    runs-on: [self-hosted]
+    runs-on: ${{ (github.ref == 'refs/heads/main' && 'self-hosted') || (github.ref == 'refs/heads/develop' && 'self-hosted, dev') }}
     steps:
       - name: Git SubModule Update
         run: git submodule update --init --recursive
@@ -30,7 +32,7 @@ jobs:
   docker-build:
     name: Build Image
     needs: npm-build
-    runs-on: [self-hosted]
+    runs-on: ${{ (github.ref == 'refs/heads/main' && 'self-hosted') || (github.ref == 'refs/heads/develop' && 'self-hosted, dev') }}
     outputs:
       BUILD_NUMBER: ${{steps.build-number.outputs.BUILD_NUMBER}}
     steps:
@@ -60,7 +62,7 @@ jobs:
   cd:
     name: Deployment into server
     needs: docker-build
-    runs-on: [self-hosted]
+    runs-on: ${{ (github.ref == 'refs/heads/main' && 'self-hosted') || (github.ref == 'refs/heads/develop' && 'self-hosted, dev') }}
     steps:
       - name: deploy new business app image
         if: ${{ always() }}
