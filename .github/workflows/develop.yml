@@ -13,11 +13,11 @@ jobs:
     name: Build App
     runs-on: [self-hosted, dev.paca]
     steps:
-      - name: Git SubModule Update
-        run: git submodule update --init --recursive
-
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Git SubModule Update
+        run: git submodule update --init --recursive
 
       - name: Build App
         uses: actions/setup-node@v3
