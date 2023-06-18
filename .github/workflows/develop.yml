@@ -3,15 +3,15 @@ name: Business Frontend Deployment
 on:
   push:
     branches:
-      - main
+      - develop
   pull_request:
     branches:
-      - main
+      - develop
 
 jobs:
   npm-build:
     name: Build App
-    runs-on: [self-hosted, paca]
+    runs-on: [self-hosted, dev.paca]
     steps:
       - name: Git SubModule Update
         run: git submodule update --init --recursive
@@ -30,7 +30,7 @@ jobs:
   docker-build:
     name: Build Image
     needs: npm-build
-    runs-on: [self-hosted, paca]
+    runs-on: [self-hosted, dev.paca]
     outputs:
       BUILD_NUMBER: ${{steps.build-number.outputs.BUILD_NUMBER}}
     steps:
@@ -53,19 +53,19 @@ jobs:
       - name: Run docker build
         id: next-build
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:${{steps.build-number.outputs.BUILD_NUMBER}} -t ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:${{steps.build-number.outputs.BUILD_NUMBER}}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:${{steps.build-number.outputs.BUILD_NUMBER}} -t ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:${{steps.build-number.outputs.BUILD_NUMBER}}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:latest
 
   cd:
     name: Deployment into server
     needs: docker-build
-    runs-on: [self-hosted, paca]
+    runs-on: [self-hosted, dev.paca]
     steps:
       - name: deploy new business app image
         if: ${{ always() }}
         run: |
-          docker rm -f paca-business; 
+          docker rm -f dev.paca-business; 
           docker run \
           -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
           -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
@@ -78,4 +78,4 @@ jobs:
           -e NEXT_PUBLIC_S3_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY }} \
           -e NEXT_PUBLIC_S3_BUCKET=${{ secrets.NEXT_PUBLIC_S3_BUCKET }} \
           -v "$(pwd)":/app -d --network host \
-          --name paca-business ${{ secrets.DOCKERHUB_USERNAME }}/paca-business:latest
+          --name dev.paca-business ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:latest
