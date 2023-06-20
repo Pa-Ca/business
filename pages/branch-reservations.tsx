@@ -10,13 +10,16 @@ import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
 import validatePhone from "../src/utils/validatePhone";
+import {statusDict} from "../src/utils/reservation-status";
 import generateValidHours from "../src/utils/generateValidHours";
 import postReservationService from "../src/services/reservations/postReservationService";
 import getReservationsService from "../src/services/reservations/getReservationsService";
 import closeReservationService from "../src/services/reservations/closeReservationService";
+import startReservationService from "../src/services/reservations/startReservationService";
 import acceptReservationService from "../src/services/reservations/acceptReservationService";
 import cancelReservationService from "../src/services/reservations/cancelReservationService";
 import rejectReservationService from "../src/services/reservations/rejectReservationService";
+import retireReservationService from "../src/services/reservations/retireReservationService";
 import ReservationDTO, {
   toReservationProps,
 } from "../src/objects/reservations/ReservationDTO";
@@ -220,6 +223,8 @@ export default function BranchReservations({ header }: PageProps) {
           onCloseReservation: () => closeReservation(id),
           onReject: () => rejectReservation(id),
           onAccept: () => acceptReservation(id),
+          onRetire: () => retireReservation(id),
+          onStart: () => startReservation(id),
         },
       ]);
     }
@@ -244,35 +249,6 @@ export default function BranchReservations({ header }: PageProps) {
     }
   };
 
-  const acceptReservation = async (id: number) => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => acceptReservationService(id, token)
-    );
-
-    if (!!response.isError) {
-      if (!!response.exception) {
-      }
-    } else {
-      // Change state of reservation
-      setReservationsList((r) => {
-        return r.map((r) => {
-          if (r.id === id) {
-            return {
-              ...r,
-              state: 2,
-            };
-          }
-          return r;
-        });
-      });
-    }
-  };
-
   const rejectReservation = async (id: number) => {
     const response = await fetchAPI(
       auth.token!,
@@ -293,7 +269,129 @@ export default function BranchReservations({ header }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
+              state: 2,
+              statusColor: statusDict[2].color,
+            };
+          }
+          return r;
+        });
+      });
+    }
+  };
+
+  const acceptReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      router,
+      dispatch,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => acceptReservationService(id, token)
+    );
+
+    if (!!response.isError) {
+      if (!!response.exception) {
+      }
+    } else {
+      // Change state of reservation
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
+            return {
+              ...r,
               state: 3,
+              statusColor: statusDict[3].color,
+            };
+          }
+          return r;
+        });
+      });
+    }
+  };
+
+  const retireReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      router,
+      dispatch,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => retireReservationService(id, token)
+    );
+
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+      // Change state of reservation
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
+            return {
+              ...r,
+              state: 4,
+              statusColor: statusDict[4].color,
+            };
+          }
+          return r;
+        });
+      });
+    }
+  };
+
+  const startReservation = async (id: number) => {
+    console.log("In startReservation");
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      router,
+      dispatch,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => startReservationService(id, token)
+    );
+
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+      // Change state of reservation
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
+            return {
+              ...r,
+              state: 5,
+              statusColor: statusDict[5].color,
+            };
+          }
+          return r;
+        });
+      });
+    }
+  };
+
+  const closeReservation = async (id: number) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      router,
+      dispatch,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => closeReservationService(id, token)
+    );
+
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+      // Change state of reservation
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
+            return {
+              ...r,
+              state: 6,
+              statusColor: statusDict[6].color,
             };
           }
           return r;
@@ -319,39 +417,17 @@ export default function BranchReservations({ header }: PageProps) {
     }
   };
 
-  const closeReservation = async (id: number) => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => closeReservationService(id, token)
-    );
-
-    if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
-    } else {
-      // Change state of reservation
-      setReservationsList((r) => {
-        return r.map((r) => {
-          if (r.id === id) {
-            return {
-              ...r,
-              state: 4,
-            };
-          }
-          return r;
-        });
-      });
-    }
-  };
-
   const onSubmit = () => {
     if (validateData()) {
       createReservation();
       setshowModal(false);
+
+      persons.setValue("");
+      occasion.setValue("");
+      firstName.setValue("");
+      lastName.setValue("");
+      phone.setValue("");
+      email.setValue("");
     } else {
     }
   };
@@ -378,6 +454,8 @@ export default function BranchReservations({ header }: PageProps) {
           onCloseReservation: () => closeReservation(r.id),
           onReject: () => rejectReservation(r.id),
           onAccept: () => acceptReservation(r.id),
+          onRetire: () => retireReservation(r.id),
+          onStart: () => startReservation(r.id),
         };
       });
       setReservationsList(aux);
