@@ -1,5 +1,5 @@
 import { ReservationProps } from "paca-ui";
-import {statusDict} from "../../utils/reservation-status";
+import { statusDict } from "../../utils/reservation-status";
 
 type ReservationDTO = {
   /**

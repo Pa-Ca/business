@@ -1,21 +1,25 @@
 import { API_ENDPOINT } from "../../config";
-import ReservationDTO from "../../objects/branch/BranchDTO";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
+import ProductSubCategoryDTO from "../../objects/productSubCategory/ProductSubCategoryDTO";
+
+type SubCategoriesResponse = {
+    productSubCategories: ProductSubCategoryDTO[];
+};
 
 /**
- * @brief Get the reservation given its id
+ * @brief Get the product sub categories of a branch given its id
  *
- * @param id Reservation id
+ * @param id Branch id
  * @param token Authorization token
  *
- * @returns API response
+ * @returns API response when refresh
  */
 export default async (
   id: number,
-  token: string,
-): Promise<FetchResponse<ReservationDTO>> => {
-  const uri = `${API_ENDPOINT}/reservation/${id}`;
+  token: string
+): Promise<FetchResponse<SubCategoriesResponse>> => {
+  const uri = `${API_ENDPOINT}/branch/${id}/product-sub-category`;
 
   try {
     const response = await fetch(uri, {
@@ -27,7 +31,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: ReservationDTO = await response.json();
+      const data: SubCategoriesResponse = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

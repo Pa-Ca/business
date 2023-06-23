@@ -1,29 +1,35 @@
 import { API_ENDPOINT } from "../../config";
 import FetchResponse from "../../objects/FetchResponse";
+import SaleProductDTO from "../../objects/sale/SaleProductDTO";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Accept reservation
+ * @brief Create a new sale product
  *
- * @param id reservation id
+ * @param dto Sale product data
  * @param token Authorization token
  *
- * @returns API response
+ * @returns API response when refresh
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/accept/${id}`;
+export default async (
+  dto: Partial<SaleProductDTO>,
+  token: string
+): Promise<FetchResponse<SaleProductDTO>> => {
+    const uri = `${API_ENDPOINT}/sale/${dto.saleId}/product`;
 
   try {
     const response = await fetch(uri, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      return { isError: false };
+      const data: SaleProductDTO = await response.json();
+      return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();
       return { exception, isError: true };

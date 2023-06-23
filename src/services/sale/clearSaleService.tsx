@@ -1,25 +1,29 @@
 import { API_ENDPOINT } from "../../config";
 import FetchResponse from "../../objects/FetchResponse";
+import SaleProductDTO from "../../objects/sale/SaleProductDTO";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Accept reservation
+ * @brief Delete all products from sale
  *
- * @param id reservation id
+ * @param id Sale id
  * @param token Authorization token
  *
- * @returns API response
+ * @returns API response when refresh
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/accept/${id}`;
+export default async (
+  id: number,
+  token: string
+): Promise<FetchResponse<null>> => {
+  const uri = `${API_ENDPOINT}/sale/${id}/product/clear`;
 
   try {
     const response = await fetch(uri, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.status === 200) {

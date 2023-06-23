@@ -1,21 +1,32 @@
 import { API_ENDPOINT } from "../../config";
-import ReservationDTO from "../../objects/branch/BranchDTO";
+import SaleDTO from "../../objects/sale/SaleDTO";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
+type SaleResponse = {
+  ongoingSales: SaleDTO[];
+  historicSales: SaleDTO[];
+  page: number;
+  totalPages: number;
+};
+
 /**
- * @brief Get the reservation given its id
+ * @brief Get the sales of a branch given its id
  *
- * @param id Reservation id
+ * @param id Branch id
  * @param token Authorization token
+ * @param pageIndex Index of the page
+ * @param pageSize Size of the page
  *
- * @returns API response
+ * @returns API response when refresh
  */
 export default async (
   id: number,
   token: string,
-): Promise<FetchResponse<ReservationDTO>> => {
-  const uri = `${API_ENDPOINT}/reservation/${id}`;
+  pageIndex: number = 0,
+  pageSize: number = 10
+): Promise<FetchResponse<SaleResponse>> => {
+  const uri = `${API_ENDPOINT}/branch/${id}/sale?page=${pageIndex}&size=${pageSize}`;
 
   try {
     const response = await fetch(uri, {
@@ -27,7 +38,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: ReservationDTO = await response.json();
+      const data: SaleResponse = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

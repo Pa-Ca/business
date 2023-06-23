@@ -1,33 +1,34 @@
 import { API_ENDPOINT } from "../../config";
-import ReservationDTO from "../../objects/branch/BranchDTO";
 import FetchResponse from "../../objects/FetchResponse";
+import SaleProductDTO from "../../objects/sale/SaleProductDTO";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Get the reservation given its id
+ * @brief Change the data of a sale product. Undefined variables will be ignored
  *
- * @param id Reservation id
+ * @param dto Sale product data
  * @param token Authorization token
  *
- * @returns API response
+ * @returns API response when refresh
  */
 export default async (
-  id: number,
-  token: string,
-): Promise<FetchResponse<ReservationDTO>> => {
-  const uri = `${API_ENDPOINT}/reservation/${id}`;
+  dto: Partial<SaleProductDTO>,
+  token: string
+): Promise<FetchResponse<SaleProductDTO>> => {
+  const uri = `${API_ENDPOINT}/sale/${dto.saleId}/product/${dto.id}`;
 
   try {
     const response = await fetch(uri, {
-      method: "GET",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      const data: ReservationDTO = await response.json();
+      const data: SaleProductDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

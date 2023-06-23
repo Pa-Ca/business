@@ -3,24 +3,25 @@ import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Accept reservation
+ * @brief Delete table
  *
- * @param id reservation id
+ * @param id table id
  * @param token Authorization token
  *
  * @returns API response
  */
 export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/accept/${id}`;
+  const uri = `${API_ENDPOINT}/table/${id}`;
 
   try {
     const response = await fetch(uri, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`
       }
     });
+    console.log(response)
 
     if (response.status === 200) {
       return { isError: false };

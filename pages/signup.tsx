@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useRouter } from "next/router";
+import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
-import { useSession, signIn } from "next-auth/react";
 import validateName from "../src/utils/validateName";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
 import { loginUser } from "../src/context/slices/auth";
 import validatePassword from "../src/utils/validatePassword";
 import { loginBusiness } from "../src/context/slices/business";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
 import { Box, SignUp as SignUpComponent, useInputForm } from "paca-ui";
 import signUpBusinessService from "../src/services/auth/signUpBusinessService";
 
@@ -141,9 +140,6 @@ export default function Signup() {
         onTermsAndConditionsClick={() => router.push("/terms-and-conditions")}
         onBusinessSignUp={signup}
         onGoogleSignUp={() => signIn("google")}
-        color={MAIN_COLOR}
-        secondaryColor={SECONDARY_COLOR}
-        otherLoginsColor={GREEN}
         business={true}
       />
     </Box>

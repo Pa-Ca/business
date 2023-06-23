@@ -3,24 +3,28 @@ import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Accept reservation
+ * @brief Delete sale
  *
- * @param id reservation id
+ * @param id sale id
  * @param token Authorization token
  *
  * @returns API response
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/accept/${id}`;
+export default async (
+  id: number,
+  token: string
+): Promise<FetchResponse<null>> => {
+  const uri = `${API_ENDPOINT}/sale/${id}`;
 
   try {
     const response = await fetch(uri, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
+    console.log(response);
 
     if (response.status === 200) {
       return { isError: false };

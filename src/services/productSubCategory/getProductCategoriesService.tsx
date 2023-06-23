@@ -1,29 +1,36 @@
 import { API_ENDPOINT } from "../../config";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
+import ProductCategoryDTO from "../../objects/productSubCategory/ProductCategoryDTO";
+
+type CategoriesResponse = {
+    productCategories: ProductCategoryDTO[];
+};
 
 /**
- * @brief Accept reservation
+ * @brief Get all product categories
  *
- * @param id reservation id
  * @param token Authorization token
  *
- * @returns API response
+ * @returns API response when refresh
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/accept/${id}`;
+export default async (
+  token: string
+): Promise<FetchResponse<CategoriesResponse>> => {
+  const uri = `${API_ENDPOINT}/product-sub-category/categories`;
 
   try {
     const response = await fetch(uri, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.status === 200) {
-      return { isError: false };
+      const data: CategoriesResponse = await response.json();
+      return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();
       return { exception, isError: true };

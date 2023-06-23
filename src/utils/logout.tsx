@@ -4,6 +4,7 @@ import { NextRouter } from "next/router";
 import { ParsedUrlQueryInput } from "querystring";
 import { logoutUser } from "../context/slices/auth";
 import { unsetBranches } from "../context/slices/branches";
+import { unsetProducts } from "../context/slices/products";
 import { logoutBusiness } from "../context/slices/business";
 import logoutUserService from "../services/auth/logoutUserService";
 
@@ -20,6 +21,7 @@ export default async (
   dispatch(logoutBusiness());
   dispatch(logoutUser());
   dispatch(unsetBranches());
+  dispatch(unsetProducts());
   callback();
   await logoutUserService(token, refresh);
 };

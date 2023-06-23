@@ -6,6 +6,7 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
  * @brief Close reservation
  *
  * @param id reservation id
+ * @param token Authorization token
  *
  * @returns API response
  */

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Box, Terms } from "paca-ui";
 import { useRouter } from "next/router";
 import { useAppSelector } from "../src/context/store";

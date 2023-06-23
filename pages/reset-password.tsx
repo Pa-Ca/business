@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
+import resetPasswordService from "../src/services/auth/resetPasswordWithTokenService";
 import {
   Box,
   ResetPassword as ResetPasswordComponent,
   useInputForm,
 } from "paca-ui";
-import resetPasswordService from "../src/services/auth/resetPasswordWithTokenService";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -51,9 +50,6 @@ export default function Signup() {
         completed={completed}
         onBackToLogin={() => router.push("/login")}
         onSubmit={() => resetPassword(password.value)}
-        color={MAIN_COLOR}
-        secondaryColor={SECONDARY_COLOR}
-        otherLoginsColor={GREEN}
       />
     </Box>
   );

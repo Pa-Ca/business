@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
 import fetchAPI from "../src/services/fetchAPI";
+import getProducts from "../src/utils/getProducts";
 import { useAppSelector } from "../src/context/store";
 import { Box, Login as LoginComponent } from "paca-ui";
 import { setBranches } from "../src/context/slices/branches";
@@ -55,6 +56,21 @@ export default function Login() {
       return;
     }
 
+    // Change hourIn and hourOut from 23:59:59 to 24:00:00
+    branchesResponse.data!.branches.forEach((branch) => {
+      if (branch.hourIn === "23:59:59") {
+        branch.hourIn = "24:00:00";
+      }
+      if (branch.hourOut === "23:59:59") {
+        branch.hourOut = "24:00:00";
+      }
+    });
+
+    const branchList = branchesResponse.data!.branches.filter(
+      (branch) => !branch.deleted
+    );
+    const branchIndex = branchList.length > 0 ? 0 : -1;
+
     dispatch(
       loginUser({
         logged: true,
@@ -77,22 +93,19 @@ export default function Login() {
       })
     );
 
-    // Change hourIn and hourOut from 23:59:59 to 24:00:00
-    branchesResponse.data!.branches.forEach((branch) => {
-      if (branch.hourIn === "23:59:59") {
-        branch.hourIn = "24:00:00";
-      }
-      if (branch.hourOut === "23:59:59") {
-        branch.hourOut = "24:00:00";
-      }
-    });
-
-    const branchList = branchesResponse.data!.branches.filter(
-      (branch) => !branch.deleted
-    );
     dispatch(setBranches(branchList));
-    if (branchList.length > 0) {
-      dispatch(setCurrentBranch(0));
+    dispatch(setCurrentBranch(branchIndex));
+
+    if (branchIndex !== -1) {
+      const branch = branchList[branchIndex];
+      await getProducts(
+        branch.id,
+        response.data!.token,
+        response.data!.refresh,
+        router,
+        dispatch,
+        (token: string) => dispatch(setToken(token))
+      );
     }
 
     router.push("/branch-reservations");
