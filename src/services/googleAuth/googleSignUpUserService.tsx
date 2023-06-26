@@ -1,6 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse } from "objects";
 
 type GoogleSignUpResponse = {
   /**

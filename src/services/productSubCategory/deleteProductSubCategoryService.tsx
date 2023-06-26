@@ -1,6 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse } from "objects";
 
 /**
  * @brief Delete product sub-category
@@ -10,7 +9,10 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
  *
  * @returns API response
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
+export default async (
+  id: number,
+  token: string
+): Promise<FetchResponse<null>> => {
   const uri = `${API_ENDPOINT}/product-sub-category/${id}`;
 
   try {
@@ -18,10 +20,10 @@ export default async (id: number, token: string): Promise<FetchResponse<null>> =
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
-    console.log(response)
+    console.log(response);
 
     if (response.status === 200) {
       return { isError: false };

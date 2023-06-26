@@ -1,6 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse } from "objects";
 
 /**
  * @brief Change a user's password usin a JWT token
@@ -10,7 +9,10 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
  *
  * @returns API response
  */
-export default async (newPassword: string, token: string): Promise<FetchResponse<null>> => {
+export default async (
+  newPassword: string,
+  token: string
+): Promise<FetchResponse<null>> => {
   const uri = `${API_ENDPOINT}/auth/reset-password/${token}`;
 
   try {

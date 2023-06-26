@@ -1,13 +1,11 @@
 import { API_ENDPOINT } from "../../config";
-import SaleDTO from "../../objects/sale/SaleDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, SaleDTO } from "objects";
 
 type SaleResponse = {
-  ongoingSales: SaleDTO[];
-  historicSales: SaleDTO[];
-  page: number;
-  totalPages: number;
+  ongoingSalesInfo: SaleDTO[];
+  historicSalesInfo: SaleDTO[];
+  currentHistoricPage: number;
+  totalHistoricPages: number;
 };
 
 /**

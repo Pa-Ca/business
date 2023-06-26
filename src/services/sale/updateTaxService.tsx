@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import TaxDTO from "../../objects/sale/TaxDTO";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, TaxDTO } from "objects";
 
 /**
  * @brief Change the data of a tax. Undefined variables will be ignored

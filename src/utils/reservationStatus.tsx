@@ -1,6 +1,6 @@
 import styleVariables from "../paca-ui/src/stories/assets/scss/variables.module.scss";
 
-export const statusDict = [
+export default [
     {name: "Indefinido", color: styleVariables.pendingStatus},
     {name: "Pendiente", color: styleVariables.pendingStatus},
     {name: "Aceptada", color: styleVariables.acceptedStatus},

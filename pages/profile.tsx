@@ -1,34 +1,40 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
-import logout from "../src/utils/logout";
 import { useDispatch } from "react-redux";
-import cousines from "../src/utils/cousines";
-import upload from "../src/services/s3/upload";
-import locations from "../src/utils/locations";
-import PageProps from "../src/objects/PageProps";
-import formatTime from "../src/utils/formatTime";
-import { GOOGLE_MAPS_API_KEY } from "../src/config";
-import validateName from "../src/utils/validateName";
+import { GOOGLE_MAPS_API_KEY } from "config";
 import { useSession, signOut } from "next-auth/react";
-import { setToken } from "../src/context/slices/auth";
-import { useAppSelector } from "../src/context/store";
-import validatePhone from "../src/utils/validatePhone";
-import { setName } from "../src/context/slices/business";
-import { setPhoneNumber } from "../src/context/slices/business";
-import getProfilePictureUrl from "../src/utils/getProfilePictureUrl";
-import changeNameService from "../src/services/business/changeNameService";
-import getBranchesService from "../src/services/branch/getBranchesService";
-import createBranchService from "../src/services/branch/createBranchService";
-import updateBranchService from "../src/services/branch/updateBranchService";
-import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
-import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
-import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
-import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
-import BranchDTO, {
-  Duration as BranchDuration,
+import {
+  logout,
+  cousines,
+  locations,
+  formatTime,
+  validateName,
+  validatePhone,
+  getProfilePictureUrl,
+} from "utils";
+import {
+  setName,
+  setBranches,
+  setPhoneNumber,
+  useAppSelector,
+  setCurrentBranch,
+} from "context";
+import {
+  S3UploadService,
+  getBranchesService,
+  createBranchService,
+  updateBranchService,
+  updateBusinessService,
+  resetPasswordWithOldPasswordService,
+  resetPasswordRequestService,
+} from "services";
+import {
+  PageProps,
+  BranchDTO,
   LocalTime,
-} from "../src/objects/branch/BranchDTO";
+  Duration as BranchDuration,
+} from "objects";
 import {
   useInputForm,
   InputFormHook,
@@ -123,13 +129,14 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       hourIn: hourIn as LocalTime,
       hourOut: hourOut as LocalTime,
       deleted: false,
+      dollarToLocalCurrencyExchange: branch.dollarToLocalCurrencyExchange,
     };
     return dto;
   };
 
   const saveName = async (newName: string) => {
     const response = await fetchAPI((token: string) =>
-      changeNameService(auth.id!, newName, token)
+      updateBusinessService({ id: auth.id!, name: newName }, token)
     );
 
     if (response.isError) {
@@ -142,7 +149,10 @@ export default function Profile({ header, fetchAPI }: PageProps) {
 
   const savePhoneNumber = async (newPhoneNumber: string) => {
     const response = await fetchAPI((token: string) =>
-      changePhoneNumberService(auth.id!, newPhoneNumber, token)
+      updateBusinessService(
+        { id: auth.id!, phoneNumber: newPhoneNumber },
+        token
+      )
     );
 
     if (response.isError) {
@@ -154,7 +164,10 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   };
 
   const onProfileUploadImage = async (file: File) => {
-    const res = await upload(file, `business-${business.id}-profile.jpeg`);
+    const res = await S3UploadService(
+      file,
+      `business-${business.id}-profile.jpeg`
+    );
 
     if (!res.data || res.isError) return;
   };
@@ -399,6 +412,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       hourIn,
       hourOut,
       deleted: false,
+      dollarToLocalCurrencyExchange: 1,
     };
 
     const response = await fetchAPI((token: string) =>

@@ -1,7 +1,9 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
-import ProductSubCategoryDTO from "../../objects/productSubCategory/ProductSubCategoryDTO";
+import {
+  FetchResponse,
+  ExceptionResponse,
+  ProductSubCategoryDTO,
+} from "objects";
 
 /**
  * @brief Create a new product sub-category

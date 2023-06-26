@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
-import resetPasswordService from "../src/services/auth/resetPasswordWithTokenService";
+import { resetPasswordWithTokenService } from "services";
 import {
   Box,
   ResetPassword as ResetPasswordComponent,
@@ -31,7 +31,7 @@ export default function Signup() {
       return;
     }
 
-    const response = await resetPasswordService(password, token);
+    const response = await resetPasswordWithTokenService(password, token);
 
     if (!!response.isError) {
       setError(true);

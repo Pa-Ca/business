@@ -1,18 +1,23 @@
 import React, { useState } from "react";
+import { getProducts } from "utils";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
-import fetchAPI from "../src/services/fetchAPI";
-import getProducts from "../src/utils/getProducts";
-import { useAppSelector } from "../src/context/store";
 import { Box, Login as LoginComponent } from "paca-ui";
-import { setBranches } from "../src/context/slices/branches";
-import { loginBusiness } from "../src/context/slices/business";
-import { loginUser, setToken } from "../src/context/slices/auth";
-import { setCurrentBranch } from "../src/context/slices/branches";
-import { MAIN_COLOR, SECONDARY_COLOR, GREEN } from "../src/config";
-import getBranchesService from "../src/services/branch/getBranchesService";
-import loginBusinessService from "../src/services/auth/loginBusinessService";
+import {
+  setToken,
+  loginUser,
+  setBranches,
+  loginBusiness,
+  useAppSelector,
+  setCurrentBranch,
+} from "context";
+import {
+  fetchAPI,
+  getBranchesService,
+  loginBusinessService,
+  getProductCategoriesService,
+} from "services";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",
@@ -53,6 +58,23 @@ export default function Login() {
       typeof branchesResponse.data === "string"
     ) {
       setError(true);
+      return;
+    }
+
+    // Get product categories
+    const categoriesResponse = await fetchAPI(
+      response.data!.token,
+      response.data!.refresh,
+      router,
+      dispatch,
+      setToken,
+      (token: string) => getProductCategoriesService(token)
+    );
+
+    if (
+      !!categoriesResponse.isError ||
+      typeof categoriesResponse.data === "string"
+    ) {
       return;
     }
 
@@ -116,13 +138,10 @@ export default function Login() {
       <LoginComponent
         error={error}
         images={images}
-        color={MAIN_COLOR}
         onLogin={login}
         onForgotClick={() => router.push("/recover-password")}
         onGoogleSignUp={() => signIn("google")}
         onSignUp={() => router.replace("/signup")}
-        secondaryColor={SECONDARY_COLOR}
-        otherLoginsColor={GREEN}
       />
     </Box>
   );

@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import SaleDTO from "../../objects/sale/SaleDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, SaleDTO } from "objects";
 
 /**
  * @brief Create a new sale
@@ -15,7 +13,7 @@ export default async (
   dto: Partial<SaleDTO>,
   token: string
 ): Promise<FetchResponse<SaleDTO>> => {
-    const uri = `${API_ENDPOINT}/sale`;
+  const uri = `${API_ENDPOINT}/sale`;
 
   try {
     const response = await fetch(uri, {

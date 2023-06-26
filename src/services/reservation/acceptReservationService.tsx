@@ -1,6 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse } from "objects";
 
 /**
  * @brief Accept reservation
@@ -10,7 +9,10 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
  *
  * @returns API response
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
+export default async (
+  id: number,
+  token: string
+): Promise<FetchResponse<null>> => {
   const uri = `${API_ENDPOINT}/reservation/accept/${id}`;
 
   try {
@@ -18,8 +20,8 @@ export default async (id: number, token: string): Promise<FetchResponse<null>> =
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.status === 200) {

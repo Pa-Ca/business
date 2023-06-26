@@ -2,14 +2,10 @@ import React from "react";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
-import validateName from "../src/utils/validateName";
-import { useAppSelector } from "../src/context/store";
-import validateEmail from "../src/utils/validateEmail";
-import { loginUser } from "../src/context/slices/auth";
-import validatePassword from "../src/utils/validatePassword";
-import { loginBusiness } from "../src/context/slices/business";
+import { signUpBusinessService } from "services";
+import { loginBusiness, useAppSelector, loginUser } from "context";
+import { validatePassword, validateName, validateEmail } from "utils";
 import { Box, SignUp as SignUpComponent, useInputForm } from "paca-ui";
-import signUpBusinessService from "../src/services/auth/signUpBusinessService";
 
 const images = [
   "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fd36tnp772eyphs.cloudfront.net%2Fblogs%2F1%2F2018%2F10%2FTerrasse-Suite-Carre-dOr-Hotel-Metropole-balcony-view.jpeg&f=1&nofb=1&ipt=9736c4b3ccbe4f89b8bfc453ff92138e9e1d5e527324123d5ff783268be37bdc&ipo=images",

@@ -1,10 +1,8 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
-import ProductCategoryDTO from "../../objects/productSubCategory/ProductCategoryDTO";
+import { FetchResponse, ExceptionResponse, ProductCategoryDTO } from "objects";
 
 type CategoriesResponse = {
-    productCategories: ProductCategoryDTO[];
+  productCategories: ProductCategoryDTO[];
 };
 
 /**

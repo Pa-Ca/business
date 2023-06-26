@@ -2,10 +2,9 @@ import "../styles/globals.css";
 import Head from "next/head";
 import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
+import store, { persistor } from "context";
 import { SessionProvider } from "next-auth/react";
-import AuthWrapper from "../src/components/AuthWrapper";
-import store, { persistor } from "../src/context/store";
-import HeaderWrapper from "../src/components/HeaderWrapper";
+import { HeaderWrapper, AuthWrapper } from "components";
 import { PersistGate } from "redux-persist/integration/react";
 
 export default function App({

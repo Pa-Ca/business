@@ -1,17 +1,7 @@
 import React, { useMemo } from "react";
+import { PageProps } from "objects";
 import { useDispatch } from "react-redux";
-import PageProps from "../src/objects/PageProps";
-import { useAppSelector } from "../src/context/store";
-import updateProductService from "../src/services/product/updateProductService";
-import createProductService from "../src/services/product/createProductService";
-import deleteProductService from "../src/services/product/deleteProductService";
-import createProductSubCategoryService from "../src/services/productSubCategory/createProductSubCategoryService";
-import updateProductSubCategoryService from "../src/services/productSubCategory/updateProductSubCategoryService";
-import deleteProductSubCategoryService from "../src/services/productSubCategory/deleteProductSubCategoryService";
-import {
-  setProductSubCategories,
-  setProducts,
-} from "../src/context/slices/products";
+import { setProductSubCategories, setProducts, useAppSelector } from "context";
 import {
   ProductProps,
   InputFormHook,
@@ -20,6 +10,14 @@ import {
   ProductSubCategoryObject,
   OptionObject,
 } from "paca-ui";
+import {
+  updateProductService,
+  createProductService,
+  deleteProductService,
+  createProductSubCategoryService,
+  updateProductSubCategoryService,
+  deleteProductSubCategoryService,
+} from "services";
 
 export default function Product({ header, fetchAPI }: PageProps) {
   const dispatch = useDispatch();

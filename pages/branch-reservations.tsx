@@ -1,27 +1,28 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import formatTime from "../src/utils/formatTime";
-import PageProps from "../src/objects/PageProps";
-import validateName from "../src/utils/validateName";
-import { useAppSelector } from "../src/context/store";
-import validateEmail from "../src/utils/validateEmail";
-import validatePhone from "../src/utils/validatePhone";
-import generateValidHours from "../src/utils/generateValidHours";
-import postReservationService from "../src/services/reservations/postReservationService";
-import getReservationsService from "../src/services/reservations/getReservationsService";
-import closeReservationService from "../src/services/reservations/closeReservationService";
-import acceptReservationService from "../src/services/reservations/acceptReservationService";
-import cancelReservationService from "../src/services/reservations/cancelReservationService";
-import rejectReservationService from "../src/services/reservations/rejectReservationService";
-import ReservationDTO, {
-  toReservationProps,
-} from "../src/objects/reservations/ReservationDTO";
+import { useAppSelector } from "context";
+import { PageProps, ReservationDTO, toReservationProps } from "objects";
 import {
-  BranchReserves,
-  ReservationProps,
   useInputForm,
   OptionObject,
+  BranchReserves,
+  ReservationProps,
 } from "paca-ui";
+import {
+  formatTime,
+  validateName,
+  validateEmail,
+  validatePhone,
+  generateValidHours,
+} from "utils";
+import {
+  postReservationService,
+  getReservationsService,
+  closeReservationService,
+  acceptReservationService,
+  cancelReservationService,
+  rejectReservationService,
+} from "services";
 
 export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const branches = useAppSelector((state) => state.branches).branches;

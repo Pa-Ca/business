@@ -1,7 +1,9 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
-import SubCategoryDTO from "../../objects/productSubCategory/ProductSubCategoryDTO";
+import {
+  FetchResponse,
+  ExceptionResponse,
+  ProductSubCategoryDTO,
+} from "objects";
 
 /**
  * @brief Change the data of a product sub-category. Undefined variables will 
@@ -13,9 +15,9 @@ import SubCategoryDTO from "../../objects/productSubCategory/ProductSubCategoryD
  * @returns API response when refresh
  */
 export default async (
-  dto: SubCategoryDTO,
+  dto: ProductSubCategoryDTO,
   token: string
-): Promise<FetchResponse<SubCategoryDTO>> => {
+): Promise<FetchResponse<ProductSubCategoryDTO>> => {
   const uri = `${API_ENDPOINT}/product-sub-category/${dto.id}`;
 
   try {
@@ -29,7 +31,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: SubCategoryDTO = await response.json();
+      const data: ProductSubCategoryDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

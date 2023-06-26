@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import TableDTO from "../../objects/branch/TableDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, TableDTO } from "objects";
 
 type TablesResponse = {
   tables: TableDTO[];
@@ -19,7 +17,7 @@ export default async (
   id: number,
   token: string
 ): Promise<FetchResponse<TablesResponse>> => {
-  const uri = `${API_ENDPOINT}/branch/${id}/tables`;
+  const uri = `${API_ENDPOINT}/branch/${id}/table`;
 
   try {
     const response = await fetch(uri, {

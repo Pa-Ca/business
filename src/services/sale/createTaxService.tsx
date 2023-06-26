@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import TaxDTO from "../../objects/sale/TaxDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, TaxDTO } from "objects";
 
 /**
  * @brief Create a new tax
@@ -15,7 +13,7 @@ export default async (
   dto: Partial<TaxDTO>,
   token: string
 ): Promise<FetchResponse<TaxDTO>> => {
-    const uri = `${API_ENDPOINT}/sale/${dto.saleId}/tax`;
+  const uri = `${API_ENDPOINT}/sale/${dto.saleId}/tax`;
 
   try {
     const response = await fetch(uri, {

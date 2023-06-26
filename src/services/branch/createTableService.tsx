@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import TableDTO from "../../objects/branch/TableDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, TableDTO } from "objects";
 
 /**
  * @brief Create a new table

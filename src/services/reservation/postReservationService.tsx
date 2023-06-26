@@ -1,36 +1,32 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import BusinessDTO from "../../objects/business/BusinessDTO";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, ReservationDTO } from "objects";
 
 /**
- * @brief Change the name of the business
+ * @brief Create reservation
  *
- * @param id Business id
- * @param name New business name
+ * @param dto Reservation data
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
-  id: number,
-  name: string,
+  dto: ReservationDTO,
   token: string
-): Promise<FetchResponse<BusinessDTO>> => {
-  const uri = `${API_ENDPOINT}/business/${id}`;
+): Promise<FetchResponse<ReservationDTO>> => {
+  const uri = `${API_ENDPOINT}/reservation`;
 
   try {
     const response = await fetch(uri, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ id, name }),
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      const data: BusinessDTO = await response.json();
+      const data: ReservationDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

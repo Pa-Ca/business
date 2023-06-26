@@ -1,25 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/router";
-import PageProps from "../src/objects/PageProps";
-import { TaxType } from "../src/objects/sale/TaxDTO";
-import { useAppSelector } from "../src/context/store";
-import TableDTO from "../src/objects/branch/TableDTO";
-import SaleDTO, { SaleStatus } from "../src/objects/sale/SaleDTO";
-import getSalesService from "../src/services/sale/getSalesService";
-import deleteTaxService from "../src/services/sale/deleteTaxService";
-import updateTaxService from "../src/services/sale/updateTaxService";
-import createTaxService from "../src/services/sale/createTaxService";
-import clearSaleService from "../src/services/sale/clearSaleService";
-import createSaleService from "../src/services/sale/createSaleService";
-import updateSaleService from "../src/services/sale/updateSaleService";
-import deleteSaleService from "../src/services/sale/deleteSaleService";
-import getTablesService from "../src/services/branch/getTablesService";
-import createTableService from "../src/services/branch/createTableService";
-import updateTableService from "../src/services/branch/updateTableService";
-import deleteTableService from "../src/services/branch/deleteTableService";
-import createProductSaleService from "../src/services/sale/createProductSaleService";
-import updateProductSaleService from "../src/services/sale/updateProductSaleService";
-import deleteProductSaleService from "../src/services/sale/deleteProductSaleService";
+import { useAppSelector } from "context";
+import { SaleDTO, SaleStatus, TableDTO, PageProps, TaxType } from "objects";
 import {
   BranchSales,
   OptionObject,
@@ -29,6 +11,23 @@ import {
   ProductCategoryObject,
   ProductSubCategoryObject,
 } from "paca-ui";
+import {
+  getSalesService,
+  deleteTaxService,
+  updateTaxService,
+  createTaxService,
+  clearSaleService,
+  createSaleService,
+  updateSaleService,
+  deleteSaleService,
+  getTablesService,
+  createTableService,
+  updateTableService,
+  deleteTableService,
+  createProductSaleService,
+  updateProductSaleService,
+  deleteProductSaleService,
+} from "services";
 
 export default function Sales({ header, fetchAPI }: PageProps) {
   const router = useRouter();
@@ -511,9 +510,9 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
       if (response.isError || typeof response.data === "string") {
       } else {
-        setOngoingSales(response.data?.ongoingSales!);
-        setHistoricSales(response.data?.historicSales!);
-        setTotalPages(response.data?.totalPages!);
+        setOngoingSales(response.data?.ongoingSalesInfo!);
+        setHistoricSales(response.data?.historicSalesInfo!);
+        setTotalPages(response.data?.totalHistoricPages!);
       }
     };
 

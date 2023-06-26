@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import SaleDTO from "../../objects/sale/SaleDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, SaleDTO } from "objects";
 
 /**
  * @brief Change the data of a sale. Undefined variables will be ignored

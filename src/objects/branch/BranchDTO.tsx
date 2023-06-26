@@ -1,5 +1,3 @@
-import TableDTO from "./TableDTO";
-
 export type Duration = `PT${number}H${number}M${number}S`;
 export type LocalTime = `${number}:${number}:${number}`;
 
@@ -72,6 +70,10 @@ type BranchDTO = {
    * Indicate if the branch is deleted
    */
   deleted: boolean;
+  /**
+   * Exchange between the dollar and the local currency
+   */
+  dollarToLocalCurrencyExchange: number;
 };
 
 export { type BranchDTO as default };
