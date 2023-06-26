@@ -1,3 +1,5 @@
+export * from "./alertService";
+
 import fetchAPI from "./fetchAPI";
 
 // Auth
