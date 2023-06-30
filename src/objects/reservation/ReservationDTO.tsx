@@ -79,20 +79,22 @@ export const toReservationProps = (
   const start = date.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
   });
 
   const statusColor = reservationStatus[reservation.status].color;
   return {
     id: reservation.id,
     start: start,
-    owner: reservation.name + "" + reservation.surname,
+    date: reservation.reservationDate,
+    end: "",
+    owner: reservation.name + " " + reservation.surname,
+    ownerEmail: reservation.email,
+    ownerOccasion: reservation.occasion,
     ownerPhone: reservation.phoneNumber,
     persons: reservation.clientNumber,
     tables: 1,
     state: reservation.status,
     statusColor: statusColor,
-    date: reservation.reservationDate,
   };
 };
 

@@ -48,9 +48,11 @@ import getReservationService from "./reservation/getReservationService";
 import postReservationService from "./reservation/postReservationService";
 import getReservationsService from "./reservation/getReservationsService";
 import closeReservationService from "./reservation/closeReservationService";
+import startReservationService from "./reservation/startReservationService";
 import acceptReservationService from "./reservation/acceptReservationService";
 import cancelReservationService from "./reservation/cancelReservationService";
 import rejectReservationService from "./reservation/rejectReservationService";
+import retireReservationService from "./reservation/retireReservationService";
 
 // S3
 import S3ClientService from "./s3/S3ClientService";
@@ -112,9 +114,11 @@ export {
   postReservationService,
   getReservationsService,
   closeReservationService,
+  startReservationService,
   acceptReservationService,
   cancelReservationService,
   rejectReservationService,
+  retireReservationService,
   // S3
   S3ClientService,
   S3UploadService,

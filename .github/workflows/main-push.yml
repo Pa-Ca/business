@@ -1,17 +1,33 @@
-name: Business Frontend Deployment
+name: Main Push
 
 on:
   push:
     branches:
-      - develop
-  pull_request:
-    branches:
-      - develop
+      - main
 
 jobs:
-  build:
+  npm-build:
+    name: Build App
+    runs-on: [self-hosted, paca]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Git SubModule Update
+        run: git submodule update --init --recursive
+
+      - name: Build App
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - run: npm ci
+      - run: npm run build
+
+  
+  docker-build:
     name: Build Image
-    runs-on: [self-hosted]
+    needs: npm-build
+    runs-on: [self-hosted, paca]
     outputs:
       BUILD_NUMBER: ${{steps.build-number.outputs.BUILD_NUMBER}}
     steps:
@@ -40,8 +56,8 @@ jobs:
 
   cd:
     name: Deployment into server
-    needs: build
-    runs-on: [self-hosted]
+    needs: docker-build
+    runs-on: [self-hosted, paca]
     steps:
       - name: deploy new business app image
         if: ${{ always() }}

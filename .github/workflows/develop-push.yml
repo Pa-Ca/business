@@ -1,0 +1,78 @@
+name: Dev Push
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  npm-build:
+    name: Build App
+    runs-on: [self-hosted, dev.paca]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Git SubModule Update
+        run: git submodule update --init --recursive
+
+      - name: Build App
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - run: npm ci
+      - run: npm run build
+
+  
+  docker-build:
+    name: Build Image
+    needs: npm-build
+    runs-on: [self-hosted, dev.paca]
+    outputs:
+      BUILD_NUMBER: ${{steps.build-number.outputs.BUILD_NUMBER}}
+    steps:
+      - name: Git SubModule Update
+        run: git submodule update --init --recursive
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEM }}
+
+      - name: Build Number
+        id: build-number
+        run: echo "BUILD_NUMBER=$(date '+%-d.%-m.%Y.%-H.%-M.%-S')" >> $GITHUB_OUTPUT
+
+      - name: Run docker build
+        id: next-build
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:${{steps.build-number.outputs.BUILD_NUMBER}} -t ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:${{steps.build-number.outputs.BUILD_NUMBER}}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:latest
+
+  cd:
+    name: Deployment into server
+    needs: docker-build
+    runs-on: [self-hosted, dev.paca]
+    steps:
+      - name: deploy new business app image
+        if: ${{ always() }}
+        run: |
+          docker rm -f dev.paca-business; 
+          docker run \
+          -e GOOGLE_CLIENT_ID=${{secrets.GOOGLE_CLIENT_ID}} \
+          -e GOOGLE_CLIENT_SECRET=${{secrets.GOOGLE_CLIENT_SECRET}} \
+          -e NEXTAUTH_URL=${{secrets.DEV_NEXTAUTH_URL}} \
+          -e JWT_SECRET=${{secrets.JWT_SECRET}} \
+          -e NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{secrets.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}} \
+          -e NEXT_PUBLIC_API_ENDPOINT=${{secrets.DEV_NEXT_PUBLIC_API_ENDPOINT}} \
+          -e NEXT_PUBLIC_S3_ENDPOINT=${{ secrets.NEXT_PUBLIC_S3_ENDPOINT }} \
+          -e NEXT_PUBLIC_S3_ACCESS_KEY_ID=${{ secrets.NEXT_PUBLIC_S3_ACCESS_KEY_ID }} \
+          -e NEXT_PUBLIC_S3_SECRET_ACCESS_KEY=${{ secrets.NEXT_PUBLIC_S3_SECRET_ACCESS_KEY }} \
+          -e NEXT_PUBLIC_S3_BUCKET=${{ secrets.DEV_NEXT_PUBLIC_S3_BUCKET }} \
+          -v "$(pwd)":/app -d --network host \
+          --name dev.paca-business ${{ secrets.DOCKERHUB_USERNAME }}/dev.paca-business:latest

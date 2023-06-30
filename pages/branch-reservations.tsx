@@ -13,6 +13,7 @@ import {
   validateName,
   validateEmail,
   validatePhone,
+  reservationStatus,
   generateValidHours,
 } from "utils";
 import {
@@ -20,9 +21,11 @@ import {
   postReservationService,
   getReservationsService,
   closeReservationService,
+  startReservationService,
   acceptReservationService,
   cancelReservationService,
   rejectReservationService,
+  retireReservationService,
 } from "services";
 
 export default function BranchReservations({ header, fetchAPI }: PageProps) {
@@ -213,6 +216,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           onCloseReservation: () => closeReservation(id),
           onReject: () => rejectReservation(id),
           onAccept: () => acceptReservation(id),
+          onRetire: () => retireReservation(id),
+          onStart: () => startReservation(id),
         },
       ]);
     }
@@ -234,6 +239,31 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     }
   };
 
+  const rejectReservation = async (id: number) => {
+    const response = await fetchAPI(
+      (token: string) => rejectReservationService(id, token)
+    );
+
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+      // Change state of reservation
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
+            return {
+              ...r,
+              state: 2,
+              statusColor: reservationStatus[2].color,
+            };
+          }
+          return r;
+        });
+      });
+    }
+  };
+
   const acceptReservation = async (id: number) => {
     const response = await fetchAPI((token: string) =>
       acceptReservationService(id, token)
@@ -251,7 +281,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 2,
+              state: 3,
+              statusColor: reservationStatus[3].color,
             };
           }
           return r;
@@ -260,9 +291,9 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     }
   };
 
-  const rejectReservation = async (id: number) => {
-    const response = await fetchAPI((token: string) =>
-      rejectReservationService(id, token)
+  const retireReservation = async (id: number) => {
+    const response = await fetchAPI(
+      (token: string) => retireReservationService(id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
@@ -277,7 +308,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 3,
+              state: 4,
+              statusColor: reservationStatus[4].color,
             };
           }
           return r;
@@ -286,9 +318,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     }
   };
 
-  const cancelReservation = async (id: number) => {
-    const response = await fetchAPI((token: string) =>
-      cancelReservationService(id, token)
+  const startReservation = async (id: number) => {
+    console.log("In startReservation");
+    const response = await fetchAPI(
+      (token: string) => startReservationService(id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
@@ -297,6 +330,19 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
         : response.error?.message;
       alertService.error(`Error cancelando la reserva: ${message}`);
     } else {
+      // Change state of reservation
+      setReservationsList((r) => {
+        return r.map((r) => {
+          if (r.id === id) {
+            return {
+              ...r,
+              state: 5,
+              statusColor: reservationStatus[5].color,
+            };
+          }
+          return r;
+        });
+      });
     }
   };
 
@@ -317,7 +363,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 4,
+              state: 6,
+              statusColor: reservationStatus[6].color,
             };
           }
           return r;
@@ -326,10 +373,29 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     }
   };
 
+  const cancelReservation = async (id: number) => {
+    const response = await fetchAPI(
+      (token: string) => cancelReservationService(id, token)
+    );
+
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+    } else {
+    }
+  };
+
   const onSubmit = () => {
     if (validateData()) {
       createReservation();
       setshowModal(false);
+
+      persons.setValue("");
+      occasion.setValue("");
+      firstName.setValue("");
+      lastName.setValue("");
+      phone.setValue("");
+      email.setValue("");
     } else {
     }
   };
@@ -356,6 +422,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           onCloseReservation: () => closeReservation(r.id),
           onReject: () => rejectReservation(r.id),
           onAccept: () => acceptReservation(r.id),
+          onRetire: () => retireReservation(r.id),
+          onStart: () => startReservation(r.id),
         };
       });
       setReservationsList(aux);
