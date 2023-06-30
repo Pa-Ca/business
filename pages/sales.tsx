@@ -102,11 +102,9 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   }, [products_]);
 
   const currentSale = useMemo(() => {
-    const sale = ongoingSales.find(
-      (sale) => sale.tableId === table.value?.value?.id
-    );
+    const sale = ongoingSales.find((s) => s.tableId === table.value?.value?.id);
     return sale;
-  }, [ongoingSales, table.value]);
+  }, [ongoingSales, table.value.value?.id]);
 
   const products = useMemo(() => {
     if (!currentSale) return [];
@@ -177,7 +175,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       const saveValueFunction = async (
         name: InputFormHook<string>,
         value: InputFormHook<string>,
-        type: InputFormHook<string>,
+        type: InputFormHook<string>
       ) => {
         const dto = {
           id: tax.id,
@@ -464,9 +462,9 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       alertService.error(`Error al crear la venta: ${message}`);
     } else {
       const newSale = {
-        ...response.data!,
-        products: [],
-        taxes: [],
+        ...response.data!.sale,
+        products: response.data!.products,
+        taxes: response.data!.taxes,
       };
 
       // Update sales
@@ -506,7 +504,12 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       });
 
       // Add to historic sales
-      const pastSale = response.data!;
+      const pastSale = {
+        ...response.data!.sale,
+        products: response.data!.products,
+        taxes: response.data!.taxes,
+      };
+
       setHistoricSales((oldSales) => {
         const newSales = [...oldSales];
         newSales.push(pastSale);
@@ -629,7 +632,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   useEffect(() => {
     const getSales = async () => {
       const response = await fetchAPI((token: string) =>
-        getSalesService(branch.id, token, page-1, pastSalesNumber)
+        getSalesService(branch.id, token, page - 1, pastSalesNumber)
       );
 
       if (response.isError || typeof response.data === "string") {

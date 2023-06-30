@@ -57,6 +57,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const lastName = useInputForm("");
   const phone = useInputForm("");
   const email = useInputForm("");
+  const tables = useInputForm("");
   const [showModal, setshowModal] = useState(false);
 
   const addDatePlusHour = (date: Date, hour: string) => {
@@ -477,6 +478,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       setShowModal={setshowModal}
       onSubmit={onSubmit}
       cancelButtonColor="Cancel"
+      tables={tables}
     />
   );
 }

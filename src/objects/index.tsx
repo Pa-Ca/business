@@ -26,6 +26,7 @@ import ReservationDTO, {
 } from "./reservation/ReservationDTO";
 
 // Sale
+import SaleInfoDTO from "./sale/SaleInfoDTO";
 import TaxDTO, { TaxType } from "./sale/TaxDTO";
 import SaleProductDTO from "./sale/SaleProductDTO";
 import SaleDTO, { SaleStatus } from "./sale/SaleDTO";
@@ -57,5 +58,6 @@ export {
   SaleStatus,
   type TaxDTO,
   type SaleDTO,
+  type SaleInfoDTO,
   type SaleProductDTO,
 };
