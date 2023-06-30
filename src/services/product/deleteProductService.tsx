@@ -20,7 +20,6 @@ export default async (id: number, token: string): Promise<FetchResponse<null>> =
         Authorization: `Bearer ${token}`
       }
     });
-    console.log(response)
 
     if (response.status === 200) {
       return { isError: false };

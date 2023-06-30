@@ -16,6 +16,7 @@ import {
   generateValidHours,
 } from "utils";
 import {
+  alertService,
   postReservationService,
   getReservationsService,
   closeReservationService,
@@ -199,8 +200,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data! === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error creando la reserva: ${message}`);
     } else {
       const id = response.data!.id;
       setReservationsList([
@@ -221,8 +224,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error cargando las reservas: ${message}`);
       return [];
     } else {
       return response.data!.reservations;
@@ -235,8 +240,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     );
 
     if (!!response.isError) {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error aceptando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {
@@ -259,8 +266,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error rechazando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {
@@ -283,8 +292,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error cancelando la reserva: ${message}`);
     } else {
     }
   };
@@ -295,8 +306,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error cerrando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {

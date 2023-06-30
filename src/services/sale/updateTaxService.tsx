@@ -13,7 +13,8 @@ export default async (
   dto: Partial<TaxDTO>,
   token: string
 ): Promise<FetchResponse<TaxDTO>> => {
-  const uri = `${API_ENDPOINT}/sale/${dto.saleId}/tax/${dto.id}`;
+  const uri = `${API_ENDPOINT}/tax/${dto.id}`;
+  console.log(dto)
 
   try {
     const response = await fetch(uri, {

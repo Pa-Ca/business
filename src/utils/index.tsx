@@ -6,6 +6,7 @@ import getProducts from "./getProducts";
 import validateName from "./validateName";
 import validateEmail from "./validateEmail";
 import validatePhone from "./validatePhone";
+import carouselImages from "./carouselImages";
 import validatePassword from "./validatePassword";
 import reservationStatus from "./reservationStatus";
 import generateValidHours from "./generateValidHours";
@@ -20,6 +21,7 @@ export {
   validateName,
   validateEmail,
   validatePhone,
+  carouselImages,
   validatePassword,
   reservationStatus,
   generateValidHours,

@@ -1,15 +1,13 @@
 import { Dispatch } from "react";
 import { AnyAction } from "redux";
 import { NextRouter } from "next/router";
-import fetchAPI from "../services/fetchAPI";
-import ProductDTO from "../objects/product/ProductDTO";
-import getProductsService from "../services/product/getProductsService";
-import ProductSubCategoryDTO from "../objects/productSubCategory/ProductSubCategoryDTO";
-import getProductSubCategoriesService from "../services/productSubCategory/getProductSubCategoriesService";
+import { ProductDTO, ProductSubCategoryDTO } from "objects";
+import { setProductSubCategories, setProducts } from "context";
 import {
-  setProductSubCategories,
-  setProducts,
-} from "../context/slices/products";
+  fetchAPI,
+  getProductsService,
+  getProductSubCategoriesService,
+} from "services";
 
 export default async (
   branchId: number,

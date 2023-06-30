@@ -21,13 +21,17 @@ type SaleDTO = {
    */
   reservationId?: number;
   /**
+   * Client quantity
+   */
+  clientQuantity: number;
+  /**
    * Start datetime of the sale
    */
-  startDate: string;
+  startTime: string;
   /**
    * End datetime of the sale
    */
-  endDate?: string;
+  endTime?: string;
   /**
    * Sale status
    */

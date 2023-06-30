@@ -66,9 +66,9 @@ import updateTaxService from "./sale/updateTaxService";
 import createSaleService from "./sale/createSaleService";
 import updateSaleService from "./sale/updateSaleService";
 import deleteSaleService from "./sale/deleteSaleService";
-import createProductSaleService from "./sale/createProductSaleService";
-import updateProductSaleService from "./sale/updateProductSaleService";
-import deleteProductSaleService from "./sale/deleteProductSaleService";
+import createSaleProductService from "./sale/createSaleProductService";
+import updateSaleProductService from "./sale/updateSaleProductService";
+import deleteSaleProductService from "./sale/deleteSaleProductService";
 
 export {
   fetchAPI,
@@ -128,7 +128,7 @@ export {
   createSaleService,
   updateSaleService,
   deleteSaleService,
-  createProductSaleService,
-  updateProductSaleService,
-  deleteProductSaleService,
+  createSaleProductService,
+  updateSaleProductService,
+  deleteSaleProductService,
 };

@@ -2,7 +2,7 @@ import { API_ENDPOINT } from "../../config";
 import { FetchResponse, ExceptionResponse, SaleProductDTO } from "objects";
 
 /**
- * @brief Change the data of a sale product. Undefined variables will be ignored
+ * @brief Create a new sale product
  *
  * @param dto Sale product data
  * @param token Authorization token
@@ -13,11 +13,11 @@ export default async (
   dto: Partial<SaleProductDTO>,
   token: string
 ): Promise<FetchResponse<SaleProductDTO>> => {
-  const uri = `${API_ENDPOINT}/sale/${dto.saleId}/product/${dto.id}`;
+  const uri = `${API_ENDPOINT}/sale-product`;
 
   try {
     const response = await fetch(uri, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

@@ -11,6 +11,7 @@ import {
   OptionObject,
 } from "paca-ui";
 import {
+  alertService,
   updateProductService,
   createProductService,
   deleteProductService,
@@ -105,8 +106,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
           if (!!response.exception) {
             name.setError(1);
             name.setErrorMessage(response.exception!.message);
-          } else {
           }
+
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error modificando el nombre: ${message}`);
         } else {
           dispatch(
             setProducts({
@@ -134,8 +139,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
           if (!!response.exception) {
             subCategory.setError(1);
             subCategory.setErrorMessage(response.exception!.message);
-          } else {
           }
+
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error modificando la sub-categoría: ${message}`);
         } else {
           dispatch(
             setProducts({
@@ -161,8 +170,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
           if (!!response.exception) {
             description.setError(1);
             description.setErrorMessage(response.exception!.message);
-          } else {
           }
+
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error modificando la descripción: ${message}`);
         } else {
           dispatch(
             setProducts({
@@ -185,8 +198,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
           if (!!response.exception) {
             price.setError(1);
             price.setErrorMessage(response.exception!.message);
-          } else {
           }
+
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error modificando el precio: ${message}`);
         } else {
           dispatch(
             setProducts({
@@ -203,9 +220,10 @@ export default function Product({ header, fetchAPI }: PageProps) {
         );
 
         if (response.isError || typeof response.data === "string") {
-          if (!!response.exception) {
-          } else {
-          }
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error modificando la disponibilidad: ${message}`);
         } else {
           dispatch(
             setProducts({
@@ -222,9 +240,10 @@ export default function Product({ header, fetchAPI }: PageProps) {
         );
 
         if (response.isError || typeof response.data === "string") {
-          if (!!response.exception) {
-          } else {
-          }
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error eliminando el producto: ${message}`);
         } else {
           const products = { ...products_ };
           delete products[id];
@@ -279,8 +298,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
       if (!!response.exception) {
         name.setError(1);
         name.setErrorMessage(response.exception!.message);
-      } else {
       }
+
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error creando el producto: ${message}`);
 
       return false;
     } else {
@@ -310,8 +333,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
       if (!!response.exception) {
         subCategory.setError(1);
         subCategory.setErrorMessage(response.exception!.message);
-      } else {
       }
+
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error creando la subcategoría: ${message}`);
 
       return { id: -1, name: "", categoryId: -1 };
     } else {
@@ -346,8 +373,12 @@ export default function Product({ header, fetchAPI }: PageProps) {
       if (!!response.exception) {
         subCategory.setError(1);
         subCategory.setErrorMessage(response.exception!.message);
-      } else {
       }
+
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error modificando la subcategoría: ${message}`);
 
       return false;
     } else {
@@ -368,9 +399,10 @@ export default function Product({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      } else {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error eliminando la subcategoría: ${message}`);
     } else {
       const subCategories = { ...productSubCategories_ };
       delete subCategories[id];

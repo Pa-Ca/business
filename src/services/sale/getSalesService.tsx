@@ -1,9 +1,21 @@
 import { API_ENDPOINT } from "../../config";
-import { FetchResponse, ExceptionResponse, SaleDTO } from "objects";
+import {
+  TaxDTO,
+  SaleDTO,
+  FetchResponse,
+  SaleProductDTO,
+  ExceptionResponse,
+} from "objects";
+
+type SaleInfo = {
+  sale: SaleDTO;
+  taxes: TaxDTO[];
+  products: SaleProductDTO[];
+};
 
 type SaleResponse = {
-  ongoingSalesInfo: SaleDTO[];
-  historicSalesInfo: SaleDTO[];
+  ongoingSalesInfo: SaleInfo[];
+  historicSalesInfo: SaleInfo[];
   currentHistoricPage: number;
   totalHistoricPages: number;
 };

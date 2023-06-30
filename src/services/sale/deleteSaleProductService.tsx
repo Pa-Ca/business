@@ -15,7 +15,7 @@ export default async (
   saleId: number,
   token: string
 ): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/sale/${saleId}/product/${id}`;
+  const uri = `${API_ENDPOINT}/sale-product/${id}`;
 
   try {
     const response = await fetch(uri, {
@@ -25,7 +25,6 @@ export default async (
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response);
 
     if (response.status === 200) {
       return { isError: false };

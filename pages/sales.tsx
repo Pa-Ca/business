@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
 import { useAppSelector } from "context";
 import { SaleDTO, SaleStatus, TableDTO, PageProps, TaxType } from "objects";
 import {
@@ -12,6 +11,7 @@ import {
   ProductSubCategoryObject,
 } from "paca-ui";
 import {
+  alertService,
   getSalesService,
   deleteTaxService,
   updateTaxService,
@@ -24,15 +24,15 @@ import {
   createTableService,
   updateTableService,
   deleteTableService,
-  createProductSaleService,
-  updateProductSaleService,
-  deleteProductSaleService,
+  createSaleProductService,
+  updateSaleProductService,
+  deleteSaleProductService,
 } from "services";
 
 export default function Sales({ header, fetchAPI }: PageProps) {
-  const router = useRouter();
-  const { page } = router.query;
+  const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [pastSalesNumber, setPastSalesNumber] = useState<number>(5);
   const branches = useAppSelector((state) => state.branches).branches;
   const products_ = useAppSelector((state) => state.products.products);
   const branchIndex = useAppSelector((state) => state.branches).current;
@@ -102,7 +102,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   }, [products_]);
 
   const currentSale = useMemo(() => {
-    return ongoingSales.find((sale) => sale.tableId === table.value?.value?.id);
+    const sale = ongoingSales.find(
+      (sale) => sale.tableId === table.value?.value?.id
+    );
+    return sale;
   }, [ongoingSales, table.value]);
 
   const products = useMemo(() => {
@@ -110,17 +113,49 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
     const onChangeAmount = async (id: number, amount: number) => {
       const response = await fetchAPI((token: string) =>
-        updateProductSaleService({ id, amount: amount }, token)
+        updateSaleProductService({ id, amount: amount }, token)
       );
+
+      if (response.isError || typeof response.data === "string") {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error al actualizar el producto: ${message}`);
+      }
     };
 
     const onDelete = async (id: number, saleId: number) => {
       const response = await fetchAPI((token: string) =>
-        deleteProductSaleService(id, saleId, token)
+        deleteSaleProductService(id, saleId, token)
       );
+
+      if (response.isError || typeof response.data === "string") {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error al eliminar el producto: ${message}`);
+      } else {
+        // Update products
+        const newProducts = [...currentSale?.products!];
+        newProducts.splice(
+          newProducts.findIndex((product) => product.id === id),
+          1
+        );
+
+        // Update sale
+        setOngoingSales((oldSales) => {
+          const newSales = [...oldSales];
+          const saleIndex = newSales.findIndex(
+            (sale) => sale.id === currentSale?.id
+          );
+          newSales[saleIndex].products = newProducts;
+          return newSales;
+        });
+      }
     };
 
-    return currentSale?.products!.map((product) => ({
+    const products = currentSale?.products!.map((product) => ({
+      id: product.id,
       name: product.name,
       price: product.price,
       amount: product.amount,
@@ -128,30 +163,37 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         onChangeAmount(product.id, parseInt(amount)),
       onDelete: () => onDelete(product.id, currentSale.id),
     }));
-  }, [currentSale]);
+
+    // Sort products by id
+    products?.sort((a, b) => a.id - b.id);
+
+    return products;
+  }, [currentSale?.products]);
 
   const taxes = useMemo(() => {
     if (!currentSale) return [];
 
-    return currentSale?.taxes!.map((tax, index) => {
+    const taxes = currentSale?.taxes!.map((tax, index) => {
       const saveValueFunction = async (
         name: InputFormHook<string>,
+        value: InputFormHook<string>,
         type: InputFormHook<string>,
-        value: InputFormHook<string>
       ) => {
+        const dto = {
+          id: tax.id,
+          name: name.value,
+          type: TaxType[type.value as keyof typeof TaxType],
+          value: Number(value.value),
+        };
         const response = await fetchAPI((token: string) =>
-          updateTaxService(
-            {
-              id: tax.id,
-              name: name.value,
-              type: TaxType[type.value as keyof typeof TaxType],
-              value: parseFloat(value.value),
-            },
-            token
-          )
+          updateTaxService(dto, token)
         );
 
         if (response.isError || typeof response.data === "string") {
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error al actualizar el impuesto: ${message}`);
         } else {
           // Update tax
           const newTaxes = [...currentSale.taxes!];
@@ -171,10 +213,14 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
       const deleteValueFunction = async () => {
         const response = await fetchAPI((token: string) =>
-          deleteTaxService(tax.id, tax.saleId, token)
+          deleteTaxService(tax.id, token)
         );
 
         if (response.isError || typeof response.data === "string") {
+          const message = !!response.exception
+            ? response.exception.message
+            : response.error?.message;
+          alertService.error(`Error al eliminar el impuesto: ${message}`);
         } else {
           // Delete tax
           const newTaxes = [...currentSale.taxes!];
@@ -193,6 +239,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       };
 
       return {
+        id: tax.id,
         name: tax.name,
         type: tax.type,
         value: tax.value,
@@ -200,12 +247,17 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         deleteValueFunction,
       };
     });
+
+    // Sort taxes by id
+    taxes?.sort((a, b) => a.id - b.id);
+
+    return taxes;
   }, [currentSale?.taxes]);
 
   const pastSales = useMemo(() => {
     return historicSales.map((sale) => ({
       ...sale,
-      startDate: new Date(sale.startDate),
+      startTime: new Date(sale.startTime),
       taxes: sale.taxes.map((tax) => ({
         ...tax,
         type: TaxType[tax.type] as "$" | "%",
@@ -227,6 +279,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al crear el impuesto: ${message}`);
     } else {
       // Update tax
       const newTaxes = [...currentSale?.taxes!];
@@ -257,6 +313,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al crear la mesa: ${message}`);
       return false;
     } else {
       const newTable = response.data!;
@@ -294,6 +354,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al actualizar la mesa: ${message}`);
       return false;
     } else {
       const newTable = response.data!;
@@ -307,6 +371,8 @@ export default function Sales({ header, fetchAPI }: PageProps) {
           label: newTable.name,
           value: newTable,
         };
+        table.setValue(newTables[tableIndex]);
+
         return newTables;
       });
 
@@ -315,18 +381,20 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   };
 
   const onAddProduct = async (productId: number, amount: number) => {
+    const dto = {
+      productId,
+      saleId: currentSale!.id,
+      amount: amount,
+    };
     const response = await fetchAPI((token: string) =>
-      createProductSaleService(
-        {
-          productId,
-          saleId: currentSale!.id,
-          amount: amount,
-        },
-        token
-      )
+      createSaleProductService(dto, token)
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al agregar el producto: ${message}`);
       return false;
     } else {
       // Update products
@@ -353,6 +421,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al eliminar los productos: ${message}`);
     } else {
       // Update sale
       setOngoingSales((oldSales) => {
@@ -367,18 +439,35 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   };
 
   const onCreateSale = async () => {
+    if (!table.value.value) {
+      alertService.error("No hay ninguna mesa seleccionada");
+      return;
+    }
+
+    const dto = {
+      tableId: table.value.value.id,
+      clientQuantity: 1,
+      startTime: new Date().toISOString(),
+      status: SaleStatus.ONGOING,
+      tableName: table.value.value.name,
+      note: "",
+      dollarToLocalCurrencyExchange: 1,
+    };
     const response = await fetchAPI((token: string) =>
-      createSaleService(
-        {
-          tableId: table.value!.value!.id,
-        },
-        token
-      )
+      createSaleService(dto, token)
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al crear la venta: ${message}`);
     } else {
-      const newSale = response.data!;
+      const newSale = {
+        ...response.data!,
+        products: [],
+        taxes: [],
+      };
 
       // Update sales
       setOngoingSales((oldSales) => {
@@ -401,6 +490,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al cerrar la venta: ${message}`);
     } else {
       // Delete ongoing sales
       setOngoingSales((oldSales) => {
@@ -428,6 +521,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al eliminar la venta: ${message}`);
     } else {
       // Update sales
       setOngoingSales((oldSales) => {
@@ -453,6 +550,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al guardar la nota: ${message}`);
     } else {
     }
   };
@@ -463,14 +564,31 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error al eliminar la mesa: ${message}`);
     } else {
       // Update tables
       setAllTables((oldTables) => {
         const newTables = [...oldTables];
         const tableIndex = newTables.findIndex(
-          (table) => table.value!.id === table.value!.id
+          (t) => t.value!.id === table.value!.value!.id
         );
         newTables.splice(tableIndex, 1);
+
+        if (newTables.length === 0) {
+          table.setValue({
+            label: "",
+            value: null,
+          });
+        } else {
+          table.setValue({
+            label: newTables[0].label,
+            value: newTables[0].value,
+          });
+        }
+
         return newTables;
       });
     }
@@ -484,16 +602,22 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       );
 
       if (response.isError || typeof response.data === "string") {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error al obtener las mesas: ${message}`);
       } else if (response.data?.tables.length! > 0) {
-        setAllTables(
-          response.data?.tables.map((table) => ({
-            label: table.name!,
-            value: table!,
-          }))!
-        );
+        const tables = response.data?.tables.map((table) => ({
+          label: table.name!,
+          value: table!,
+        }))!;
+
+        // Sort tables by name
+        tables.sort((a, b) => a.label.localeCompare(b.label));
+        setAllTables(tables);
         table.setValue({
-          label: response.data?.tables[0].name!,
-          value: response.data?.tables[0]!,
+          label: tables[0].value.name!,
+          value: tables[0].value,
         });
       }
     };
@@ -505,19 +629,38 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   useEffect(() => {
     const getSales = async () => {
       const response = await fetchAPI((token: string) =>
-        getSalesService(branch.id, token, 1)
+        getSalesService(branch.id, token, page-1, pastSalesNumber)
       );
 
       if (response.isError || typeof response.data === "string") {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error al obtener las ventas: ${message}`);
       } else {
-        setOngoingSales(response.data?.ongoingSalesInfo!);
-        setHistoricSales(response.data?.historicSalesInfo!);
+        const ongoing = response.data?.ongoingSalesInfo!.map((saleInfo) => {
+          return {
+            ...saleInfo.sale,
+            taxes: saleInfo.taxes,
+            products: saleInfo.products,
+          };
+        });
+        const historic = response.data?.historicSalesInfo!.map((saleInfo) => {
+          return {
+            ...saleInfo.sale,
+            taxes: saleInfo.taxes,
+            products: saleInfo.products,
+          };
+        });
+
+        setOngoingSales(ongoing!);
+        setHistoricSales(historic!);
         setTotalPages(response.data?.totalHistoricPages!);
       }
     };
 
     getSales();
-  }, []);
+  }, [page, pastSalesNumber]);
 
   return (
     <BranchSales
@@ -527,6 +670,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       taxes={taxes}
       products={products}
       allTables={allTables}
+      note={currentSale?.note!}
       allProducts={allProducts}
       categories={productCategories}
       hasSale={currentSale !== undefined}
@@ -545,25 +689,9 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       // Historic sales
       pastSales={pastSales}
       totalPages={totalPages}
-      page={parseInt(page as string) || 1}
-      onNextPage={() =>
-        router.push({
-          pathname: router.pathname,
-          query: {
-            ...router.query,
-            page: Math.min(totalPages, parseInt(page as string) + 1),
-          },
-        })
-      }
-      onPreviousPage={() =>
-        router.push({
-          pathname: router.pathname,
-          query: {
-            ...router.query,
-            page: Math.max(1, parseInt(page as string) - 1),
-          },
-        })
-      }
+      page={page}
+      onNextPage={() => setPage(page + 1)}
+      onPreviousPage={() => setPage(page - 1)}
     />
   );
 }

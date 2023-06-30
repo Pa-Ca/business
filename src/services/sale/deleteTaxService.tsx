@@ -12,10 +12,9 @@ import { FetchResponse, ExceptionResponse } from "objects";
  */
 export default async (
   id: number,
-  saleId: number,
   token: string
 ): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/sale/${saleId}/tax/${id}`;
+  const uri = `${API_ENDPOINT}/tax/${id}`;
 
   try {
     const response = await fetch(uri, {
@@ -25,7 +24,6 @@ export default async (
         Authorization: `Bearer ${token}`,
       },
     });
-    console.log(response);
 
     if (response.status === 200) {
       return { isError: false };
