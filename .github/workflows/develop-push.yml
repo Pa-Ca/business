@@ -1,10 +1,7 @@
-name: Dev deploy
+name: Dev Push
 
 on:
   push:
-    branches:
-      - develop
-  pull_request:
     branches:
       - develop
 
