@@ -1,5 +1,5 @@
+import { reservationStatus } from "utils";
 import { ReservationProps } from "paca-ui";
-import {statusDict} from "../../utils/reservation-status";
 
 type ReservationDTO = {
   /**
@@ -81,7 +81,7 @@ export const toReservationProps = (
     minute: "2-digit",
   });
 
-  const statusColor = statusDict[reservation.status].color;
+  const statusColor = reservationStatus[reservation.status].color;
   return {
     id: reservation.id,
     start: start,

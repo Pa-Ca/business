@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
 import logout from "../utils/logout";
-import { MAIN_COLOR } from "../config";
+import { useRouter } from "next/router";
 import type { AppProps } from "next/app";
+import fetch from "../services/fetchAPI";
 import { useDispatch } from "react-redux";
+import getProducts from "../utils/getProducts";
 import { useAppSelector } from "../context/store";
+import { setToken } from "../context/slices/auth";
+import FetchResponse from "../objects/FetchResponse";
 import { setCurrentBranch } from "../context/slices/branches";
 import getProfilePictureUrl from "../utils/getProfilePictureUrl";
 
@@ -29,13 +32,13 @@ export default function HeaderWrapper({
   const business = useAppSelector((state) => state.business);
   const branches = useAppSelector((state) => state.branches).branches;
   const branchIndex = useAppSelector((state) => state.branches).current;
-  const [profilePictureUrl, setProfilePictureUrl] = useState('');
+  const [profilePictureUrl, setProfilePictureUrl] = useState("");
 
   const branch = branches[branchIndex];
 
   useEffect(() => {
-    getProfilePictureUrl(business.id).then(url => setProfilePictureUrl(url))
-  }, [])
+    getProfilePictureUrl(business.id).then((url) => setProfilePictureUrl(url));
+  }, []);
 
   const header = {
     // [TODO] Fix header picture
@@ -51,34 +54,53 @@ export default function HeaderWrapper({
         undefined,
         () => {}
       ),
-      userRole: "business",
-      logged: true,
+    userRole: "business",
+    logged: true,
     currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
     branchOptions: branches.map((branch, index) => {
       return {
         name: `${branch.name!} | ${branch.location}`,
-        func: () => {
+        func: async () => {
           dispatch(setCurrentBranch(index));
+          await getProducts(
+            branch.id,
+            auth.token!,
+            auth.refresh!,
+            router,
+            dispatch,
+            (token: string) => dispatch(setToken(token))
+          );
           router.reload();
         },
       };
     }),
     onEditProfile: () => router.push("/profile"),
-    onReserveClick: () => { },
+    onReserveClick: () => {},
     onReservationsClick: () => router.push("/branch-reservations"),
-    onFavoritesClick: () => { },
+    onFavoritesClick: () => {},
     onLeftSectionClick: () => {},
     onPacaClick: () => router.reload(),
     onLoginClick: () => router.push("/login"),
     onRegisterClick: () => router.push("/signup"),
     onProfileClick: () => {},
-    color: MAIN_COLOR,
+  };
+
+  const fetchAPI = async function <T>(
+    service: (token: string) => Promise<FetchResponse<T>>
+  ): Promise<FetchResponse<T | string>> {
+    return await fetch(
+      auth.token!,
+      auth.refresh!,
+      router,
+      dispatch,
+      (token: string) => dispatch(setToken(token)),
+      service
+    );
   };
 
   if (profilePictureUrl) {
-    return <Component header={header} {...pageProps} />;
+    return <Component header={header} fetchAPI={fetchAPI} {...pageProps} />;
   } else {
-    return <>Loading...</>
+    return <>Loading...</>;
   }
-
 }

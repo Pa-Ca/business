@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
-import LoginResponseDTO from "../../objects/auth/LoginResponseDTO";
+import { FetchResponse, ExceptionResponse, LoginResponseDTO } from "objects";
 
 /**
  * @brief Create a new user

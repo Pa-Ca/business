@@ -20,9 +20,10 @@
     "incremental": true,
     "paths": {
       "paca-ui": [
-        "./src/paca-ui/src/index.tsx"
+        "./paca-ui/src/index.tsx"
       ]
-    }
+    },
+    "baseUrl": "./src"
   },
   "include": [
     "next-env.d.ts",

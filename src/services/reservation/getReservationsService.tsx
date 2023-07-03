@@ -1,20 +1,23 @@
 import { API_ENDPOINT } from "../../config";
-import ReservationDTO from "../../objects/branch/BranchDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, ReservationDTO } from "objects";
+
+type ReservationResponse = {
+  reservations: ReservationDTO[];
+};
 
 /**
- * @brief Get the reservation given its id
+ * @brief Get the branches of a business given its id
  *
- * @param id Reservation id
+ * @param id Business id
+ * @param token Authorization token
  *
- * @returns API response
+ * @returns API response when refresh
  */
 export default async (
   id: number,
-  token: string,
-): Promise<FetchResponse<ReservationDTO>> => {
-  const uri = `${API_ENDPOINT}/reservation/${id}`;
+  token: string
+): Promise<FetchResponse<ReservationResponse>> => {
+  const uri = `${API_ENDPOINT}/branch/${id}/reservation`;
 
   try {
     const response = await fetch(uri, {
@@ -26,7 +29,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: ReservationDTO = await response.json();
+      const data: ReservationResponse = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

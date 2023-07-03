@@ -1,4 +1,4 @@
-import client from "./client";
+import client from "./S3ClientService";
 import { GetObjectOutput, GetObjectRequest } from "aws-sdk/clients/s3";
 
 

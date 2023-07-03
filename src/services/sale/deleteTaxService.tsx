@@ -1,24 +1,28 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse } from "objects";
 
 /**
- * @brief Reject reservation
+ * @brief Delete tax
  *
- * @param id reservation id
+ * @param id tax id
+ * @param saleId sale id
+ * @param token Authorization token
  *
  * @returns API response
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/reject/${id}`;
+export default async (
+  id: number,
+  token: string
+): Promise<FetchResponse<null>> => {
+  const uri = `${API_ENDPOINT}/tax/${id}`;
 
   try {
     const response = await fetch(uri, {
-      method: "POST",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (response.status === 200) {

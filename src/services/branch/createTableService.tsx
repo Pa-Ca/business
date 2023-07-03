@@ -1,36 +1,32 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import BusinessDTO from "../../objects/business/BusinessDTO";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, TableDTO } from "objects";
 
 /**
- * @brief Change the name of the business
+ * @brief Create a new table
  *
- * @param id Business id
- * @param name New business name
+ * @param dto Table data
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
-  id: number,
-  name: string,
+  dto: Partial<TableDTO>,
   token: string
-): Promise<FetchResponse<BusinessDTO>> => {
-  const uri = `${API_ENDPOINT}/business/${id}`;
+): Promise<FetchResponse<TableDTO>> => {
+  const uri = `${API_ENDPOINT}/table`;
 
   try {
     const response = await fetch(uri, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ id, name }),
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      const data: BusinessDTO = await response.json();
+      const data: TableDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

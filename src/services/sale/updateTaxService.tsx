@@ -1,23 +1,20 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import BusinessDTO from "../../objects/business/BusinessDTO";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, TaxDTO } from "objects";
 
 /**
- * @brief Change the phone number of the business
+ * @brief Change the data of a tax. Undefined variables will be ignored
  *
- * @param id Business id
- * @param phoneNumber New business phone number
+ * @param dto Tax data
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
-  id: number,
-  phoneNumber: string,
+  dto: Partial<TaxDTO>,
   token: string
-): Promise<FetchResponse<BusinessDTO>> => {
-  const uri = `${API_ENDPOINT}/business/${id}`;
+): Promise<FetchResponse<TaxDTO>> => {
+  const uri = `${API_ENDPOINT}/tax/${dto.id}`;
+  console.log(dto)
 
   try {
     const response = await fetch(uri, {
@@ -26,11 +23,11 @@ export default async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ id, phoneNumber }),
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      const data: BusinessDTO = await response.json();
+      const data: TaxDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

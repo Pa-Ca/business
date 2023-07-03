@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import BranchDTO from "../../objects/branch/BranchDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, BranchDTO } from "objects";
 
 /**
  * @brief Change the data of a branch. Undefined variables will be ignored

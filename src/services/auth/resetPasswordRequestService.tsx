@@ -1,8 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
-import ResetPasswordDTO from "../../objects/auth/ResetPasswordDTO";
-
+import { FetchResponse, ExceptionResponse, ResetPasswordDTO } from "objects";
 /**
  * @brief Create a password change request
  *
@@ -10,7 +7,9 @@ import ResetPasswordDTO from "../../objects/auth/ResetPasswordDTO";
  *
  * @returns API response
  */
-export default async (email: string): Promise<FetchResponse<ResetPasswordDTO>> => {
+export default async (
+  email: string
+): Promise<FetchResponse<ResetPasswordDTO>> => {
   const uri = `${API_ENDPOINT}/auth/reset-password-request`;
 
   try {

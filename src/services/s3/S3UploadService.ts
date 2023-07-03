@@ -1,4 +1,4 @@
-import client from "./client";
+import client from "./S3ClientService";
 import { PutObjectRequest } from "aws-sdk/clients/s3";
 
 export default async (file: File | null, fileName: string) => {
