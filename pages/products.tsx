@@ -99,7 +99,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
       // Product methods
       const onSaveName = async (id: number, name: InputFormHook<string>) => {
         const response = await fetchAPI((token: string) =>
-          updateProductService({ ...product, id, name: name.value }, token)
+          updateProductService({ id, name: name.value }, token)
         );
 
         if (response.isError || typeof response.data === "string") {
@@ -130,7 +130,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
       ) => {
         const response = await fetchAPI((token: string) =>
           updateProductService(
-            { ...product, id, subCategoryId: subCategory.value!.value?.id! },
+            { id, subCategoryId: subCategory.value!.value?.id! },
             token
           )
         );
@@ -161,7 +161,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
       ) => {
         const response = await fetchAPI((token: string) =>
           updateProductService(
-            { ...product, id, description: description.value },
+            { id, description: description.value },
             token
           )
         );
@@ -189,7 +189,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
       const onSavePrice = async (id: number, price: InputFormHook<string>) => {
         const response = await fetchAPI((token: string) =>
           updateProductService(
-            { ...product, id, price: Number(price.value) },
+            { id, price: Number(price.value) },
             token
           )
         );
@@ -216,7 +216,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
       const onSaveDisabled = async (id: number, disabled: boolean) => {
         const response = await fetchAPI((token: string) =>
-          updateProductService({ ...product, id, disabled }, token)
+          updateProductService({ id, disabled }, token)
         );
 
         if (response.isError || typeof response.data === "string") {
@@ -295,15 +295,15 @@ export default function Product({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
+      if (!!response.exception && response.exception.code === 57) {
         name.setError(1);
-        name.setErrorMessage(response.exception!.message);
+        name.setErrorMessage("Ya existe un producto con ese nombre");
+      } else {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error creando el producto: ${message}`);
       }
-
-      const message = !!response.exception
-        ? response.exception.message
-        : response.error?.message;
-      alertService.error(`Error creando el producto: ${message}`);
 
       return false;
     } else {
