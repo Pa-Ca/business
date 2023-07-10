@@ -3,12 +3,12 @@ import { useAppSelector } from "context";
 import { SaleDTO, SaleStatus, TableDTO, PageProps, TaxType } from "objects";
 import {
   BranchSales,
-  OptionObject,
   useInputForm,
   InputFormHook,
   ProductObject,
   ProductCategoryObject,
   ProductSubCategoryObject,
+  TableObject,
 } from "paca-ui";
 import {
   alertService,
@@ -32,7 +32,7 @@ import {
 export default function Sales({ header, fetchAPI }: PageProps) {
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [pastSalesNumber, setPastSalesNumber] = useState<number>(5);
+  const [pastSalesNumber, setPastSalesNumber] = useState<number>(15);
   const branches = useAppSelector((state) => state.branches).branches;
   const products_ = useAppSelector((state) => state.products.products);
   const branchIndex = useAppSelector((state) => state.branches).current;
@@ -40,11 +40,8 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
   const [ongoingSales, setOngoingSales] = useState<SaleDTO[]>([]);
   const [historicSales, setHistoricSales] = useState<SaleDTO[]>([]);
-  const [allTables, setAllTables] = useState<OptionObject<TableDTO>[]>([]);
-  const table = useInputForm<OptionObject<TableDTO | null>>({
-    label: "",
-    value: null,
-  });
+  const [allTables, setAllTables] = useState<TableObject[]>([]);
+  const table = useInputForm<TableObject | null>(null);
   const productCategories_ = useAppSelector(
     (state) => state.products.categories
   );
@@ -93,7 +90,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
     for (let key of Object.keys(products_)) {
       const product = products_[Number(key)];
-      if (!product) continue;
+      if (!product || product.disabled) continue;
 
       products[product.id] = { ...product };
     }
@@ -102,9 +99,9 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   }, [products_]);
 
   const currentSale = useMemo(() => {
-    const sale = ongoingSales.find((s) => s.tableId === table.value?.value?.id);
+    const sale = ongoingSales.find((s) => s.tableId === table.value?.id);
     return sale;
-  }, [ongoingSales, table.value.value?.id]);
+  }, [ongoingSales, table.value?.id]);
 
   const products = useMemo(() => {
     if (!currentSale) return [];
@@ -311,28 +308,32 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
-      const message = !!response.exception
-        ? response.exception.message
-        : response.error?.message;
-      alertService.error(`Error al crear la mesa: ${message}`);
+      if (!!response.exception && response.exception.code === 55) {
+        name.setErrorMessage("Ya existe una mesa con ese nombre");
+        name.setError(1);
+      } else {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error al crear la mesa: ${message}`);
+      }
+
       return false;
     } else {
-      const newTable = response.data!;
+      const newTable: TableObject = {
+        ...response.data!,
+        hasSale: false,
+        onClick: () => table.setValue(newTable),
+      };
 
       // Update tables
       setAllTables((oldTables) => {
         const newTables = [...oldTables];
-        newTables.push({
-          label: newTable.name,
-          value: newTable,
-        });
+        newTables.push(newTable);
         return newTables;
       });
 
-      table.setValue({
-        label: newTable.name,
-        value: newTable,
-      });
+      table.setValue(newTable);
 
       return true;
     }
@@ -342,7 +343,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     const response = await fetchAPI((token: string) =>
       updateTableService(
         {
-          id: table.value!.value!.id,
+          id: table.value!.id,
           name: name.value,
           branchId: branch.id,
           deleted: false,
@@ -352,23 +353,32 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError || typeof response.data === "string") {
-      const message = !!response.exception
-        ? response.exception.message
-        : response.error?.message;
-      alertService.error(`Error al actualizar la mesa: ${message}`);
+      if (!!response.exception && response.exception.code === 55) {
+        name.setErrorMessage("Ya existe una mesa con ese nombre");
+        name.setError(1);
+      } else {
+        const message = !!response.exception
+          ? response.exception.message
+          : response.error?.message;
+        alertService.error(`Error al crear la mesa: ${message}`);
+      }
+
       return false;
     } else {
-      const newTable = response.data!;
+      const newTable: TableObject = {
+        ...response.data!,
+        hasSale: false,
+        onClick: () => table.setValue(newTable),
+      };
+
       // Update tables
       setAllTables((oldTables) => {
         const newTables = [...oldTables];
         const tableIndex = newTables.findIndex(
-          (table) => table.value!.id === newTable.id
+          (table) => table.id === newTable.id
         );
-        newTables[tableIndex] = {
-          label: newTable.name,
-          value: newTable,
-        };
+        newTable.hasSale = newTables[tableIndex].hasSale;
+        newTables[tableIndex] = newTable;
         table.setValue(newTables[tableIndex]);
 
         return newTables;
@@ -437,17 +447,17 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   };
 
   const onCreateSale = async () => {
-    if (!table.value.value) {
+    if (!table.value) {
       alertService.error("No hay ninguna mesa seleccionada");
       return;
     }
 
     const dto = {
-      tableId: table.value.value.id,
+      tableId: table.value.id,
       clientQuantity: 1,
       startTime: new Date().toISOString(),
       status: SaleStatus.ONGOING,
-      tableName: table.value.value.name,
+      tableName: table.value.name,
       note: "",
       dollarToLocalCurrencyExchange: 1,
     };
@@ -472,6 +482,14 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         const newSales = [...oldSales];
         newSales.push(newSale);
         return newSales;
+      });
+
+      // Change hasSale to true
+      setAllTables((oldTables) => {
+        const newTables = [...oldTables];
+        const tableIndex = newTables.findIndex((t) => t.id === table.value!.id);
+        newTables[tableIndex].hasSale = true;
+        return newTables;
       });
     }
   };
@@ -515,6 +533,16 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         newSales.push(pastSale);
         return newSales;
       });
+
+      // Set table hasSale to false
+      setAllTables((oldTables) => {
+        const newTables = [...oldTables];
+        const tableIndex = newTables.findIndex(
+          (t) => t.id === currentSale?.tableId
+        );
+        newTables[tableIndex].hasSale = false;
+        return newTables;
+      });
     }
   };
 
@@ -537,6 +565,16 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         );
         newSales.splice(saleIndex, 1);
         return newSales;
+      });
+
+      // Set table hasSale to false
+      setAllTables((oldTables) => {
+        const newTables = [...oldTables];
+        const tableIndex = newTables.findIndex(
+          (t) => t.id === currentSale?.tableId
+        );
+        newTables[tableIndex].hasSale = false;
+        return newTables;
       });
     }
   };
@@ -563,7 +601,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
   const onDeleteTable = async () => {
     const response = await fetchAPI((token: string) =>
-      deleteTableService(table.value!.value!.id, token)
+      deleteTableService(table.value!.id, token)
     );
 
     if (response.isError || typeof response.data === "string") {
@@ -575,21 +613,13 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       // Update tables
       setAllTables((oldTables) => {
         const newTables = [...oldTables];
-        const tableIndex = newTables.findIndex(
-          (t) => t.value!.id === table.value!.value!.id
-        );
+        const tableIndex = newTables.findIndex((t) => t.id === table.value!.id);
         newTables.splice(tableIndex, 1);
 
         if (newTables.length === 0) {
-          table.setValue({
-            label: "",
-            value: null,
-          });
+          table.setValue(null);
         } else {
-          table.setValue({
-            label: newTables[0].label,
-            value: newTables[0].value,
-          });
+          table.setValue(newTables[0]);
         }
 
         return newTables;
@@ -610,18 +640,19 @@ export default function Sales({ header, fetchAPI }: PageProps) {
           : response.error?.message;
         alertService.error(`Error al obtener las mesas: ${message}`);
       } else if (response.data?.tables.length! > 0) {
-        const tables = response.data?.tables.map((table) => ({
-          label: table.name!,
-          value: table!,
-        }))!;
+        const tables = response.data?.tables!.map((t) => {
+          const data: TableObject = {
+            ...t,
+            hasSale: ongoingSales.find((s) => s.tableId === t.id) !== undefined,
+            onClick: () => table.setValue(data),
+          };
+          return data;
+        })!;
 
         // Sort tables by name
-        tables.sort((a, b) => a.label.localeCompare(b.label));
+        tables.sort((a, b) => a.name.localeCompare(b.name));
         setAllTables(tables);
-        table.setValue({
-          label: tables[0].value.name!,
-          value: tables[0].value,
-        });
+        table.setValue(tables[0]);
       }
     };
 
@@ -669,14 +700,13 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     <BranchSales
       header={header}
       // Ongoing sale
-      table={table}
+      table={table.value}
       taxes={taxes}
       products={products}
       allTables={allTables}
       note={currentSale?.note!}
       allProducts={allProducts}
       categories={productCategories}
-      hasSale={currentSale !== undefined}
       subCategories={productSubCategories}
       // Ongoing sale actions
       onAddTax={onAddTax}

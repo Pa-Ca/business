@@ -10,7 +10,7 @@ import { FetchResponse, ExceptionResponse, ProductDTO } from "objects";
  * @returns API response when refresh
  */
 export default async (
-  dto: ProductDTO,
+  dto: Partial<ProductDTO>,
   token: string
 ): Promise<FetchResponse<ProductDTO>> => {
   const uri = `${API_ENDPOINT}/product/${dto.id}`;

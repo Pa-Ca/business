@@ -82,7 +82,9 @@ export default function HeaderWrapper({
     onPacaClick: () => router.reload(),
     onLoginClick: () => router.push("/login"),
     onRegisterClick: () => router.push("/signup"),
-    onProfileClick: () => {},
+    onProfileClick: () => { },
+    onProductsClick: () => router.push("/products"),
+    onSalesClick: () => router.push("/sales"),
   };
 
   const fetchAPI = async function <T>(

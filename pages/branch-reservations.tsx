@@ -43,6 +43,11 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const persons = useInputForm<string>("");
   const occasion = useInputForm<string>("");
   const date = useInputForm<Date>(new Date());
+  const identityDocument = useInputForm<string>("");
+  const identityDocumentType = useInputForm<OptionObject<string | null>>({
+    value: null,
+    label: "",
+  });
   const hourIn = useInputForm<OptionObject<string | null>>({
     value: null,
     label: "",
@@ -479,6 +484,9 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       onSubmit={onSubmit}
       cancelButtonColor="Cancel"
       tables={tables}
+      identityDocument={identityDocument}
+      identityDocumentType={identityDocumentType}
+      onGetGuest={() => {}} // TODO
     />
   );
 }

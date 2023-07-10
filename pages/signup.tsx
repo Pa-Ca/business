@@ -2,14 +2,26 @@ import React from "react";
 import { useRouter } from "next/router";
 import { signIn } from "next-auth/react";
 import { useDispatch } from "react-redux";
-import { signUpBusinessService } from "services";
-import { loginBusiness, useAppSelector, loginUser } from "context";
+import { ProductCategoryDTO } from "objects";
 import { Box, SignUp as SignUpComponent, useInputForm } from "paca-ui";
 import {
-  validatePassword,
+  fetchAPI,
+  alertService,
+  signUpBusinessService,
+  getProductCategoriesService,
+} from "services";
+import {
+  setToken,
+  loginUser,
+  loginBusiness,
+  useAppSelector,
+  setProductCategories,
+} from "context";
+import {
   validateName,
   validateEmail,
   carouselImages,
+  validatePassword,
 } from "utils";
 
 export default function Signup() {
@@ -94,6 +106,29 @@ export default function Signup() {
       return;
     }
 
+    // Get product categories
+    const categoriesResponse = await fetchAPI(
+      response.data!.token,
+      response.data!.refresh,
+      router,
+      dispatch,
+      setToken,
+      (token: string) => getProductCategoriesService(token)
+    );
+
+    if (
+      !!categoriesResponse.isError ||
+      typeof categoriesResponse.data === "string"
+    ) {
+      const message = !!categoriesResponse.exception
+        ? categoriesResponse.exception.message
+        : categoriesResponse.error?.message;
+      alertService.error(
+        `Error cargando los datos de los productos: ${message}`
+      );
+      return;
+    }
+
     dispatch(
       loginUser({
         logged: true,
@@ -114,6 +149,15 @@ export default function Signup() {
         tier: "basic",
         phoneNumber: "", // [TODO]
       })
+    );
+
+    dispatch(
+      setProductCategories(
+        categoriesResponse.data!.productCategories.reduce((acc, obj) => {
+          acc[obj.id] = obj;
+          return acc;
+        }, {} as Record<number, ProductCategoryDTO>)
+      )
     );
 
     router.push("/profile");
