@@ -1,6 +1,7 @@
 import auth from "./slices/auth";
 import business from "./slices/business";
 import branches from "./slices/branches";
+import products from "./slices/products";
 import storage from "redux-persist/lib/storage";
 import {
   persistReducer,
@@ -20,6 +21,7 @@ const reducer = combineReducers({
   auth,
   business,
   branches,
+  products,
 });
 
 // Create the configuration object for redux-persist

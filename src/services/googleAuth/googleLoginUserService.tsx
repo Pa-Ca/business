@@ -1,6 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse } from "objects";
 
 type GoogleLoginResponse = {
   /**
@@ -48,6 +47,6 @@ export default async (
       return { exception, isError: true };
     }
   } catch (e) {
-    return {  error: e as Error, isError: true };
+    return { error: e as Error, isError: true };
   }
 };

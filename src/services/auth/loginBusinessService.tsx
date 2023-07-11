@@ -1,8 +1,6 @@
-import loginUserService from "./loginUserService";
 import { API_ENDPOINT } from "../../config";
-import BusinessDTO from "../../objects/business/BusinessDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import loginUserService from "./loginUserService";
+import { BusinessDTO, FetchResponse, ExceptionResponse } from "objects";
 
 /**
  * @brief Create a new Business

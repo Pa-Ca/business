@@ -1,44 +1,49 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { OptionObject } from "paca-ui";
 import { useRouter } from "next/router";
-import logout from "../src/utils/logout";
-import { BusinessProfile } from "paca-ui";
 import { useDispatch } from "react-redux";
-import cousines from "../src/utils/cousines";
-import upload from "../src/services/s3/upload";
-import locations from "../src/utils/locations";
-import fetchAPI from "../src/services/fetchAPI";
-import PageProps from "../src/objects/PageProps";
-import formatTime from "../src/utils/formatTime";
-import validateName from "../src/utils/validateName";
+import { GOOGLE_MAPS_API_KEY } from "config";
 import { useSession, signOut } from "next-auth/react";
-import { setToken } from "../src/context/slices/auth";
-import { useAppSelector } from "../src/context/store";
-import { useInputForm, InputFormHook } from "paca-ui";
-import validatePhone from "../src/utils/validatePhone";
-import { setName } from "../src/context/slices/business";
-import { setPhoneNumber } from "../src/context/slices/business";
-import getProfilePictureUrl from "../src/utils/getProfilePictureUrl";
-import changeNameService from "../src/services/business/changeNameService";
-import getBranchesService from "../src/services/branch/getBranchesService";
-import createBranchService from "../src/services/branch/createBranchService";
-import updateBranchService from "../src/services/branch/updateBranchService";
-import { setBranches, setCurrentBranch } from "../src/context/slices/branches";
-import changePhoneNumberService from "../src/services/business/changePhoneNumberService";
-import resetPasswordRequestService from "../src/services/auth/resetPasswordRequestService";
-import resetPasswordWithOldPasswordService from "../src/services/auth/resetPasswordWithOldPasswordService";
-import BranchDTO, {
-  Duration as BranchDuration,
-  LocalTime,
-} from "../src/objects/branch/BranchDTO";
 import {
-  GOOGLE_MAPS_API_KEY,
-  MAIN_COLOR,
-  SECONDARY_COLOR,
-} from "../src/config";
+  logout,
+  cousines,
+  locations,
+  formatTime,
+  validateName,
+  validatePhone,
+  getProfilePictureUrl,
+} from "utils";
+import {
+  setName,
+  setBranches,
+  setPhoneNumber,
+  useAppSelector,
+  setCurrentBranch,
+} from "context";
+import {
+  alertService,
+  S3UploadService,
+  getBranchesService,
+  createBranchService,
+  updateBranchService,
+  updateBusinessService,
+  resetPasswordWithOldPasswordService,
+  resetPasswordRequestService,
+} from "services";
+import {
+  PageProps,
+  BranchDTO,
+  LocalTime,
+  Duration as BranchDuration,
+} from "objects";
+import {
+  useInputForm,
+  InputFormHook,
+  OptionObject,
+  BusinessProfile,
+} from "paca-ui";
 
-export default function Profile({ header }: PageProps) {
+export default function Profile({ header, fetchAPI }: PageProps) {
   const router = useRouter();
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
@@ -60,8 +65,14 @@ export default function Profile({ header }: PageProps) {
 
   // Current branch data
   const branchName = useInputForm(branch?.name!);
-  const branchType = useInputForm(branch?.type!);
-  const branchLocation = useInputForm(branch?.location!);
+  const branchType = useInputForm<OptionObject<string | null>>({
+    label: branch?.type!,
+    value: branch?.type!,
+  });
+  const branchLocation = useInputForm<OptionObject<string | null>>({
+    label: branch?.location!,
+    value: branch?.location!,
+  });
   const branchPhone = useInputForm(branch?.phoneNumber!);
   const branchDescription = useInputForm(branch?.overview!);
   const branchMapsLink = useInputForm(branch?.mapsLink!);
@@ -104,12 +115,12 @@ export default function Profile({ header }: PageProps) {
     const dto: BranchDTO = {
       id: branch.id,
       businessId: branch.businessId,
-      location: branchLocation.value,
+      location: branchLocation.value.value!,
       mapsLink: branchMapsLink.value,
       name: branchName.value,
       overview: branchDescription.value,
       phoneNumber: branchPhone.value,
-      type: branchType.value,
+      type: branchType.value.value!,
       score: branch.score,
       capacity: parseInt(branchCapacity.value),
       reservationPrice: parseFloat(branchPrice.value),
@@ -119,18 +130,14 @@ export default function Profile({ header }: PageProps) {
       hourIn: hourIn as LocalTime,
       hourOut: hourOut as LocalTime,
       deleted: false,
+      dollarToLocalCurrencyExchange: branch.dollarToLocalCurrencyExchange,
     };
     return dto;
   };
 
   const saveName = async (newName: string) => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => changeNameService(auth.id!, newName, token)
+    const response = await fetchAPI((token: string) =>
+      updateBusinessService({ id: auth.id!, name: newName }, token)
     );
 
     if (response.isError) {
@@ -142,14 +149,11 @@ export default function Profile({ header }: PageProps) {
   };
 
   const savePhoneNumber = async (newPhoneNumber: string) => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) =>
-        changePhoneNumberService(auth.id!, newPhoneNumber, token)
+    const response = await fetchAPI((token: string) =>
+      updateBusinessService(
+        { id: auth.id!, phoneNumber: newPhoneNumber },
+        token
+      )
     );
 
     if (response.isError) {
@@ -161,7 +165,10 @@ export default function Profile({ header }: PageProps) {
   };
 
   const onProfileUploadImage = async (file: File) => {
-    const res = await upload(file, `business-${business.id}-profile.jpeg`);
+    const res = await S3UploadService(
+      file,
+      `business-${business.id}-profile.jpeg`
+    );
 
     if (!res.data || res.isError) return;
   };
@@ -212,13 +219,8 @@ export default function Profile({ header }: PageProps) {
   const updateBranch = async (deleted: boolean = false) => {
     const dto = getUpdatedBranch();
     dto.deleted = deleted;
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => updateBranchService(dto, token)
+    const response = await fetchAPI((token: string) =>
+      updateBranchService(dto, token)
     );
 
     if (response.isError || typeof response.data === "string") {
@@ -262,9 +264,9 @@ export default function Profile({ header }: PageProps) {
     name: InputFormHook<string>,
     phoneNumber: InputFormHook<string>,
     price: InputFormHook<string>,
-    type: InputFormHook<OptionObject>,
+    type: InputFormHook<OptionObject<string | null>>,
     capacity: InputFormHook<string>,
-    location: InputFormHook<OptionObject>,
+    location: InputFormHook<OptionObject<string | null>>,
     averageReserveTimeHours: InputFormHook<string>,
     averageReserveTimeMinutes: InputFormHook<string>,
     openingTimeHour: InputFormHook<string>,
@@ -312,7 +314,7 @@ export default function Profile({ header }: PageProps) {
     }
 
     // Verify that the type is not empty
-    if (type.value.text === null || type.value.text === "") {
+    if (!type.value.value) {
       type.setError(1);
       type.setErrorMessage("Debe seleccionar un tipo.");
       error = true;
@@ -364,7 +366,7 @@ export default function Profile({ header }: PageProps) {
     }
 
     // Verify that the location is not empty
-    if (location.value.text === null || location.value.text === "") {
+    if (!location.value.value) {
       location.setError(1);
       location.setErrorMessage("Debe seleccionar una ubicación.");
       error = true;
@@ -394,12 +396,12 @@ export default function Profile({ header }: PageProps) {
     const dto: BranchDTO = {
       id: 0,
       businessId: business.id!,
-      location: location.value.text!,
+      location: location.value.value!,
       mapsLink: mapsLink.value,
       name: name.value,
       overview: description.value,
       phoneNumber: phoneNumber.value,
-      type: type.value.text!,
+      type: type.value.value!,
       score: 0,
       capacity: parseInt(capacity.value),
       reservationPrice: parseFloat(price.value),
@@ -411,15 +413,11 @@ export default function Profile({ header }: PageProps) {
       hourIn,
       hourOut,
       deleted: false,
+      dollarToLocalCurrencyExchange: 1,
     };
 
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => createBranchService(dto, token)
+    const response = await fetchAPI((token: string) =>
+      createBranchService(dto, token)
     );
 
     if (response.isError) {
@@ -427,13 +425,8 @@ export default function Profile({ header }: PageProps) {
       }
     } else {
       // Get business branches
-      const branchesResponse = await fetchAPI(
-        auth.token!,
-        auth.refresh!,
-        router,
-        dispatch,
-        (token: string) => dispatch(setToken(token)),
-        (token: string) => getBranchesService(auth.id!, token)
+      const branchesResponse = await fetchAPI((token: string) =>
+        getBranchesService(auth.id!, token)
       );
 
       if (

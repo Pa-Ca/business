@@ -1,54 +1,62 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { useRouter } from "next/router";
-import { useDispatch } from "react-redux";
-import fetchAPI from "../src/services/fetchAPI";
-import formatTime from "../src/utils/formatTime";
-import PageProps from "../src/objects/PageProps";
-import validateName from "../src/utils/validateName";
-import { setToken } from "../src/context/slices/auth";
-import { useAppSelector } from "../src/context/store";
-import validateEmail from "../src/utils/validateEmail";
-import validatePhone from "../src/utils/validatePhone";
-import generateValidHours from "../src/utils/generateValidHours";
-import {getReservationStatusObject} from "../src/utils/reservation-status";
-import getGuestService from "../src/services/reservations/getGuestService";
-import getReservationsService from "../src/services/reservations/getReservationsService";
-import postReservationService from "../src/services/reservations/postReservationService";
-import closeReservationService from "../src/services/reservations/closeReservationService";
-import startReservationService from "../src/services/reservations/startReservationService";
-import acceptReservationService from "../src/services/reservations/acceptReservationService";
-import cancelReservationService from "../src/services/reservations/cancelReservationService";
-import rejectReservationService from "../src/services/reservations/rejectReservationService";
-import retireReservationService from "../src/services/reservations/retireReservationService";
-import ReservationDTO, {
-  toReservationProps,
-} from "../src/objects/reservations/ReservationDTO";
+import { useAppSelector } from "context";
+import { PageProps, ReservationDTO, toReservationProps } from "objects";
 import {
-  BranchReserves,
-  ReservationProps,
   useInputForm,
   OptionObject,
+  BranchReserves,
+  ReservationProps,
 } from "paca-ui";
-import { setPhoneNumber } from "../src/context/slices/business";
+import {
+  formatTime,
+  validateName,
+  validateEmail,
+  validatePhone,
+  generateValidHours,
+  getReservationStatusObject,
+} from "utils";
+import {
+  alertService,
+  getGuestService,
+  postReservationService,
+  getReservationsService,
+  closeReservationService,
+  startReservationService,
+  acceptReservationService,
+  cancelReservationService,
+  rejectReservationService,
+  retireReservationService,
+} from "services";
 
-export default function BranchReservations({ header }: PageProps) {
-  const router = useRouter();
-  const dispatch = useDispatch();
-  const auth = useAppSelector((state) => state.auth);
+export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const branches = useAppSelector((state) => state.branches).branches;
   const branch = branches[useAppSelector((state) => state.branches).current];
-  const [validHoursIn, setValidHoursIn] = useState<OptionObject[]>([]);
-  const [validHoursOut, setValidHoursOut] = useState<OptionObject[]>([]);
-  const [reservationsList, setReservationsList] = useState<ReservationProps[]>([]);
+  const [validHoursIn, setValidHoursIn] = useState<OptionObject<string>[]>([]);
+  const [validHoursOut, setValidHoursOut] = useState<OptionObject<string>[]>(
+    []
+  );
+  const [reservationsList, setReservationsList] = useState<ReservationProps[]>(
+    []
+  );
 
   // Reservation data
   const tables = useInputForm("");
   const persons = useInputForm<string>("");
   const occasion = useInputForm<string>("");
   const date = useInputForm<Date>(new Date());
-  const hourIn = useInputForm<OptionObject>({ label: "", value: "" });
-  const hourOut = useInputForm<OptionObject>({ label: "", value: "" });
+  const identityDocumentType = useInputForm<OptionObject<string | null>>({
+    value: null,
+    label: "",
+  });
+  const hourIn = useInputForm<OptionObject<string | null>>({
+    value: null,
+    label: "",
+  });
+  const hourOut = useInputForm<OptionObject<string | null>>({
+    value: null,
+    label: "",
+  });
 
   // Client data
   const firstName = useInputForm("");
@@ -56,7 +64,6 @@ export default function BranchReservations({ header }: PageProps) {
   const phone = useInputForm("");
   const email = useInputForm("");
   const identityDocument = useInputForm("");
-  const identityDocumentType = useInputForm<OptionObject>({ label: "", value: "" });
   const [showModal, setshowModal] = useState(false);
 
   const addDatePlusHour = (date: Date, hour: string) => {
@@ -66,16 +73,13 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const getUpdatedReservation = (): ReservationDTO => {
-    if (typeof hourIn.value.text === "number") {
-      throw new Error("hourIn must be string");
-    }
     return {
       id: 69,
       branchId: branch.id,
       guestId: 69,
       requestDate: new Date().toISOString(),
-      reservationDateIn: addDatePlusHour(date.value, hourIn.value.text!),
-      reservationDateOut: addDatePlusHour(date.value, hourOut.value.text!),
+      reservationDateIn: addDatePlusHour(date.value, hourIn.value.value!),
+      reservationDateOut: addDatePlusHour(date.value, hourOut.value.value!),
       clientNumber: parseInt(persons.value),
       payment: "",
       status: 1,
@@ -110,9 +114,7 @@ export default function BranchReservations({ header }: PageProps) {
       firstName.setError(1);
       switch (firstNameValidation.code) {
         case 1:
-          firstName.setErrorMessage(
-            "Debe tener al menos 2 caracteres."
-          );
+          firstName.setErrorMessage("Debe tener al menos 2 caracteres.");
           break;
         default:
           firstName.setErrorMessage("Nombre inválido.");
@@ -126,9 +128,7 @@ export default function BranchReservations({ header }: PageProps) {
       lastName.setError(1);
       switch (lastNameValidation.code) {
         case 1:
-          lastName.setErrorMessage(
-            "Debe tener al menos 2 caracteres."
-          );
+          lastName.setErrorMessage("Debe tener al menos 2 caracteres.");
           break;
         default:
           lastName.setErrorMessage("Apellido inválido.");
@@ -204,21 +204,19 @@ export default function BranchReservations({ header }: PageProps) {
     }
 
     // Hour In validation
-    if (!hourIn.value.text || hourIn.value.text === "") {
+    if (!hourIn.value.value) {
       valid = false;
       hourIn.setError(1);
       hourIn.setErrorMessage("Indique la hora de llegada");
     }
 
     // Check that hourIn is less than hourOut
-    if (!!hourOut.value.text || hourOut.value.text !== "") {
-      if (typeof hourIn.value.text === "number") return false;
-      if (typeof hourOut.value.text === "number") return false;
+    if (!!hourOut.value.value) {
       const [hourInHours, hourInMinutes] = hourIn.value
-        .text!.split(":")
+        .value!.split(":")
         .map(Number);
       const [hourOutHours, hourOutMinutes] = hourOut.value
-        .text!.split(":")
+        .value!.split(":")
         .map(Number);
       if (hourInHours === hourOutHours && hourInMinutes === hourOutMinutes) {
         valid = false;
@@ -231,18 +229,15 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const createReservation = async () => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => postReservationService(getUpdatedReservation(), token)
+    const response = await fetchAPI((token: string) =>
+      postReservationService(getUpdatedReservation(), token)
     );
 
     if (response.isError || typeof response.data! === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error creando la reserva: ${message}`);
     } else {
       const id = response.data!.id;
       setReservationsList([
@@ -261,11 +256,6 @@ export default function BranchReservations({ header }: PageProps) {
 
   const getGuest = async (identityDocument: string) => {
     const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
       (token: string) => getGuestService(identityDocument, token)
     );
 
@@ -279,18 +269,15 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const getReservations = async () => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => getReservationsService(branch.id, token)
+    const response = await fetchAPI((token: string) =>
+      getReservationsService(branch.id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error cargando las reservas: ${message}`);
       return [];
     } else {
       return response.data!.reservations;
@@ -299,11 +286,6 @@ export default function BranchReservations({ header }: PageProps) {
 
   const rejectReservation = async (id: number) => {
     const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
       (token: string) => rejectReservationService(id, token)
     );
 
@@ -327,18 +309,15 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const acceptReservation = async (id: number) => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => acceptReservationService(id, token)
+    const response = await fetchAPI((token: string) =>
+      acceptReservationService(id, token)
     );
 
     if (!!response.isError) {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error aceptando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {
@@ -357,17 +336,14 @@ export default function BranchReservations({ header }: PageProps) {
 
   const retireReservation = async (id: number) => {
     const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
       (token: string) => retireReservationService(id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error rechazando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {
@@ -386,17 +362,14 @@ export default function BranchReservations({ header }: PageProps) {
 
   const startReservation = async (id: number) => {
     const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
       (token: string) => startReservationService(id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error cancelando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {
@@ -414,18 +387,15 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const closeReservation = async (id: number) => {
-    const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
-      (token: string) => closeReservationService(id, token)
+    const response = await fetchAPI((token: string) =>
+      closeReservationService(id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
-      if (!!response.exception) {
-      }
+      const message = !!response.exception
+        ? response.exception.message
+        : response.error?.message;
+      alertService.error(`Error cerrando la reserva: ${message}`);
     } else {
       // Change state of reservation
       setReservationsList((r) => {
@@ -444,11 +414,6 @@ export default function BranchReservations({ header }: PageProps) {
 
   const cancelReservation = async (id: number) => {
     const response = await fetchAPI(
-      auth.token!,
-      auth.refresh!,
-      router,
-      dispatch,
-      (token: string) => dispatch(setToken(token)),
       (token: string) => cancelReservationService(id, token)
     );
 
@@ -498,7 +463,7 @@ export default function BranchReservations({ header }: PageProps) {
     if (!branch) return;
     const validHoursIn_ = generateValidHours(branch.hourIn, branch.hourOut).map(
       (x) => {
-        return { text: x, label: x };
+        return { value: x, label: x };
       }
     );
     const validHoursOut_ = [validHoursIn_[0], ...validHoursIn_.slice(2)];
@@ -506,7 +471,7 @@ export default function BranchReservations({ header }: PageProps) {
 
     setValidHoursIn(validHoursIn_);
     setValidHoursOut(validHoursOut_);
-  }, [])
+  }, []);
 
   useEffect(() => {
     const getReservations_ = async () => {

@@ -8,7 +8,12 @@ import FetchResponse from "../objects/FetchResponse";
 /**
  * @brief Given the refresh token, get a new token
  *
+ * @param token User token
  * @param refresh User token refresh
+ * @param router Next router
+ * @param dispatch Redux dispatch
+ * @param setToken Set the new token
+ * @param fetchFunction Function to fetch the API
  *
  * @returns API response when refresh
  */

@@ -1,8 +1,6 @@
-import signUpUserService from "./signUpUserService";
 import { API_ENDPOINT } from "../../config";
-import FetchResponse from "../../objects/FetchResponse";
-import BusinessDTO from "../../objects/business/BusinessDTO";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { signUpUserService } from "services";
+import { FetchResponse, ExceptionResponse, BusinessDTO } from "objects";
 
 /**
  * @brief Create a new Business
@@ -23,7 +21,11 @@ export default async (
 
   // Verify that the user was created correctly
   if (userResponse.isError || userResponse.data === undefined) {
-    return { exception: userResponse.exception, error: userResponse.error, isError: true };
+    return {
+      exception: userResponse.exception,
+      error: userResponse.error,
+      isError: true,
+    };
   }
 
   // Create the Business

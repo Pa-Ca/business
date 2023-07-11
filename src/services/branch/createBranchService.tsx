@@ -1,7 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import BranchDTO from "../../objects/branch/BranchDTO";
-import FetchResponse from "../../objects/FetchResponse";
-import ExceptionResponse from "../../objects/ExceptionResponse";
+import { FetchResponse, ExceptionResponse, BranchDTO } from "objects";
 
 /**
  * @brief Create a new branch

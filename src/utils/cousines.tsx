@@ -42,7 +42,7 @@ const cousines = [
 const sorted = cousines.sort();
 const result = sorted.map((item) => ({
   label: item,
-  text: item,
+  value: item,
 }));
 
 export default result;
