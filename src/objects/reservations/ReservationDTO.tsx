@@ -1,5 +1,5 @@
 import { ReservationProps } from "paca-ui";
-import {statusDict} from "../../utils/reservation-status";
+import {getReservationStatusObject} from "../../utils/reservation-status";
 
 type ReservationDTO = {
   /**
@@ -19,13 +19,21 @@ type ReservationDTO = {
    */
   requestDate: string;
   /**
-   * Date the Reservation occurs
+   * Date the Reservation occurs Start Hour
    */
-  reservationDate: string;
+  reservationDateIn: string;
+  /**
+   * Date the Reservation occurs End Hour
+   */
+  reservationDateOut: string;
   /**
    * Number of clients in this reservation
    */
   clientNumber: number;
+  /**
+   * Number of clients in this reservation
+   */
+  tableNumber: number;
   /**
    * Reservation payment code
    */
@@ -70,31 +78,40 @@ type ReservationDTO = {
    * Owner phone number
    */
   phoneNumber: string;
+  /**
+   * Owner identity document
+   */
+  identityDocument: string;
 };
 
 export const toReservationProps = (
   reservation: ReservationDTO
 ): ReservationProps => {
-  const date = new Date(reservation.reservationDate);
-  const start = date.toLocaleTimeString([], {
+  const dateIn = new Date(reservation.reservationDateIn);
+  const start = dateIn.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  
+  const dateOut = new Date(reservation.reservationDateOut);
+  const end = dateOut.toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
   });
 
-  const statusColor = statusDict[reservation.status].color;
   return {
     id: reservation.id,
     start: start,
-    date: reservation.reservationDate,
-    end: "",
+    end: end,
+    date: reservation.reservationDateIn,
     owner: reservation.name + " " + reservation.surname,
     ownerEmail: reservation.email,
     ownerOccasion: reservation.occasion,
     ownerPhone: reservation.phoneNumber,
     persons: reservation.clientNumber,
-    tables: 1,
-    state: reservation.status,
-    statusColor: statusColor,
+    tables: reservation.tableNumber,
+    status: getReservationStatusObject(reservation.status),
+    identityDocument: reservation.identityDocument,
   };
 };
 

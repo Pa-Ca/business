@@ -10,10 +10,11 @@ import { setToken } from "../src/context/slices/auth";
 import { useAppSelector } from "../src/context/store";
 import validateEmail from "../src/utils/validateEmail";
 import validatePhone from "../src/utils/validatePhone";
-import {statusDict} from "../src/utils/reservation-status";
 import generateValidHours from "../src/utils/generateValidHours";
-import postReservationService from "../src/services/reservations/postReservationService";
+import {getReservationStatusObject} from "../src/utils/reservation-status";
+import getGuestService from "../src/services/reservations/getGuestService";
 import getReservationsService from "../src/services/reservations/getReservationsService";
+import postReservationService from "../src/services/reservations/postReservationService";
 import closeReservationService from "../src/services/reservations/closeReservationService";
 import startReservationService from "../src/services/reservations/startReservationService";
 import acceptReservationService from "../src/services/reservations/acceptReservationService";
@@ -29,6 +30,7 @@ import {
   useInputForm,
   OptionObject,
 } from "paca-ui";
+import { setPhoneNumber } from "../src/context/slices/business";
 
 export default function BranchReservations({ header }: PageProps) {
   const router = useRouter();
@@ -41,17 +43,20 @@ export default function BranchReservations({ header }: PageProps) {
   const [reservationsList, setReservationsList] = useState<ReservationProps[]>([]);
 
   // Reservation data
+  const tables = useInputForm("");
   const persons = useInputForm<string>("");
   const occasion = useInputForm<string>("");
   const date = useInputForm<Date>(new Date());
-  const hourIn = useInputForm<OptionObject>({ text: "", label: "" });
-  const hourOut = useInputForm<OptionObject>({ text: "", label: "" });
+  const hourIn = useInputForm<OptionObject>({ label: "", value: "" });
+  const hourOut = useInputForm<OptionObject>({ label: "", value: "" });
 
   // Client data
   const firstName = useInputForm("");
   const lastName = useInputForm("");
   const phone = useInputForm("");
   const email = useInputForm("");
+  const identityDocument = useInputForm("");
+  const identityDocumentType = useInputForm<OptionObject>({ label: "", value: "" });
   const [showModal, setshowModal] = useState(false);
 
   const addDatePlusHour = (date: Date, hour: string) => {
@@ -69,7 +74,8 @@ export default function BranchReservations({ header }: PageProps) {
       branchId: branch.id,
       guestId: 69,
       requestDate: new Date().toISOString(),
-      reservationDate: addDatePlusHour(date.value, hourIn.value.text!),
+      reservationDateIn: addDatePlusHour(date.value, hourIn.value.text!),
+      reservationDateOut: addDatePlusHour(date.value, hourOut.value.text!),
       clientNumber: parseInt(persons.value),
       payment: "",
       status: 1,
@@ -82,6 +88,8 @@ export default function BranchReservations({ header }: PageProps) {
       surname: lastName.value,
       email: email.value,
       phoneNumber: phone.value,
+      identityDocument: identityDocument.value + identityDocumentType.value,
+      tableNumber: parseInt(tables.value),
     };
   };
 
@@ -91,6 +99,7 @@ export default function BranchReservations({ header }: PageProps) {
     lastName.setError(0);
     email.setError(0);
     phone.setError(0);
+    tables.setError(0);
     persons.setError(0);
     hourIn.setError(0);
 
@@ -140,7 +149,7 @@ export default function BranchReservations({ header }: PageProps) {
       }
     }
 
-    // Email validation
+    // Phone validation
     const phoneValidation = validatePhone(phone.value);
     if (phoneValidation.code !== 0) {
       valid = false;
@@ -171,6 +180,26 @@ export default function BranchReservations({ header }: PageProps) {
         valid = false;
         persons.setError(1);
         persons.setErrorMessage("Indique al menos una persona");
+      }
+    }
+
+    // Table validation
+    if (!tables.value || tables.value === "") {
+      valid = false;
+      tables.setError(1);
+      tables.setErrorMessage("Indique el número de mesas");
+    } else {
+      try {
+        parseInt(tables.value);
+      } catch (error) {
+        valid = false;
+        tables.setError(1);
+        tables.setErrorMessage("Indique un número postivo");
+      }
+      if (parseInt(tables.value) < 1) {
+        valid = false;
+        tables.setError(1);
+        tables.setErrorMessage("Indique al menos una mesa");
       }
     }
 
@@ -230,6 +259,25 @@ export default function BranchReservations({ header }: PageProps) {
     }
   };
 
+  const getGuest = async (identityDocument: string) => {
+    const response = await fetchAPI(
+      auth.token!,
+      auth.refresh!,
+      router,
+      dispatch,
+      (token: string) => dispatch(setToken(token)),
+      (token: string) => getGuestService(identityDocument, token)
+    );
+
+    if (!!response.isError || typeof response.data === "string") {
+      if (!!response.exception) {
+      }
+      return [];
+    } else {
+      return response.data!.guest;
+    }
+  };
+
   const getReservations = async () => {
     const response = await fetchAPI(
       auth.token!,
@@ -269,8 +317,7 @@ export default function BranchReservations({ header }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 2,
-              statusColor: statusDict[2].color,
+              status: getReservationStatusObject(2),
             };
           }
           return r;
@@ -299,8 +346,7 @@ export default function BranchReservations({ header }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 3,
-              statusColor: statusDict[3].color,
+              status: getReservationStatusObject(3),
             };
           }
           return r;
@@ -329,8 +375,7 @@ export default function BranchReservations({ header }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 4,
-              statusColor: statusDict[4].color,
+              status: getReservationStatusObject(4),
             };
           }
           return r;
@@ -340,7 +385,6 @@ export default function BranchReservations({ header }: PageProps) {
   };
 
   const startReservation = async (id: number) => {
-    console.log("In startReservation");
     const response = await fetchAPI(
       auth.token!,
       auth.refresh!,
@@ -360,8 +404,7 @@ export default function BranchReservations({ header }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 5,
-              statusColor: statusDict[5].color,
+              status: getReservationStatusObject(5),
             };
           }
           return r;
@@ -390,8 +433,7 @@ export default function BranchReservations({ header }: PageProps) {
           if (r.id === id) {
             return {
               ...r,
-              state: 6,
-              statusColor: statusDict[6].color,
+              status: getReservationStatusObject(6),
             };
           }
           return r;
@@ -417,17 +459,37 @@ export default function BranchReservations({ header }: PageProps) {
     }
   };
 
+  const onGetGuest = () => {
+    const getGuest_ = async () => {
+      const aux = (await getGuest(
+        identityDocumentType.value + identityDocument.value));
+      if (Array.isArray(aux)) {
+          identityDocument.setError(1);
+          identityDocument.setErrorMessage("Usuario no encontrado en la base de datos");
+        }
+        else{
+          firstName.setValue(aux.name);
+          lastName.setValue(aux.surname);
+          email.setValue(aux.email);
+          phone.setValue(aux.phoneNumber);
+      }
+    };
+    getGuest_();
+  };
+
   const onSubmit = () => {
     if (validateData()) {
       createReservation();
       setshowModal(false);
 
-      persons.setValue("");
-      occasion.setValue("");
+      identityDocument.setValue("");
       firstName.setValue("");
       lastName.setValue("");
       phone.setValue("");
       email.setValue("");
+      persons.setValue("");
+      tables.setValue("");
+      occasion.setValue("");
     } else {
     }
   };
@@ -498,16 +560,20 @@ export default function BranchReservations({ header }: PageProps) {
       hourOut={hourOut}
       validHoursOut={validHoursOut}
       persons={persons}
+      tables={tables}
       occasion={occasion}
       firstName={firstName}
       lastName={lastName}
       phone={phone}
       email={email}
+      identityDocument={identityDocument}
+      identityDocumentType={identityDocumentType}
       haveBranch={branch !== undefined}
       icon_size="450px"
       showModal={showModal}
       setShowModal={setshowModal}
       onSubmit={onSubmit}
+      onGetGuest={onGetGuest}
       cancelButtonColor="Cancel"
     />
   );
