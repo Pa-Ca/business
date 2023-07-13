@@ -104,8 +104,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
         if (response.isError || typeof response.data === "string") {
           if (!!response.exception) {
-            name.setError(1);
-            name.setErrorMessage(response.exception!.message);
+            name.setCode(4);
+            name.setMessage(response.exception!.message);
           }
 
           const message = !!response.exception
@@ -137,8 +137,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
         if (response.isError || typeof response.data === "string") {
           if (!!response.exception) {
-            subCategory.setError(1);
-            subCategory.setErrorMessage(response.exception!.message);
+            subCategory.setCode(4);
+            subCategory.setMessage(response.exception!.message);
           }
 
           const message = !!response.exception
@@ -168,8 +168,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
         if (response.isError || typeof response.data === "string") {
           if (!!response.exception) {
-            description.setError(1);
-            description.setErrorMessage(response.exception!.message);
+            description.setCode(4);
+            description.setMessage(response.exception!.message);
           }
 
           const message = !!response.exception
@@ -196,8 +196,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
         if (response.isError || typeof response.data === "string") {
           if (!!response.exception) {
-            price.setError(1);
-            price.setErrorMessage(response.exception!.message);
+            price.setCode(4);
+            price.setMessage(response.exception!.message);
           }
 
           const message = !!response.exception
@@ -296,8 +296,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception && response.exception.code === 57) {
-        name.setError(1);
-        name.setErrorMessage("Ya existe un producto con ese nombre");
+        name.setCode(4);
+        name.setMessage("Ya existe un producto con ese nombre");
       } else {
         const message = !!response.exception
           ? response.exception.message
@@ -331,8 +331,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception) {
-        subCategory.setError(1);
-        subCategory.setErrorMessage(response.exception!.message);
+        subCategory.setCode(4);
+        subCategory.setMessage(response.exception!.message);
       }
 
       const message = !!response.exception
@@ -371,8 +371,8 @@ export default function Product({ header, fetchAPI }: PageProps) {
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception) {
-        subCategory.setError(1);
-        subCategory.setErrorMessage(response.exception!.message);
+        subCategory.setCode(4);
+        subCategory.setMessage(response.exception!.message);
       }
 
       const message = !!response.exception

@@ -13,6 +13,7 @@ import {
   validateName,
   validateEmail,
   validatePhone,
+  validateIdentityDocument,
   generateValidHours,
   getReservationStatusObject,
 } from "utils";
@@ -41,32 +42,36 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   );
 
   // Reservation data
-  const tables = useInputForm("");
+  const tables = useInputForm<string>("");
   const persons = useInputForm<string>("");
   const occasion = useInputForm<string>("");
   const date = useInputForm<Date>(new Date());
-  const identityDocumentType = useInputForm<OptionObject<string | null>>({
-    value: null,
-    label: "",
-  });
   const hourIn = useInputForm<OptionObject<string | null>>({
-    value: null,
+    value: "",
     label: "",
   });
   const hourOut = useInputForm<OptionObject<string | null>>({
-    value: null,
+    value: "",
     label: "",
   });
-
+  
   // Client data
-  const firstName = useInputForm("");
-  const lastName = useInputForm("");
-  const phone = useInputForm("");
-  const email = useInputForm("");
-  const identityDocument = useInputForm("");
+  const firstName = useInputForm<string>("");
+  const lastName = useInputForm<string>("");
+  const phone = useInputForm<string>("");
+  const email = useInputForm<string>("");
+  const identityDocument = useInputForm<string>("");
+  const identityDocumentType = useInputForm<OptionObject<string | null>>({
+    value: "V",
+    label: "V",
+  });
+  const [identityDocumentChecked, setIdentityDocumentChecked] = useState("");
   const [showModal, setshowModal] = useState(false);
 
   const addDatePlusHour = (date: Date, hour: string) => {
+    if (hour === ""){
+      return "";
+    }
     const [hours, minutes, seconds] = hour.split(":").map(Number);
     date.setHours(hours, minutes, seconds, 0);
     return date.toISOString();
@@ -92,32 +97,62 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       surname: lastName.value,
       email: email.value,
       phoneNumber: phone.value,
-      identityDocument: identityDocument.value + identityDocumentType.value,
+      identityDocument: identityDocumentType.value.value! + identityDocument.value,
       tableNumber: parseInt(tables.value),
     };
   };
 
   const validateData = () => {
     let valid = true;
-    firstName.setError(0);
-    lastName.setError(0);
-    email.setError(0);
-    phone.setError(0);
-    tables.setError(0);
-    persons.setError(0);
-    hourIn.setError(0);
+    identityDocument.setCode(0);
+    firstName.setCode(0);
+    lastName.setCode(0);
+    email.setCode(0);
+    phone.setCode(0);
+    tables.setCode(0);
+    persons.setCode(0);
+    hourIn.setCode(0);
+
+
+    // identity Document validation
+    const currentIdentityDocument = identityDocumentType.value.value! + identityDocument.value.trim();
+    const identityDocumentValidation = validateIdentityDocument(
+      identityDocumentType.value.value!, identityDocument.value);
+    if (identityDocumentChecked !== currentIdentityDocument){
+      valid = false;
+      identityDocument.setCode(4);
+      identityDocument.setMessage(
+        "Haga click en Obtener Usuario");
+    }
+
+    if (identityDocumentValidation.code !== 0) {
+      valid = false;
+      identityDocument.setCode(4);
+      switch (identityDocumentValidation.code) {
+        case 1:
+          identityDocument.setMessage(
+            "Introduzca un número de documento de identidad");
+          break;
+        case 2:
+          identityDocument.setMessage(
+            "Introduzca un documento de identidad con solo números");
+          break;
+        default:
+          identityDocument.setMessage("Documento inválido.");
+      }
+    }
 
     // firstName validations
     const firstNameValidation = validateName(firstName.value);
     if (firstNameValidation.code !== 0) {
       valid = false;
-      firstName.setError(1);
+      firstName.setCode(4);
       switch (firstNameValidation.code) {
         case 1:
-          firstName.setErrorMessage("Debe tener al menos 2 caracteres.");
+          firstName.setMessage("Debe tener al menos 2 caracteres.");
           break;
         default:
-          firstName.setErrorMessage("Nombre inválido.");
+          firstName.setMessage("Nombre inválido.");
       }
     }
 
@@ -125,13 +160,13 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     const lastNameValidation = validateName(lastName.value);
     if (lastNameValidation.code !== 0) {
       valid = false;
-      lastName.setError(1);
+      lastName.setCode(4);
       switch (lastNameValidation.code) {
         case 1:
-          lastName.setErrorMessage("Debe tener al menos 2 caracteres.");
+          lastName.setMessage("Debe tener al menos 2 caracteres.");
           break;
         default:
-          lastName.setErrorMessage("Apellido inválido.");
+          lastName.setMessage("Apellido inválido.");
       }
     }
 
@@ -139,13 +174,13 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     const emailValidation = validateEmail(email.value);
     if (emailValidation.code !== 0) {
       valid = false;
-      email.setError(1);
+      email.setCode(4);
       switch (emailValidation.code) {
         case 1:
-          email.setErrorMessage("Formato de correo inválido.");
+          email.setMessage("Formato de correo inválido.");
           break;
         default:
-          email.setErrorMessage("Correo inválido.");
+          email.setMessage("Correo inválido.");
       }
     }
 
@@ -153,61 +188,61 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     const phoneValidation = validatePhone(phone.value);
     if (phoneValidation.code !== 0) {
       valid = false;
-      phone.setError(1);
+      phone.setCode(4);
       switch (phoneValidation.code) {
         case 1:
-          phone.setErrorMessage("Formato de teléfono inválido.");
+          phone.setMessage("Formato de teléfono inválido.");
           break;
         default:
-          phone.setErrorMessage("Teléfono inválido.");
+          phone.setMessage("Teléfono inválido.");
       }
     }
 
     // Persons validation
     if (!persons.value || persons.value === "") {
       valid = false;
-      persons.setError(1);
-      persons.setErrorMessage("Indique el número de personas");
+      persons.setCode(4);
+      persons.setMessage("Indique el número de personas");
     } else {
       try {
         parseInt(persons.value);
       } catch (error) {
         valid = false;
-        persons.setError(1);
-        persons.setErrorMessage("Indique un número postivo");
+        persons.setCode(4);
+        persons.setMessage("Indique un número postivo");
       }
       if (parseInt(persons.value) < 1) {
         valid = false;
-        persons.setError(1);
-        persons.setErrorMessage("Indique al menos una persona");
+        persons.setCode(4);
+        persons.setMessage("Indique al menos una persona");
       }
     }
 
     // Table validation
     if (!tables.value || tables.value === "") {
       valid = false;
-      tables.setError(1);
-      tables.setErrorMessage("Indique el número de mesas");
+      tables.setCode(4);
+      tables.setMessage("Indique el número de mesas");
     } else {
       try {
         parseInt(tables.value);
       } catch (error) {
         valid = false;
-        tables.setError(1);
-        tables.setErrorMessage("Indique un número postivo");
+        tables.setCode(4);
+        tables.setMessage("Indique un número postivo");
       }
       if (parseInt(tables.value) < 1) {
         valid = false;
-        tables.setError(1);
-        tables.setErrorMessage("Indique al menos una mesa");
+        tables.setCode(4);
+        tables.setMessage("Indique al menos una mesa");
       }
     }
 
     // Hour In validation
     if (!hourIn.value.value) {
       valid = false;
-      hourIn.setError(1);
-      hourIn.setErrorMessage("Indique la hora de llegada");
+      hourIn.setCode(4);
+      hourIn.setMessage("Indique la hora de llegada");
     }
 
     // Check that hourIn is less than hourOut
@@ -220,8 +255,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
         .map(Number);
       if (hourInHours === hourOutHours && hourInMinutes === hourOutMinutes) {
         valid = false;
-        hourIn.setError(1);
-        hourIn.setErrorMessage("La llegada no puede ser igual a la salida");
+        hourIn.setCode(4);
+        hourIn.setMessage("La llegada no puede ser igual a la salida");
       }
     }
 
@@ -232,12 +267,11 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     const response = await fetchAPI((token: string) =>
       postReservationService(getUpdatedReservation(), token)
     );
-
     if (response.isError || typeof response.data! === "string") {
       const message = !!response.exception
         ? response.exception.message
         : response.error?.message;
-      alertService.error(`Error creando la reserva: ${message}`);
+      alertService.error(`Error creando la reserva: ${message}`, {autoClose: false});
     } else {
       const id = response.data!.id;
       setReservationsList([
@@ -264,7 +298,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       }
       return [];
     } else {
-      return response.data!.guest;
+      return response.data!;
     }
   };
 
@@ -426,17 +460,21 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
 
   const onGetGuest = () => {
     const getGuest_ = async () => {
-      const aux = (await getGuest(
-        identityDocumentType.value + identityDocument.value));
+      const document = identityDocumentType.value.value! + identityDocument.value.trim();
+      const aux = (await getGuest(document));
       if (Array.isArray(aux)) {
-          identityDocument.setError(1);
-          identityDocument.setErrorMessage("Usuario no encontrado en la base de datos");
+          identityDocument.setCode(3);
+          identityDocument.setMessage("Usuario no encontrado en la base de datos, complete los datos");
+          setIdentityDocumentChecked("");
         }
         else{
           firstName.setValue(aux.name);
           lastName.setValue(aux.surname);
           email.setValue(aux.email);
           phone.setValue(aux.phoneNumber);
+          identityDocument.setCode(1);
+          identityDocument.setMessage("Usuario obtenido exitosamente");
+          setIdentityDocumentChecked(document);
       }
     };
     getGuest_();
@@ -448,10 +486,23 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       setshowModal(false);
 
       identityDocument.setValue("");
+      identityDocumentType.setValue({
+        value: "V",
+        label: "V",
+      });
       firstName.setValue("");
       lastName.setValue("");
       phone.setValue("");
       email.setValue("");
+
+      hourIn.setValue({
+        value: "",
+        label: "",
+      });
+      hourOut.setValue({
+        value: "",
+        label: "",
+      });
       persons.setValue("");
       tables.setValue("");
       occasion.setValue("");
@@ -466,7 +517,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
         return { value: x, label: x };
       }
     );
-    const validHoursOut_ = [validHoursIn_[0], ...validHoursIn_.slice(2)];
+    const validHoursOut_ = [validHoursIn_[1], ...validHoursIn_.slice(2)];
     validHoursIn_.pop();
 
     setValidHoursIn(validHoursIn_);
@@ -495,10 +546,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     try {
       parseInt(persons.value);
       if (parseInt(persons.value) > branch.capacity) {
-        persons.setError(2);
-        persons.setErrorMessage("Excede la capacidad del local");
+        persons.setCode(3);
+        persons.setMessage("Excede la capacidad del local");
       } else {
-        if (persons.error != 1) persons.setError(0);
+        if (persons.code != 1) persons.setCode(0);
       }
     } catch (error) {}
   }, [persons.value]);

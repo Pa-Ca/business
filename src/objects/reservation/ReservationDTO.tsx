@@ -87,22 +87,22 @@ type ReservationDTO = {
 export const toReservationProps = (
   reservation: ReservationDTO
 ): ReservationProps => {
-  const dateIn = new Date(reservation.reservationDateIn);
-  const start = dateIn.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  
-  const dateOut = new Date(reservation.reservationDateOut);
-  const end = dateOut.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  function hourFormat(hour: string)  {
+    if(hour === "" || hour === null){
+      return "";
+    }else{
+      const date = new Date(hour);
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+  }
 
-  return {
+  const result = {
     id: reservation.id,
-    start: start,
-    end: end,
+    start: hourFormat(reservation.reservationDateIn),
+    end: hourFormat(reservation.reservationDateOut),
     date: reservation.reservationDateIn,
     owner: reservation.name + " " + reservation.surname,
     ownerEmail: reservation.email,
@@ -113,6 +113,7 @@ export const toReservationProps = (
     status: getReservationStatusObject(reservation.status),
     identityDocument: reservation.identityDocument,
   };
+  return result;
 };
 
 export { type ReservationDTO as default };

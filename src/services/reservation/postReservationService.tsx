@@ -14,7 +14,6 @@ export default async (
   token: string
 ): Promise<FetchResponse<ReservationDTO>> => {
   const uri = `${API_ENDPOINT}/reservation`;
-
   try {
     const response = await fetch(uri, {
       method: "POST",

@@ -141,8 +141,8 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError) {
-      name.setError(1);
-      name.setErrorMessage("Error guardando el nombre.");
+      name.setCode(4);
+      name.setMessage("Error guardando el nombre.");
     } else {
       dispatch(setName(name.value));
     }
@@ -157,8 +157,8 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     );
 
     if (response.isError) {
-      phoneNumber.setError(1);
-      phoneNumber.setErrorMessage("Error guardando el numero de telefono.");
+      phoneNumber.setCode(4);
+      phoneNumber.setMessage("Error guardando el numero de telefono.");
     } else {
       dispatch(setPhoneNumber(phoneNumber.value));
     }
@@ -185,14 +185,14 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         switch (response.exception.code) {
           case 2:
           case 3:
-            newPassword.setErrorMessage(
+            newPassword.setMessage(
               "La contraseña debe tener entre 8 y 64 caracteres."
             );
-            newPassword.setError(1);
+            newPassword.setCode(4);
             break;
           case 9:
-            password.setErrorMessage("Contraseña incorrecta");
-            password.setError(1);
+            password.setMessage("Contraseña incorrecta");
+            password.setCode(4);
             break;
         }
       }
@@ -283,22 +283,22 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     validation = validateName(name.value);
     if (validation.code !== 0) {
       name.setValue(validation.processedName);
-      name.setError(1);
-      name.setErrorMessage("Debe tener al menos 3 caracteres.");
+      name.setCode(4);
+      name.setMessage("Debe tener al menos 3 caracteres.");
       error = true;
     }
 
     // Verify that capacity is positive
     if (parseInt(capacity.value) <= 0) {
-      capacity.setError(1);
-      capacity.setErrorMessage("La capacidad debe ser mayor a 0.");
+      capacity.setCode(4);
+      capacity.setMessage("La capacidad debe ser mayor a 0.");
       error = true;
     }
 
     // Verify that the average reserve time hours is valid
     if (averageReserveTimeHours.value === "") {
-      averageReserveTimeHours.setError(1);
-      averageReserveTimeHours.setErrorMessage(
+      averageReserveTimeHours.setCode(4);
+      averageReserveTimeHours.setMessage(
         "Debe ingresar la cantidad de horas."
       );
       error = true;
@@ -306,8 +306,8 @@ export default function Profile({ header, fetchAPI }: PageProps) {
 
     // Verify that the average reserve time minutes is valid
     if (averageReserveTimeMinutes.value === "") {
-      averageReserveTimeMinutes.setError(1);
-      averageReserveTimeMinutes.setErrorMessage(
+      averageReserveTimeMinutes.setCode(4);
+      averageReserveTimeMinutes.setMessage(
         "Debe ingresar la cantidad de minutos."
       );
       error = true;
@@ -315,29 +315,29 @@ export default function Profile({ header, fetchAPI }: PageProps) {
 
     // Verify that the type is not empty
     if (!type.value.value) {
-      type.setError(1);
-      type.setErrorMessage("Debe seleccionar un tipo.");
+      type.setCode(4);
+      type.setMessage("Debe seleccionar un tipo.");
       error = true;
     }
 
     // Verify that the cost is not empty nor zero
     if (price.value === "" || parseFloat(price.value) <= 0) {
-      price.setError(1);
-      price.setErrorMessage("Debe ingresar un precio mayor a 0.");
+      price.setCode(4);
+      price.setMessage("Debe ingresar un precio mayor a 0.");
       error = true;
     }
 
     // Verify that the opening time hour is valid
     if (openingTimeHour.value === "") {
-      openingTimeHour.setError(1);
-      openingTimeHour.setErrorMessage("Debe ingresar la hora de apertura.");
+      openingTimeHour.setCode(4);
+      openingTimeHour.setMessage("Debe ingresar la hora de apertura.");
       error = true;
     }
 
     // Verify that the opening time minute is valid
     if (openingTimeMinute.value === "") {
-      openingTimeMinute.setError(1);
-      openingTimeMinute.setErrorMessage(
+      openingTimeMinute.setCode(4);
+      openingTimeMinute.setMessage(
         "Debe ingresar los minutos de apertura."
       );
       error = true;
@@ -345,15 +345,15 @@ export default function Profile({ header, fetchAPI }: PageProps) {
 
     // Verify that the closing time hour is valid
     if (closingTimeHour.value === "") {
-      closingTimeHour.setError(1);
-      closingTimeHour.setErrorMessage("Debe ingresar la hora de cierre.");
+      closingTimeHour.setCode(4);
+      closingTimeHour.setMessage("Debe ingresar la hora de cierre.");
       error = true;
     }
 
     // Verify that the closing time minute is valid
     if (closingTimeMinute.value === "") {
-      closingTimeMinute.setError(1);
-      closingTimeMinute.setErrorMessage("Debe ingresar los minutos de cierre.");
+      closingTimeMinute.setCode(4);
+      closingTimeMinute.setMessage("Debe ingresar los minutos de cierre.");
       error = true;
     }
 
@@ -361,14 +361,14 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     validation = validatePhone(phoneNumber.value);
     if (validation.code !== 0) {
       phoneNumber.setValue(validation.processedPhone);
-      phoneNumber.setError(1);
-      phoneNumber.setErrorMessage("El número de teléfono no es válido.");
+      phoneNumber.setCode(4);
+      phoneNumber.setMessage("El número de teléfono no es válido.");
     }
 
     // Verify that the location is not empty
     if (!location.value.value) {
-      location.setError(1);
-      location.setErrorMessage("Debe seleccionar una ubicación.");
+      location.setCode(4);
+      location.setMessage("Debe seleccionar una ubicación.");
       error = true;
     }
 

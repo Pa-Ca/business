@@ -1,11 +1,7 @@
 import { API_ENDPOINT } from "../../config";
-import GuestDTO from "../../objects/reservations/GuestDTO";
+import GuestDTO from "../../objects/reservation/GuestDTO";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
-
-type GuestResponse = {
-  guest: GuestDTO;
-};
 
 /**
  * @brief Get the guest data given its identity document
@@ -18,7 +14,7 @@ type GuestResponse = {
 export default async (
     identityDocument: string,
     token: string
-): Promise<FetchResponse<GuestResponse>> => {
+): Promise<FetchResponse<GuestDTO>> => {
   const uri = `${API_ENDPOINT}/guest/identity-document/${identityDocument}`;
 
   try {
@@ -31,7 +27,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: GuestResponse = await response.json();
+      const data: GuestDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

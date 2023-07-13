@@ -309,8 +309,8 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception && response.exception.code === 55) {
-        name.setErrorMessage("Ya existe una mesa con ese nombre");
-        name.setError(1);
+        name.setMessage("Ya existe una mesa con ese nombre");
+        name.setCode(4);
       } else {
         const message = !!response.exception
           ? response.exception.message
@@ -354,8 +354,8 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception && response.exception.code === 55) {
-        name.setErrorMessage("Ya existe una mesa con ese nombre");
-        name.setError(1);
+        name.setMessage("Ya existe una mesa con ese nombre");
+        name.setCode(4);
       } else {
         const message = !!response.exception
           ? response.exception.message
