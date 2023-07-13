@@ -117,8 +117,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     // identity Document validation
     const currentIdentityDocument = identityDocumentType.value.value! + identityDocument.value.trim();
     const identityDocumentValidation = validateIdentityDocument(
-      identityDocumentType.value.value!, identityDocument.value);
-    if (identityDocumentChecked !== currentIdentityDocument){
+      identityDocumentType.value.value!, identityDocument.value.trim());
+    if (currentIdentityDocument !== identityDocumentChecked){
       valid = false;
       identityDocument.setCode(4);
       identityDocument.setMessage(
@@ -460,12 +460,12 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
 
   const onGetGuest = () => {
     const getGuest_ = async () => {
-      const document = identityDocumentType.value.value! + identityDocument.value.trim();
-      const aux = (await getGuest(document));
+      const currentIdentityDocument = identityDocumentType.value.value! + identityDocument.value.trim();
+      const aux = (await getGuest(currentIdentityDocument));
+      setIdentityDocumentChecked(currentIdentityDocument);
       if (Array.isArray(aux)) {
           identityDocument.setCode(3);
-          identityDocument.setMessage("Usuario no encontrado en la base de datos, complete los datos");
-          setIdentityDocumentChecked("");
+          identityDocument.setMessage("Usuario no encontrado en la base de datos, complete los datos");        
         }
         else{
           firstName.setValue(aux.name);
@@ -474,7 +474,6 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           phone.setValue(aux.phoneNumber);
           identityDocument.setCode(1);
           identityDocument.setMessage("Usuario obtenido exitosamente");
-          setIdentityDocumentChecked(document);
       }
     };
     getGuest_();
