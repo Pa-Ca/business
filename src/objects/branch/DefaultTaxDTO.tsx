@@ -1,17 +1,14 @@
-export enum TaxType {
-  "%" = 0,
-  "$" = 1,
-}
+import { TaxType } from "objects/sale/TaxDTO";
 
-type TaxDTO = {
+type DefaultTaxDTO = {
   /**
    * Tax product id
    */
   id: number;
   /**
-   * Sale id 
+   * Branch id
    */
-  saleId: number;
+  branchId: number;
   /**
    * Tax name
    */
@@ -26,4 +23,4 @@ type TaxDTO = {
   value: number;
 };
 
-export { type TaxDTO as default };
+export { type DefaultTaxDTO as default };
