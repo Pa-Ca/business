@@ -26,6 +26,9 @@ import deleteTableService from "./branch/deleteTableService";
 import updateTableService from "./branch/updateTableService";
 import createBranchService from "./branch/createBranchService";
 import updateBranchService from "./branch/updateBranchService";
+import createDefaultTaxService from "./branch/createDefaultTaxService";
+import updateDefaultTaxService from "./branch/updateDefaultTaxService";
+import deleteDefaultTaxService from "./branch/deleteDefaultTaxService";
 
 // Business
 import updateBusinessService from "./business/updateBusinessService";
@@ -96,6 +99,9 @@ export {
   updateTableService,
   createBranchService,
   updateBranchService,
+  createDefaultTaxService,
+  updateDefaultTaxService,
+  deleteDefaultTaxService,
   // Business
   updateBusinessService,
   // Product

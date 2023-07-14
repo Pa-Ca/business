@@ -8,6 +8,7 @@ import ResetPasswordDTO from "./auth/ResetPasswordDTO";
 
 // Branch
 import TableDTO from "./branch/TableDTO";
+import DefaultTaxDTO from "./branch/DefaultTaxDTO";
 import BranchDTO, { Duration, LocalTime } from "./branch/BranchDTO";
 
 // Business
@@ -43,6 +44,7 @@ export {
   type Duration,
   type LocalTime,
   type BranchDTO,
+  type DefaultTaxDTO,
   // Business
   type BusinessDTO,
   // Product
