@@ -57,6 +57,9 @@ import cancelReservationService from "./reservation/cancelReservationService";
 import rejectReservationService from "./reservation/rejectReservationService";
 import retireReservationService from "./reservation/retireReservationService";
 
+// Guest
+import getGuestService from "./reservation/getGuestService";
+
 // S3
 import S3ClientService from "./s3/S3ClientService";
 import S3UploadService from "./s3/S3UploadService";
@@ -125,6 +128,8 @@ export {
   cancelReservationService,
   rejectReservationService,
   retireReservationService,
+  // Guest
+  getGuestService,
   // S3
   S3ClientService,
   S3UploadService,

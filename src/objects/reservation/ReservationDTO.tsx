@@ -1,4 +1,5 @@
 import { ReservationProps } from "paca-ui";
+import getReservationStatusObject from "../../utils/getReservationStatusObject";
 
 type ReservationDTO = {
   /**
@@ -18,13 +19,21 @@ type ReservationDTO = {
    */
   requestDate: string;
   /**
-   * Date the Reservation occurs
+   * Date the Reservation occurs Start Hour
    */
-  reservationDate: string;
+  reservationDateIn: string;
+  /**
+   * Date the Reservation occurs End Hour
+   */
+  reservationDateOut: string;
   /**
    * Number of clients in this reservation
    */
   clientNumber: number;
+  /**
+   * Number of clients in this reservation
+   */
+  tableNumber: number;
   /**
    * Reservation payment code
    */
@@ -69,36 +78,42 @@ type ReservationDTO = {
    * Owner phone number
    */
   phoneNumber: string;
+  /**
+   * Owner identity document
+   */
+  identityDocument: string;
 };
 
 export const toReservationProps = (
   reservation: ReservationDTO
 ): ReservationProps => {
-  const date = new Date(reservation.reservationDate);
-  const start = date.toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  function hourFormat(hour: string)  {
+    if(hour === "" || hour === null){
+      return "";
+    }else{
+      const date = new Date(hour);
+      return date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+  }
 
-  return {
+  const result = {
     id: reservation.id,
-    start: start,
-    date: reservation.reservationDate,
-    end: "",
+    start: hourFormat(reservation.reservationDateIn),
+    end: hourFormat(reservation.reservationDateOut),
+    date: reservation.reservationDateIn,
     owner: reservation.name + " " + reservation.surname,
     ownerEmail: reservation.email,
     ownerOccasion: reservation.occasion,
     ownerPhone: reservation.phoneNumber,
     persons: reservation.clientNumber,
-    tables: 1,
-    status: {
-      number: 1,
-      name: "",
-      nameShow: "",
-      icon: "pa-ca",
-    },
-    identityDocument: "",
+    tables: reservation.tableNumber,
+    status: getReservationStatusObject(reservation.status),
+    identityDocument: reservation.identityDocument,
   };
+  return result;
 };
 
 export { type ReservationDTO as default };

@@ -1,31 +1,33 @@
 import { API_ENDPOINT } from "../../config";
-import { FetchResponse, ExceptionResponse, ReservationDTO } from "objects";
+import GuestDTO from "../../objects/reservation/GuestDTO";
+import FetchResponse from "../../objects/FetchResponse";
+import ExceptionResponse from "../../objects/ExceptionResponse";
 
 /**
- * @brief Create reservation
+ * @brief Get the guest data given its identity document
  *
- * @param dto Reservation data
+ * @param identityDocument Identity document
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
-  dto: ReservationDTO,
-  token: string
-): Promise<FetchResponse<ReservationDTO>> => {
-  const uri = `${API_ENDPOINT}/reservation`;
+    identityDocument: string,
+    token: string
+): Promise<FetchResponse<GuestDTO>> => {
+  const uri = `${API_ENDPOINT}/guest/identity-document/${identityDocument}`;
+
   try {
     const response = await fetch(uri, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      const data: ReservationDTO = await response.json();
+      const data: GuestDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

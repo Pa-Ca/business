@@ -23,7 +23,7 @@ export default (hourIn: LocalTime, hourOut: LocalTime) => {
     endMinute = 0;
     }
 
-    const result = [""];
+    const result = [];
 
     while (currentHour != endHour || currentMinute != endMinute) {
         if (currentHour === 24) currentHour = 0;
