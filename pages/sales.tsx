@@ -694,7 +694,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
           startDate.value,
           endDate.value,
           fullName.value,
-          identityDocument.value
+          (identityDocumentType.value.value || "") + identityDocument.value
         )
       );
 

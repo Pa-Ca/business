@@ -45,13 +45,15 @@ export default async (
   identityDocument: string | null = null,
 ): Promise<FetchResponse<SaleResponse>> => {
   let uri = `${API_ENDPOINT}/branch/${id}/sale?page=${pageIndex}&size=${pageSize}`;
-  endTime?.setDate(endTime.getDate() + 1);
 
   if (!!startTime) {
     uri = uri.concat(`&startTime=${startTime.toISOString()}`);
   }
   if (!!endTime) {
-    uri = uri.concat(`&endTime=${endTime.toISOString()}`);
+    // Get endDateTime + 1 day
+    const endTimePlusOne = new Date(endTime);
+    endTimePlusOne.setDate(endTimePlusOne.getDate() + 1);
+    uri = uri.concat(`&endTime=${endTimePlusOne.toISOString()}`);
   }
   if (!!fullname) {
     uri = uri.concat(`&fullname=${fullname}`);
