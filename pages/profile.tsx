@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
@@ -21,26 +21,30 @@ import {
   setCurrentBranch,
 } from "context";
 import {
-  alertService,
   S3UploadService,
   getBranchesService,
   createBranchService,
   updateBranchService,
   updateBusinessService,
-  resetPasswordWithOldPasswordService,
+  updateDefaultTaxService,
   resetPasswordRequestService,
+  resetPasswordWithOldPasswordService,
+  deleteDefaultTaxService,
+  createDefaultTaxService,
 } from "services";
 import {
   PageProps,
   BranchDTO,
   LocalTime,
   Duration as BranchDuration,
+  TaxType,
 } from "objects";
 import {
   useInputForm,
   InputFormHook,
   OptionObject,
   BusinessProfile,
+  TaxObject,
 } from "paca-ui";
 
 export default function Profile({ header, fetchAPI }: PageProps) {
@@ -131,6 +135,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       hourOut: hourOut as LocalTime,
       deleted: false,
       dollarToLocalCurrencyExchange: branch.dollarToLocalCurrencyExchange,
+      defaultTaxes: branch.defaultTaxes,
     };
     return dto;
   };
@@ -259,7 +264,6 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     setEmailSent(true);
   };
 
-  // Create new branch
   const onCreateBranch = async (
     name: InputFormHook<string>,
     phoneNumber: InputFormHook<string>,
@@ -414,6 +418,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       hourOut,
       deleted: false,
       dollarToLocalCurrencyExchange: 1,
+      defaultTaxes: [],
     };
 
     const response = await fetchAPI((token: string) =>
@@ -446,11 +451,138 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     }
   };
 
+  const onCreateDefaultTax = async () => {
+    const response = await fetchAPI((token: string) =>
+      createDefaultTaxService(
+        {
+          id: 0,
+          branchId: branch!.id!,
+          name: "Tarifa Nº " + (taxes.length + 1).toString(),
+          type: TaxType["%"],
+          value: 0,
+        },
+        token
+      )
+    );
+
+    if (response.isError || typeof response.data === "string") {
+    } else {
+      const newTax = response.data!;
+      const newTaxes = [...branch.defaultTaxes, newTax];
+
+      dispatch(
+        setBranches(
+          branches.map((b) => {
+            if (b.id === branch.id) {
+              return {
+                ...b,
+                defaultTaxes: newTaxes,
+              };
+            }
+
+            return b;
+          })
+        )
+      );
+    }
+  };
+
   useEffect(() => {
     getProfilePictureUrl(business.id).then((url) => {
       setProfilePictureUrl(url);
     });
   }, []);
+
+  const taxes: TaxObject[] = useMemo(() => {
+    if (!branch) {
+      return [];
+    }
+
+    const updateTax = async (
+      id: number,
+      name: InputFormHook<string>,
+      type: InputFormHook<string>,
+      value: InputFormHook<string>
+    ) => {
+      const dto = {
+        id,
+        name: name.value,
+        type: TaxType[type.value as keyof typeof TaxType],
+        value: Number(value.value) || 0,
+      };
+      const response = await fetchAPI((token: string) =>
+        updateDefaultTaxService(dto, token)
+      );
+
+      if (response.isError || typeof response.data === "string") {
+        name.setCode(4);
+        name.setMessage("Error guardando el nombre.");
+      } else {
+        // Update branch taxes
+        const newTax = response.data!;
+        const newTaxes = branch.defaultTaxes.map((tax) => {
+          if (tax.id === newTax.id) {
+            return newTax;
+          }
+
+          return tax;
+        });
+        dispatch(
+          setBranches(
+            branches.map((b) => {
+              if (b.id === branch.id) {
+                return {
+                  ...b,
+                  defaultTaxes: newTaxes,
+                };
+              }
+
+              return b;
+            })
+          )
+        );
+      }
+    };
+
+    const deleteTax = async (id: number) => {
+      const response = await fetchAPI((token: string) =>
+        deleteDefaultTaxService(id, token)
+      );
+
+      if (response.isError || typeof response.data === "string") {
+        return;
+      }
+
+      // Update branch taxes
+      const newTaxes = branch.defaultTaxes.filter((tax) => tax.id !== id);
+      dispatch(
+        setBranches(
+          branches.map((b) => {
+            if (b.id === branch.id) {
+              return {
+                ...b,
+                defaultTaxes: newTaxes,
+              };
+            }
+
+            return b;
+          })
+        )
+      );
+    };
+
+    return branch.defaultTaxes.map((tax) => {
+      return {
+        ...tax,
+        saveValueFunction: (
+          name: InputFormHook<string>,
+          type: InputFormHook<string>,
+          value: InputFormHook<string>
+        ) => updateTax(tax.id, name, type, value),
+        deleteValueFunction: () => deleteTax(tax.id),
+      };
+    });
+  }, [branch?.defaultTaxes]);
 
   return (
     !!auth.logged &&
@@ -493,6 +625,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         branchTypeOptions={cousines}
         branchLocationOptions={locations}
         mapsApiKey={GOOGLE_MAPS_API_KEY || ""}
+        taxes={taxes}
         onSaveBranchName={() => updateBranch()}
         onSaveBranchDescription={() => updateBranch()}
         onSaveBranchLocation={() => updateBranch()}
@@ -507,6 +640,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         onDeleteBranch={() => updateBranch(true)}
         onSaveProfilePicture={() => {}} // [TODO]
         uploadProfilePicture={onProfileUploadImage}
+        onAddTax={onCreateDefaultTax}
       />
     )
   );

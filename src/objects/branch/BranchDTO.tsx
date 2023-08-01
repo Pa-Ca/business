@@ -1,3 +1,5 @@
+import DefaultTaxDTO from "./DefaultTaxDTO";
+
 export type Duration = `PT${number}H${number}M${number}S`;
 export type LocalTime = `${number}:${number}:${number}`;
 
@@ -74,6 +76,10 @@ type BranchDTO = {
    * Exchange between the dollar and the local currency
    */
   dollarToLocalCurrencyExchange: number;
+  /**
+   * Default taxes
+   */
+  defaultTaxes: DefaultTaxDTO[];
 };
 
 export { type BranchDTO as default };

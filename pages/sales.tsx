@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "context";
-import { SaleDTO, SaleStatus, TableDTO, PageProps, TaxType } from "objects";
+import { SaleDTO, SaleStatus, PageProps, TaxType } from "objects";
 import {
   BranchSales,
   useInputForm,
@@ -9,6 +9,7 @@ import {
   ProductCategoryObject,
   ProductSubCategoryObject,
   TableObject,
+  OptionObject,
 } from "paca-ui";
 import {
   alertService,
@@ -38,6 +39,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   const branchIndex = useAppSelector((state) => state.branches).current;
   const branch = branches[branchIndex];
 
+  // Sales data
   const [ongoingSales, setOngoingSales] = useState<SaleDTO[]>([]);
   const [historicSales, setHistoricSales] = useState<SaleDTO[]>([]);
   const [allTables, setAllTables] = useState<TableObject[]>([]);
@@ -48,6 +50,24 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   const productSubCategories_ = useAppSelector(
     (state) => state.products.subCategories
   );
+
+  // Sales filters
+  const [applyFilter, setApplyFilter] = useState<boolean>(true);
+  const startDate = useInputForm<Date | null>(null);
+  const endDate = useInputForm<Date | null>(null);
+  const fullName = useInputForm<string>("");
+  const identityDocument = useInputForm<string>("");
+  const identityDocumentTypeOpt: OptionObject<string>[] = [
+    { label: "V", value: "V" },
+    { label: "E", value: "E" },
+    { label: "J", value: "J" },
+    { label: "G", value: "G" },
+    { label: "P", value: "P" },
+  ];
+  const identityDocumentType = useInputForm<OptionObject<string | null>>({
+    label: "",
+    value: "",
+  });
 
   // Format all categories
   const productCategories = useMemo(() => {
@@ -657,13 +677,25 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     };
 
     getTables();
-  }, []);
+  }, [ongoingSales]);
 
   // Get all sales
   useEffect(() => {
+    if (!applyFilter) return;
+    setApplyFilter(false);
+
     const getSales = async () => {
       const response = await fetchAPI((token: string) =>
-        getSalesService(branch.id, token, page - 1, pastSalesNumber)
+        getSalesService(
+          branch.id,
+          token,
+          page,
+          pastSalesNumber,
+          startDate.value,
+          endDate.value,
+          fullName.value,
+          (identityDocumentType.value.value || "") + identityDocument.value
+        )
       );
 
       if (response.isError || typeof response.data === "string") {
@@ -694,7 +726,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     };
 
     getSales();
-  }, [page, pastSalesNumber]);
+  }, [page, pastSalesNumber, applyFilter]);
 
   return (
     <BranchSales
@@ -725,6 +757,14 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       page={page}
       onNextPage={() => setPage(page + 1)}
       onPreviousPage={() => setPage(page - 1)}
+      // Filters
+      endDate={endDate}
+      fullName={fullName}
+      startDate={startDate}
+      identityDocument={identityDocument}
+      identityDocumentType={identityDocumentType}
+      identityDocumentTypeOpt={identityDocumentTypeOpt}
+      onGetSalesFiltered={() => setApplyFilter(true)}
     />
   );
 }

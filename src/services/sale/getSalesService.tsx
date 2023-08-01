@@ -27,16 +27,40 @@ type SaleResponse = {
  * @param token Authorization token
  * @param pageIndex Index of the page
  * @param pageSize Size of the page
+ * @param startTime Start time of the sales
+ * @param endTime End time of the sales
+ * @param fullname Fullname of the customer
+ * @param identityDocument Identity document of the customer
  *
  * @returns API response when refresh
  */
 export default async (
   id: number,
   token: string,
-  pageIndex: number = 0,
-  pageSize: number = 10
+  pageIndex: number = 1,
+  pageSize: number = 10,
+  startTime: Date | null = null,
+  endTime: Date | null = null,
+  fullname: string | null = null,
+  identityDocument: string | null = null,
 ): Promise<FetchResponse<SaleResponse>> => {
-  const uri = `${API_ENDPOINT}/branch/${id}/sale?page=${pageIndex}&size=${pageSize}`;
+  let uri = `${API_ENDPOINT}/branch/${id}/sale?page=${pageIndex}&size=${pageSize}`;
+
+  if (!!startTime) {
+    uri = uri.concat(`&startTime=${startTime.toISOString()}`);
+  }
+  if (!!endTime) {
+    // Get endDateTime + 1 day
+    const endTimePlusOne = new Date(endTime);
+    endTimePlusOne.setDate(endTimePlusOne.getDate() + 1);
+    uri = uri.concat(`&endTime=${endTimePlusOne.toISOString()}`);
+  }
+  if (!!fullname) {
+    uri = uri.concat(`&fullname=${fullname}`);
+  }
+  if (!!identityDocument) {
+    uri = uri.concat(`&identityDocument=${identityDocument}`);
+  }
 
   try {
     const response = await fetch(uri, {
