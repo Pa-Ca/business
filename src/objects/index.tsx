@@ -40,6 +40,7 @@ export {
   type ResetPasswordDTO,
   // Branch
   type TableDTO,
+  type BranchReservationsInfoDTO,
   type Duration,
   type LocalTime,
   type BranchDTO,

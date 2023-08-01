@@ -21,6 +21,7 @@ import googleSignUpBusinessService from "./googleAuth/googleSignUpBusinessServic
 // Branch
 import getTablesService from "./branch/getTablesService";
 import getBranchesService from "./branch/getBranchesService";
+import getBranchReservations from "./branch/getBranchReservations";
 import createTableService from "./branch/createTableService";
 import deleteTableService from "./branch/deleteTableService";
 import updateTableService from "./branch/updateTableService";
@@ -94,6 +95,7 @@ export {
   // Branch
   getTablesService,
   getBranchesService,
+  getBranchReservations,
   createTableService,
   deleteTableService,
   updateTableService,
