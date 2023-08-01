@@ -60,9 +60,9 @@ export default async (
   endTime: Date | null = null,
   fullname: string | null = null,
   identityDocument: string | null = null,
-  status: number[] | null = null,
+  status: string[] | null = null,
 ): Promise<FetchResponse<ReservationsResponse>> => {
-  let uri = `${API_ENDPOINT}/branch/${id}/sale?page=${pageIndex}&size=${pageSize}`;
+  let uri = `${API_ENDPOINT}/branch/${id}/reservations?page=${pageIndex}&size=${pageSize}`;
 
   if (!!startTime) {
     uri = uri.concat(`&startTime=${startTime.toISOString()}`);
@@ -80,9 +80,8 @@ export default async (
     uri = uri.concat(`&identityDocument=${identityDocument}`);
   }
   if (!!status) {
-    uri = uri.concat(`&status=${status}`);//Verificar que se pase como: 1,2,3
+    uri = uri.concat(`&status=${status[0]}`)
   }
-
   try {
     const response = await fetch(uri, {
       method: "GET",

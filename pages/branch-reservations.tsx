@@ -33,6 +33,8 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const branches = useAppSelector((state) => state.branches).branches;
   const branch = branches[useAppSelector((state) => state.branches).current];
 
+  const [applyFilter, setApplyFilter] = useState<boolean>(true);
+
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pastReservationsNumber, setPastReservationsNumber] = useState<number>(10);
@@ -58,7 +60,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const filterEndDate = useInputForm<Date|null>(null);
   const filterStatus = useInputForm<OptionObject<string | null>>({
     label: "",
-    value: "",
+    value: null,
   });
   const filterStatusOptions: OptionObject<string>[] = [
     {label: "Cerrada", value: "6"},
@@ -78,9 +80,6 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     {label: "P", value: "P"},
   ];
   const filterFullName = useInputForm<string>("");
-  const onGetReservationsFiltered = () =>  {
-    console.log("");
-  };
   
   // Client data
   const firstName = useInputForm<string>("");
@@ -329,8 +328,17 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
 
   const getReservationsFiltered = async () => {
     const response = await fetchAPI((token: string) =>
-      getBranchReservations(branch.id, token, page - 1, pastReservationsNumber)
-    );
+      getBranchReservations(
+        branch.id,
+        token,
+        page - 1,
+        pastReservationsNumber,
+        filterStartDate.value,
+        filterEndDate.value,
+        filterFullName.value,
+        (filterIdentityDocumentType.value.value || "") + filterIdentityDocument.value,
+        filterStatus.value.value === null ? null : [filterStatus.value.value],
+    ));
 
     if (response.isError || typeof response.data === "string") {
       const message = !!response.exception
@@ -416,7 +424,6 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           getReservationsFiltered();
         }
       };
-
       const pending = response.data?.pendingReservations!.map((reservationInfo) => {
         return {
             ...toReservationProps(reservationInfo),
@@ -437,7 +444,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
             onCloseReservation: () => closeReservation(reservationInfo.id),
         };
       });
-      const historic = response.data?.startedReservations!.map((reservationInfo) => {
+      const historic = response.data?.historicReservations!.map((reservationInfo) => {
         return {
             ...toReservationProps(reservationInfo),
         };
@@ -556,8 +563,10 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   }, [persons.value]);
 
   useEffect(() => {
-    getReservationsFiltered()
-  }, [page, pastReservationsNumber]);
+    if (!applyFilter) return;
+    setApplyFilter(false);
+    getReservationsFiltered();
+  }, [page, pastReservationsNumber,applyFilter]);
 
   const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
   const branchAverageReserveTimeHours = parseInt(
@@ -577,6 +586,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       historicReservationList={historicReservationList}
       historicCurrentPage={page}
       historicReservationListTotalLenght={totalHistoricElements}
+      // totalPages
       onNextPage={() => setPage(page + 1)}
       onPreviousPage={() => setPage(page - 1)}
       //Filter
@@ -588,7 +598,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       filterIdentityDocumentType={filterIdentityDocumentType}
       filterIdentityDocumentTypeOpt={filterIdentityDocumentTypeOpt}
       filterFullName={filterFullName}
-      onGetReservationsFiltered={()=>{}}
+      onGetReservationsFiltered={() => setApplyFilter(true)}
       //Reservation Details
       date={date}
       hourIn={hourIn}
