@@ -82,6 +82,7 @@ export default async (
   if (!!status) {
     uri = uri.concat(`&status=${status[0]}`)
   }
+
   try {
     const response = await fetch(uri, {
       method: "GET",

@@ -311,7 +311,6 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     return valid;
   };
 
-  
   const getGuest = async (identityDocument: string) => {
     const response = await fetchAPI(
       (token: string) => getGuestService(identityDocument, token)
@@ -338,7 +337,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
         filterFullName.value,
         (filterIdentityDocumentType.value.value || "") + filterIdentityDocument.value,
         filterStatus.value.value === null ? null : [filterStatus.value.value],
-    ));
+      ));
 
     if (response.isError || typeof response.data === "string") {
       const message = !!response.exception
@@ -449,9 +448,9 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
             ...toReservationProps(reservationInfo),
         };
       });
-      setPendingReservationList(pending!);
-      setAcceptedReservationList(accepted!);
-      setStartedReservationList(started!);
+      setPendingReservationList(pending!.reverse());
+      setAcceptedReservationList(accepted!.reverse());
+      setStartedReservationList(started!.reverse());
       setHistoricReservationList(historic!);
       setTotalPages(response.data?.totalHistoricPages!);
       setTotalHistoricElements(response.data?.totalHistoricElements!);
@@ -585,10 +584,11 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       //Historic
       historicReservationList={historicReservationList}
       historicCurrentPage={page}
+      historicTotalPage={totalPages}
       historicReservationListTotalLenght={totalHistoricElements}
       // totalPages
-      onNextPage={() => setPage(page + 1)}
-      onPreviousPage={() => setPage(page - 1)}
+      onNextPage={() => { setPage(page + 1); setApplyFilter(true); }}
+      onPreviousPage={() => { setPage(page - 1); setApplyFilter(true); }}
       //Filter
       filterStartDate={filterStartDate}
       filterEndDate={filterEndDate}
