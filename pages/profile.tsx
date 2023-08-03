@@ -236,7 +236,10 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         dispatch(
           setBranches([
             ...branches.slice(0, branchIndex),
-            response.data!,
+            {
+              ...branches[branchIndex],
+              ...response.data!,
+            },
             ...branches.slice(branchIndex + 1, branches.length),
           ])
         );
