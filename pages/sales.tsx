@@ -33,6 +33,7 @@ import {
 export default function Sales({ header, fetchAPI }: PageProps) {
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(1);
+  const [totalElements, setTotalElements] = useState<number>(0);
   const [pastSalesNumber, setPastSalesNumber] = useState<number>(15);
   const branches = useAppSelector((state) => state.branches).branches;
   const products_ = useAppSelector((state) => state.products.products);
@@ -531,38 +532,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         : response.error?.message;
       alertService.error(`Error al cerrar la venta: ${message}`);
     } else {
-      // Delete ongoing sales
-      setOngoingSales((oldSales) => {
-        const newSales = [...oldSales];
-        const saleIndex = newSales.findIndex(
-          (sale) => sale.id === currentSale?.id
-        );
-        newSales.splice(saleIndex, 1);
-        return newSales;
-      });
-
-      // Add to historic sales
-      const pastSale = {
-        ...response.data!.sale,
-        products: response.data!.products,
-        taxes: response.data!.taxes,
-      };
-
-      setHistoricSales((oldSales) => {
-        const newSales = [...oldSales];
-        newSales.push(pastSale);
-        return newSales;
-      });
-
-      // Set table hasSale to false
-      setAllTables((oldTables) => {
-        const newTables = [...oldTables];
-        const tableIndex = newTables.findIndex(
-          (t) => t.id === currentSale?.tableId
-        );
-        newTables[tableIndex].hasSale = false;
-        return newTables;
-      });
+      setApplyFilter(true);
     }
   };
 
@@ -689,7 +659,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         getSalesService(
           branch.id,
           token,
-          page,
+          page-1,
           pastSalesNumber,
           startDate.value,
           endDate.value,
@@ -722,6 +692,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         setOngoingSales(ongoing!);
         setHistoricSales(historic!);
         setTotalPages(response.data?.totalHistoricPages!);
+        setTotalElements(response.data?.totalHistoricElements!);
       }
     };
 
@@ -752,11 +723,18 @@ export default function Sales({ header, fetchAPI }: PageProps) {
       onSaveSaleNote={onSaveSaleNote}
       onDeleteTable={onDeleteTable}
       // Historic sales
+      page={page}
       pastSales={pastSales}
       totalPages={totalPages}
-      page={page}
-      onNextPage={() => setPage(page + 1)}
-      onPreviousPage={() => setPage(page - 1)}
+      totalElements={totalElements}
+      onNextPage={() => {
+        setPage(page + 1);
+        setApplyFilter(true);
+      }}
+      onPreviousPage={() => {
+        setPage(page - 1);
+        setApplyFilter(true);
+      }}
       // Filters
       endDate={endDate}
       fullName={fullName}
