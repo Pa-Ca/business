@@ -18,6 +18,7 @@ type SaleResponse = {
   historicSalesInfo: SaleInfo[];
   currentHistoricPage: number;
   totalHistoricPages: number;
+  totalHistoricElements: number;
 };
 
 /**

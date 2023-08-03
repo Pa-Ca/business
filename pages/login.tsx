@@ -105,6 +105,8 @@ export default function Login() {
     const branchList = branchesResponse.data!.branches.filter(
       (branch) => !branch.deleted
     );
+    // Sort branches by name
+    branchList.sort((a, b) => a.name.localeCompare(b.name));
     const branchIndex = branchList.length > 0 ? 0 : -1;
 
     dispatch(
