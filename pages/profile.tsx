@@ -593,7 +593,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       <BusinessProfile
         header={header}
         // [TODO] Fix main business image
-        mainImage="https://i.pinimg.com/originals/55/00/d3/5500d308acf37ec5c31cc2e5c7785921.jpg"
+        mainImage=""
         profilePicture={profilePictureUrl}
         onCreateBranch={onCreateBranch}
         // [TODO]
