@@ -87,7 +87,7 @@ type ReservationDTO = {
 export const toReservationProps = (
   reservation: ReservationDTO
 ): ReservationProps => {
-  function hourFormat(hour: string)  {
+  function hourMinFormat(hour: string)  {
     if(hour === "" || hour === null){
       return "";
     }else{
@@ -98,11 +98,24 @@ export const toReservationProps = (
       });
     }
   }
-
+  function yearMonthDayFormat(hour: string)  {
+    if(hour === "" || hour === null){
+      return "";
+    }else{
+      const date = new Date(hour);
+      return date.toLocaleTimeString([], {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+    }
+  }
+  console.log(reservation.reservationDateIn);
   const result = {
     id: reservation.id,
-    start: hourFormat(reservation.reservationDateIn),
-    end: hourFormat(reservation.reservationDateOut),
+    start: hourMinFormat(reservation.reservationDateIn),
+    end: hourMinFormat(reservation.reservationDateOut),
+    requestDate: yearMonthDayFormat(reservation.requestDate),
     date: reservation.reservationDateIn,
     owner: reservation.name + " " + reservation.surname,
     ownerEmail: reservation.email,
