@@ -2,26 +2,26 @@ import { API_ENDPOINT } from "../../config";
 import {
   FetchResponse, 
   ExceptionResponse,
-  ReservationDTO,
+  ReservationInfoDTO,
 } from "objects";
 
 type ReservationsResponse = {
     /**
      * List of reservations with started status
      */
-    startedReservations: ReservationDTO[];
+    startedReservations: ReservationInfoDTO[];
     /**
      * List of reservations with started status
      */
-    acceptedReservations: ReservationDTO[];
+    acceptedReservations: ReservationInfoDTO[];
     /**
      * List of reservations with accepted status
      */
-    pendingReservations: ReservationDTO[];
+    pendingReservations: ReservationInfoDTO[];
     /**
      * List of reservations with final status (rejected, retired, closed)
      */
-    historicReservations: ReservationDTO[];
+    historicReservations: ReservationInfoDTO[];
     /**
      * Current page of historic
      */
@@ -62,7 +62,7 @@ export default async (
   identityDocument: string | null = null,
   status: string[] | null = null,
 ): Promise<FetchResponse<ReservationsResponse>> => {
-  let uri = `${API_ENDPOINT}/branch/${id}/reservations?page=${pageIndex}&size=${pageSize}`;
+  let uri = `${API_ENDPOINT}/branch/${id}/reservation?page=${pageIndex}&size=${pageSize}`;
 
   if (!!startTime) {
     uri = uri.concat(`&startTime=${startTime.toISOString()}`);

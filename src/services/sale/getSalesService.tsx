@@ -5,11 +5,15 @@ import {
   FetchResponse,
   SaleProductDTO,
   ExceptionResponse,
+  TableDTO,
 } from "objects";
 
 type SaleInfo = {
   sale: SaleDTO;
+  insite: boolean;
+  reservationId: number;
   taxes: TaxDTO[];
+  tables: TableDTO[];
   products: SaleProductDTO[];
 };
 

@@ -13,7 +13,7 @@ export default async (
   id: number,
   token: string
 ): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/close/${id}`;
+  const uri = `${API_ENDPOINT}/reservation/${id}/close`;
 
   try {
     const response = await fetch(uri, {

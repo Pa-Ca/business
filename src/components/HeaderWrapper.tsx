@@ -5,10 +5,11 @@ import type { AppProps } from "next/app";
 import fetch from "../services/fetchAPI";
 import { useDispatch } from "react-redux";
 import getProducts from "../utils/getProducts";
+import { setSpinner } from "context/slices/app";
 import { useAppSelector } from "../context/store";
 import { setToken } from "../context/slices/auth";
 import FetchResponse from "../objects/FetchResponse";
-import defaultUserImage from "../../public/images/user.jpeg"
+import defaultUserImage from "../../public/images/user.jpeg";
 import { setCurrentBranch } from "../context/slices/branches";
 import getProfilePictureUrl from "../utils/getProfilePictureUrl";
 
@@ -34,15 +35,30 @@ export default function HeaderWrapper({
   const business = useAppSelector((state) => state.business);
   const branches = useAppSelector((state) => state.branches).branches;
   const branchIndex = useAppSelector((state) => state.branches).current;
-  const [profilePictureUrl, setProfilePictureUrl] = useState(defaultUserImage.src);
-
-  const branch = branches[branchIndex];
+  const [profilePictureUrl, setProfilePictureUrl] = useState(
+    defaultUserImage.src
+  );
+  const branchInfo = branches[branchIndex];
 
   useEffect(() => {
+    if (!business.id) return;
+
     getProfilePictureUrl(business.id).then((url) => setProfilePictureUrl(url));
   }, []);
 
   useEffect(() => {
+    if (!auth.token) {
+      setHeader({
+        logged: false,
+        onLoginClick: () => router.push("/login"),
+        onRegisterClick: () => router.push("/signup"),
+      });
+
+      return;
+    }
+
+    const branch = branchInfo?.branch;
+
     setHeader({
       picture: profilePictureUrl,
       name: business.name!,
@@ -59,13 +75,13 @@ export default function HeaderWrapper({
       userRole: "business",
       logged: true,
       currentBranch: !!branch ? `${branch.name!} | ${branch.location}` : "",
-      branchOptions: branches.map((branch, index) => {
+      branchOptions: branches.map((b, index) => {
         return {
-          name: `${branch.name!} | ${branch.location}`,
+          name: `${b.branch.name!} | ${b.branch.location}`,
           func: async () => {
             dispatch(setCurrentBranch(index));
             await getProducts(
-              branch.id,
+              b.branch.id,
               auth.token!,
               auth.refresh!,
               router,
@@ -93,7 +109,8 @@ export default function HeaderWrapper({
   const fetchAPI = async function <T>(
     service: (token: string) => Promise<FetchResponse<T>>
   ): Promise<FetchResponse<T | string>> {
-    return await fetch(
+    dispatch(setSpinner(true));
+    const response = await fetch(
       auth.token!,
       auth.refresh!,
       router,
@@ -101,11 +118,10 @@ export default function HeaderWrapper({
       (token: string) => dispatch(setToken(token)),
       service
     );
+    dispatch(setSpinner(false));
+
+    return response;
   };
 
-  if (profilePictureUrl) {
-    return <Component header={header} fetchAPI={fetchAPI} {...pageProps} />;
-  } else {
-    return <>Loading...</>;
-  }
+  return <Component header={header} fetchAPI={fetchAPI} {...pageProps} />;
 }

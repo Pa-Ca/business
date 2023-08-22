@@ -21,12 +21,12 @@ import googleSignUpBusinessService from "./googleAuth/googleSignUpBusinessServic
 // Branch
 import getTablesService from "./branch/getTablesService";
 import getBranchesService from "./branch/getBranchesService";
-import getBranchReservations from "./branch/getBranchReservations";
 import createTableService from "./branch/createTableService";
 import deleteTableService from "./branch/deleteTableService";
 import updateTableService from "./branch/updateTableService";
 import createBranchService from "./branch/createBranchService";
 import updateBranchService from "./branch/updateBranchService";
+import getBranchReservations from "./branch/getBranchReservations";
 import createDefaultTaxService from "./branch/createDefaultTaxService";
 import updateDefaultTaxService from "./branch/updateDefaultTaxService";
 import deleteDefaultTaxService from "./branch/deleteDefaultTaxService";
@@ -48,9 +48,7 @@ import deleteProductSubCategoryService from "./productSubCategory/deleteProductS
 import updateProductSubCategoryService from "./productSubCategory/updateProductSubCategoryService";
 
 // Reservation
-import getReservationService from "./reservation/getReservationService";
 import postReservationService from "./reservation/postReservationService";
-import getReservationsService from "./reservation/getReservationsService";
 import closeReservationService from "./reservation/closeReservationService";
 import startReservationService from "./reservation/startReservationService";
 import acceptReservationService from "./reservation/acceptReservationService";
@@ -69,12 +67,12 @@ import S3DownloadService from "./s3/S3DownloadService";
 // Sale
 import getSalesService from "./sale/getSalesService";
 import clearSaleService from "./sale/clearSaleService";
-import createTaxService from "./sale/createTaxService";
 import deleteTaxService from "./sale/deleteTaxService";
 import updateTaxService from "./sale/updateTaxService";
 import createSaleService from "./sale/createSaleService";
 import updateSaleService from "./sale/updateSaleService";
 import deleteSaleService from "./sale/deleteSaleService";
+import createSaleTaxService from "./sale/createSaleTaxService";
 import createSaleProductService from "./sale/createSaleProductService";
 import updateSaleProductService from "./sale/updateSaleProductService";
 import deleteSaleProductService from "./sale/deleteSaleProductService";
@@ -121,9 +119,7 @@ export {
   deleteProductSubCategoryService,
   updateProductSubCategoryService,
   // Reservation
-  getReservationService,
   postReservationService,
-  getReservationsService,
   closeReservationService,
   startReservationService,
   acceptReservationService,
@@ -139,12 +135,12 @@ export {
   // Sale
   getSalesService,
   clearSaleService,
-  createTaxService,
   deleteTaxService,
   updateTaxService,
   createSaleService,
   updateSaleService,
   deleteSaleService,
+  createSaleTaxService,
   createSaleProductService,
   updateSaleProductService,
   deleteSaleProductService,

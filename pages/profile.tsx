@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
@@ -11,7 +11,6 @@ import {
   formatTime,
   validateName,
   validatePhone,
-  getProfilePictureUrl,
 } from "utils";
 import {
   setName,
@@ -55,7 +54,6 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   const { data: session } = useSession();
   const branches = useAppSelector((state) => state.branches).branches;
   const branchIndex = useAppSelector((state) => state.branches).current;
-  const branch = branches[branchIndex];
 
   // Business data
   const password = useInputForm("");
@@ -65,46 +63,78 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   const name = useInputForm(business.name!);
   const [emailSent, setEmailSent] = useState(false);
   const phoneNumber = useInputForm(business.phoneNumber!);
-  const [profilePictureUrl, setProfilePictureUrl] = useState("");
 
   // Current branch data
-  const branchName = useInputForm(branch?.name!);
-  const branchType = useInputForm<OptionObject<string | null>>({
-    label: branch?.type!,
-    value: branch?.type!,
-  });
-  const branchLocation = useInputForm<OptionObject<string | null>>({
-    label: branch?.location!,
-    value: branch?.location!,
-  });
-  const branchPhone = useInputForm(branch?.phoneNumber!);
-  const branchDescription = useInputForm(branch?.overview!);
-  const branchMapsLink = useInputForm(branch?.mapsLink!);
-  const branchCapacity = useInputForm(`${branch?.capacity}`);
-  const branchPrice = useInputForm(`${branch?.reservationPrice}`);
+  const emptyOption = { label: "", value: null };
+  const branchName = useInputForm("");
+  const branchPrice = useInputForm("");
+  const branchPhone = useInputForm("");
+  const branchMapsLink = useInputForm("");
+  const branchCapacity = useInputForm("");
+  const branchDescription = useInputForm("");
+  const branchOpeningTimeHour = useInputForm("");
+  const branchClosingTimeHour = useInputForm("");
+  const branchOpeningTimeMinute = useInputForm("");
+  const branchClosingTimeMinute = useInputForm("");
+  const branchAverageReserveTimeHours = useInputForm("");
+  const branchAverageReserveTimeMinutes = useInputForm("");
+  const branchType = useInputForm<OptionObject<string | null>>(emptyOption);
+  const branchLocation = useInputForm<OptionObject<string | null>>(emptyOption);
 
-  const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
-  const currentOpeningTime = moment(branch?.hourIn, "HH:mm:ss");
-  const currentClosingTime = moment(branch?.hourOut, "HH:mm:ss");
-  const currentOpeningHour = branch?.hourIn.split(":")[0];
-  const currentClosingHour = branch?.hourOut.split(":")[0];
+  const branch = useMemo(() => {
+    console.log(branches, branchIndex)
+    if (branchIndex === -1) {
+      return undefined;
+    }
 
-  const branchAverageReserveTimeHours = useInputForm(
-    formatTime(currenAverageReserveTime.hours().toString())
-  );
-  const branchAverageReserveTimeMinutes = useInputForm(
-    formatTime(currenAverageReserveTime.minutes().toString())
-  );
-  const branchOpeningTimeHour = useInputForm(currentOpeningHour);
-  const branchOpeningTimeMinute = useInputForm(
-    formatTime(currentOpeningTime.minutes().toString())
-  );
-  const branchClosingTimeHour = useInputForm(currentClosingHour);
-  const branchClosingTimeMinute = useInputForm(
-    formatTime(currentClosingTime.minutes().toString())
-  );
+    const branch = branches[branchIndex].branch;
+
+    branchName.setValue(branch.name);
+    branchPhone.setValue(branch.phoneNumber);
+    branchMapsLink.setValue(branch.mapsLink);
+    branchDescription.setValue(branch.overview);
+    branchCapacity.setValue(`${branch.capacity}`);
+    branchPrice.setValue(`${branch.reservationPrice}`);
+    branchType.setValue({ label: branch.type, value: branch.type });
+    branchLocation.setValue({ label: branch.location, value: branch.location });
+
+    const openingHour = branch.hourIn.split(":")[0];
+    const closingHour = branch.hourOut.split(":")[0];
+    const openingTime = moment(branch.hourIn, "HH:mm:ss");
+    const closingTime = moment(branch.hourOut, "HH:mm:ss");
+    const averageReserveTime = moment.duration(branch.averageReserveTime);
+
+    branchOpeningTimeHour.setValue(openingHour);
+    branchClosingTimeHour.setValue(closingHour);
+    branchOpeningTimeMinute.setValue(
+      formatTime(openingTime.minutes().toString())
+    );
+    branchClosingTimeMinute.setValue(
+      formatTime(closingTime.minutes().toString())
+    );
+    branchAverageReserveTimeHours.setValue(
+      formatTime(averageReserveTime.hours().toString())
+    );
+    branchAverageReserveTimeMinutes.setValue(
+      formatTime(averageReserveTime.minutes().toString())
+    );
+
+    return branch;
+  }, [branchIndex, branches]);
+
+  const defaultTaxes = useMemo(() => {
+    if (!branch) {
+      return undefined;
+    }
+
+    return branches[branchIndex].defaultTaxes;
+  }, [branchIndex, branches]);
 
   const getUpdatedBranch = (): BranchDTO => {
+    if (!branch) {
+      return {} as BranchDTO;
+    }
+  
     const hourIn =
       branchOpeningTimeHour.value === "24"
         ? "23:59:59"
@@ -119,13 +149,13 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     const dto: BranchDTO = {
       id: branch.id,
       businessId: branch.businessId,
-      location: branchLocation.value.value!,
-      mapsLink: branchMapsLink.value,
       name: branchName.value,
-      overview: branchDescription.value,
-      phoneNumber: branchPhone.value,
       type: branchType.value.value!,
       score: branch.score,
+      location: branchLocation.value.value!,
+      mapsLink: branchMapsLink.value,
+      overview: branchDescription.value,
+      phoneNumber: branchPhone.value,
       capacity: parseInt(branchCapacity.value),
       reservationPrice: parseFloat(branchPrice.value),
       reserveOff: branch.reserveOff,
@@ -133,9 +163,8 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       visibility: branch.visibility,
       hourIn: hourIn as LocalTime,
       hourOut: hourOut as LocalTime,
+      dollarExchange: branch.dollarExchange,
       deleted: false,
-      dollarToLocalCurrencyExchange: branch.dollarToLocalCurrencyExchange,
-      defaultTaxes: branch.defaultTaxes,
     };
     return dto;
   };
@@ -170,12 +199,12 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   };
 
   const onProfileUploadImage = async (file: File) => {
-    const res = await S3UploadService(
+    const response = await S3UploadService(
       file,
       `business-${business.id}-profile.jpeg`
     );
 
-    if (!res.data || res.isError) return;
+    if (!response.data || response.isError) return;
   };
 
   const saveNewPassword = async () => {
@@ -249,8 +278,12 @@ export default function Profile({ header, fetchAPI }: PageProps) {
           ...branches.slice(branchIndex + 1, branches.length),
         ];
         dispatch(setBranches(branchList));
+
         if (branchList.length > 0) {
           dispatch(setCurrentBranch(0));
+        }
+        else {
+          dispatch(setCurrentBranch(-1));
         }
         router.reload();
       }
@@ -305,9 +338,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     // Verify that the average reserve time hours is valid
     if (averageReserveTimeHours.value === "") {
       averageReserveTimeHours.setCode(4);
-      averageReserveTimeHours.setMessage(
-        "Debe ingresar la cantidad de horas."
-      );
+      averageReserveTimeHours.setMessage("Debe ingresar la cantidad de horas.");
       error = true;
     }
 
@@ -344,9 +375,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     // Verify that the opening time minute is valid
     if (openingTimeMinute.value === "") {
       openingTimeMinute.setCode(4);
-      openingTimeMinute.setMessage(
-        "Debe ingresar los minutos de apertura."
-      );
+      openingTimeMinute.setMessage("Debe ingresar los minutos de apertura.");
       error = true;
     }
 
@@ -420,8 +449,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       hourIn,
       hourOut,
       deleted: false,
-      dollarToLocalCurrencyExchange: 1,
-      defaultTaxes: [],
+      dollarExchange: 1,
     };
 
     const response = await fetchAPI((token: string) =>
@@ -445,7 +473,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       }
 
       const branchList = branchesResponse.data!.branches.filter(
-        (branch) => !branch.deleted
+        (branch) => !branch.branch.deleted
       );
       dispatch(setBranches(branchList));
       dispatch(setCurrentBranch(branchList.length - 1));
@@ -455,6 +483,10 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   };
 
   const onCreateDefaultTax = async () => {
+    if (!branch || !defaultTaxes) {
+      return;
+    }
+
     const response = await fetchAPI((token: string) =>
       createDefaultTaxService(
         {
@@ -471,12 +503,12 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     if (response.isError || typeof response.data === "string") {
     } else {
       const newTax = response.data!;
-      const newTaxes = [...branch.defaultTaxes, newTax];
+      const newTaxes = [...defaultTaxes, newTax];
 
       dispatch(
         setBranches(
           branches.map((b) => {
-            if (b.id === branch.id) {
+            if (b.branch.id === branch.id) {
               return {
                 ...b,
                 defaultTaxes: newTaxes,
@@ -490,14 +522,8 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     }
   };
 
-  useEffect(() => {
-    getProfilePictureUrl(business.id).then((url) => {
-      setProfilePictureUrl(url);
-    });
-  }, []);
-
   const taxes: TaxObject[] = useMemo(() => {
-    if (!branch) {
+    if (!branch || !defaultTaxes) {
       return [];
     }
 
@@ -523,7 +549,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       } else {
         // Update branch taxes
         const newTax = response.data!;
-        const newTaxes = branch.defaultTaxes.map((tax) => {
+        const newTaxes = defaultTaxes.map((tax) => {
           if (tax.id === newTax.id) {
             return newTax;
           }
@@ -533,7 +559,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         dispatch(
           setBranches(
             branches.map((b) => {
-              if (b.id === branch.id) {
+              if (b.branch.id === branch.id) {
                 return {
                   ...b,
                   defaultTaxes: newTaxes,
@@ -557,11 +583,11 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       }
 
       // Update branch taxes
-      const newTaxes = branch.defaultTaxes.filter((tax) => tax.id !== id);
+      const newTaxes = defaultTaxes.filter((tax) => tax.id !== id);
       dispatch(
         setBranches(
           branches.map((b) => {
-            if (b.id === branch.id) {
+            if (b.branch.id === branch.id) {
               return {
                 ...b,
                 defaultTaxes: newTaxes,
@@ -574,7 +600,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       );
     };
 
-    return branch.defaultTaxes.map((tax) => {
+    return defaultTaxes.map((tax) => {
       return {
         ...tax,
         saveValueFunction: (
@@ -585,66 +611,63 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         deleteValueFunction: () => deleteTax(tax.id),
       };
     });
-  }, [branch?.defaultTaxes]);
+  }, [defaultTaxes]);
 
   return (
-    !!auth.logged &&
-    profilePictureUrl && (
-      <BusinessProfile
-        header={header}
-        // [TODO] Fix main business image
-        mainImage=""
-        profilePicture={profilePictureUrl}
-        onCreateBranch={onCreateBranch}
-        // [TODO]
-        onPictureClick={() => {}}
-        // Business data
-        name={name}
-        email={email}
-        phoneNumber={phoneNumber}
-        password={password}
-        newPassword={newPassword}
-        emailSent={emailSent}
-        done={done}
-        onSaveName={saveName}
-        onSavePhoneNumber={savePhoneNumber}
-        onChangePassword={saveNewPassword}
-        onForgotPassword={onForgotClick}
-        haveBranch={branch !== undefined}
-        branchName={branchName}
-        branchDescription={branchDescription}
-        branchLocation={branchLocation}
-        branchPhone={branchPhone}
-        branchCapacity={branchCapacity}
-        branchAverageReserveTimeHours={branchAverageReserveTimeHours}
-        branchAverageReserveTimeMinutes={branchAverageReserveTimeMinutes}
-        branchPrice={branchPrice}
-        branchMapsLink={branchMapsLink}
-        branchType={branchType}
-        branchOpeningTimeHour={branchOpeningTimeHour}
-        branchOpeningTimeMinute={branchOpeningTimeMinute}
-        branchClosingTimeHour={branchClosingTimeHour}
-        branchClosingTimeMinute={branchClosingTimeMinute}
-        branchTypeOptions={cousines}
-        branchLocationOptions={locations}
-        mapsApiKey={GOOGLE_MAPS_API_KEY || ""}
-        taxes={taxes}
-        onSaveBranchName={() => updateBranch()}
-        onSaveBranchDescription={() => updateBranch()}
-        onSaveBranchLocation={() => updateBranch()}
-        onSaveBranchPhone={() => updateBranch()}
-        onSaveBranchCapacity={() => updateBranch()}
-        onSaveBranchAverageReserveTime={() => updateBranch()}
-        onSaveBranchPrice={() => updateBranch()}
-        onSaveBranchType={() => updateBranch()}
-        onSaveBranchMapsLink={() => updateBranch()}
-        onSaveBranchClosingTime={() => updateBranch()}
-        onSaveBranchOpeningTime={() => updateBranch()}
-        onDeleteBranch={() => updateBranch(true)}
-        onSaveProfilePicture={() => {}} // [TODO]
-        uploadProfilePicture={onProfileUploadImage}
-        onAddTax={onCreateDefaultTax}
-      />
-    )
+    <BusinessProfile
+      header={header}
+      // [TODO] Fix main business image
+      mainImage=""
+      profilePicture={header.picture!}
+      onCreateBranch={onCreateBranch}
+      // [TODO]
+      onPictureClick={() => {}}
+      // Business data
+      name={name}
+      email={email}
+      phoneNumber={phoneNumber}
+      password={password}
+      newPassword={newPassword}
+      emailSent={emailSent}
+      done={done}
+      onSaveName={saveName}
+      onSavePhoneNumber={savePhoneNumber}
+      onChangePassword={saveNewPassword}
+      onForgotPassword={onForgotClick}
+      haveBranch={branch !== undefined}
+      branchName={branchName}
+      branchDescription={branchDescription}
+      branchLocation={branchLocation}
+      branchPhone={branchPhone}
+      branchCapacity={branchCapacity}
+      branchAverageReserveTimeHours={branchAverageReserveTimeHours}
+      branchAverageReserveTimeMinutes={branchAverageReserveTimeMinutes}
+      branchPrice={branchPrice}
+      branchMapsLink={branchMapsLink}
+      branchType={branchType}
+      branchOpeningTimeHour={branchOpeningTimeHour}
+      branchOpeningTimeMinute={branchOpeningTimeMinute}
+      branchClosingTimeHour={branchClosingTimeHour}
+      branchClosingTimeMinute={branchClosingTimeMinute}
+      branchTypeOptions={cousines}
+      branchLocationOptions={locations}
+      mapsApiKey={GOOGLE_MAPS_API_KEY || ""}
+      taxes={taxes}
+      onSaveBranchName={() => updateBranch()}
+      onSaveBranchDescription={() => updateBranch()}
+      onSaveBranchLocation={() => updateBranch()}
+      onSaveBranchPhone={() => updateBranch()}
+      onSaveBranchCapacity={() => updateBranch()}
+      onSaveBranchAverageReserveTime={() => updateBranch()}
+      onSaveBranchPrice={() => updateBranch()}
+      onSaveBranchType={() => updateBranch()}
+      onSaveBranchMapsLink={() => updateBranch()}
+      onSaveBranchClosingTime={() => updateBranch()}
+      onSaveBranchOpeningTime={() => updateBranch()}
+      onDeleteBranch={() => updateBranch(true)}
+      onSaveProfilePicture={() => {}}
+      uploadProfilePicture={onProfileUploadImage}
+      onAddTax={onCreateDefaultTax}
+    />
   );
 }

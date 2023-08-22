@@ -1,5 +1,5 @@
 import { API_ENDPOINT } from "../../config";
-import GuestDTO from "../../objects/reservation/GuestDTO";
+import { GuestInfoDTO } from "objects";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
 
@@ -14,7 +14,7 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
 export default async (
     identityDocument: string,
     token: string
-): Promise<FetchResponse<GuestDTO>> => {
+): Promise<FetchResponse<GuestInfoDTO>> => {
   const uri = `${API_ENDPOINT}/guest/identity-document/${identityDocument}`;
 
   try {
@@ -27,7 +27,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: GuestDTO = await response.json();
+      const data: GuestInfoDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

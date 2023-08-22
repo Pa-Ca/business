@@ -10,7 +10,7 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
  * @returns API response
  */
 export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/retire/${id}`;
+  const uri = `${API_ENDPOINT}/reservation/${id}/retire`;
 
   try {
     const response = await fetch(uri, {

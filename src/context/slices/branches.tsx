@@ -1,11 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import BranchDTO from "../../objects/branch/BranchDTO";
+import BranchInfoDTO from "../../objects/branch/BranchInfoDTO";
 
 interface BranchesProps {
   /**
    * List of business branches
    */
-  branches: BranchDTO[];
+  branches: BranchInfoDTO[];
   /**
    * Branch you are currently focusing on
    */
@@ -25,7 +25,7 @@ const branches = createSlice({
       state.branches = [];
       state.current = -1;
     },
-    setBranches: (state: BranchesProps, action: PayloadAction<BranchDTO[]>) => {
+    setBranches: (state: BranchesProps, action: PayloadAction<BranchInfoDTO[]>) => {
       state.branches = action.payload;
     },
     setCurrentBranch: (state: BranchesProps, action: PayloadAction<number>) => {

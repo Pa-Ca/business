@@ -16,15 +16,15 @@ import {
   getSalesService,
   deleteTaxService,
   updateTaxService,
-  createTaxService,
+  getTablesService,
   clearSaleService,
   createSaleService,
   updateSaleService,
   deleteSaleService,
-  getTablesService,
   createTableService,
   updateTableService,
   deleteTableService,
+  createSaleTaxService,
   createSaleProductService,
   updateSaleProductService,
   deleteSaleProductService,
@@ -38,7 +38,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   const branches = useAppSelector((state) => state.branches).branches;
   const products_ = useAppSelector((state) => state.products.products);
   const branchIndex = useAppSelector((state) => state.branches).current;
-  const branch = branches[branchIndex];
+  const branchInfo = branches[branchIndex];
 
   // Sales data
   const [ongoingSales, setOngoingSales] = useState<SaleDTO[]>([]);
@@ -121,6 +121,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
   const currentSale = useMemo(() => {
     const sale = ongoingSales.find((s) => s.tableId === table.value?.id);
+    console.log(sale);
     return sale;
   }, [ongoingSales, table.value?.id]);
 
@@ -283,12 +284,14 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
   const onAddTax = async () => {
     const response = await fetchAPI((token: string) =>
-      createTaxService(
+      createSaleTaxService(
         {
-          name: `Tarifa ${taxes.length + 1}`,
-          type: TaxType["%"],
-          value: 0,
           saleId: currentSale!.id,
+          tax: {
+            name: `Tarifa ${taxes.length + 1}`,
+            type: TaxType["%"],
+            value: 0,
+          },
         },
         token
       )
@@ -317,12 +320,14 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   };
 
   const onCreateTable = async (name: InputFormHook<string>) => {
+    if (!branchInfo) return false;
+    const branch = branchInfo.branch;
+
     const response = await fetchAPI((token: string) =>
       createTableService(
         {
           name: name.value,
           branchId: branch.id,
-          deleted: false,
         },
         token
       )
@@ -361,13 +366,15 @@ export default function Sales({ header, fetchAPI }: PageProps) {
   };
 
   const onEditTable = async (name: InputFormHook<string>) => {
+    if (!branchInfo) return false;
+    const branch = branchInfo.branch;
+
     const response = await fetchAPI((token: string) =>
       updateTableService(
         {
           id: table.value!.id,
           name: name.value,
           branchId: branch.id,
-          deleted: false,
         },
         token
       )
@@ -586,6 +593,15 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         : response.error?.message;
       alertService.error(`Error al guardar la nota: ${message}`);
     } else {
+      // Update sale
+      setOngoingSales((oldSales) => {
+        const newSales = [...oldSales];
+        const saleIndex = newSales.findIndex(
+          (sale) => sale.id === currentSale?.id
+        );
+        newSales[saleIndex].note = note;
+        return newSales;
+      });
     }
   };
 
@@ -619,6 +635,10 @@ export default function Sales({ header, fetchAPI }: PageProps) {
 
   // Get all tables
   useEffect(() => {
+    if (!branchInfo) return;
+
+    const branch = branchInfo.branch;
+
     const getTables = async () => {
       const response = await fetchAPI((token: string) =>
         getTablesService(branch.id, token)
@@ -642,24 +662,36 @@ export default function Sales({ header, fetchAPI }: PageProps) {
         // Sort tables by name
         tables.sort((a, b) => a.name.localeCompare(b.name));
         setAllTables(tables);
-        table.setValue(tables[0]);
+
+        if (table.value !== null) {
+          const tableIndex = tables.findIndex((t) => t.id === table.value!.id);
+          if (tableIndex === -1) {
+            table.setValue(tables[0]);
+          } else {
+            table.setValue(tables[tableIndex]);
+          }
+        } else {
+          table.setValue(tables[0]);
+        }
       }
     };
 
     getTables();
-  }, [ongoingSales]);
+  }, [ongoingSales, branchInfo]);
 
   // Get all sales
   useEffect(() => {
-    if (!applyFilter) return;
+    if (!applyFilter || !branchInfo) return;
+
     setApplyFilter(false);
+    const branch = branchInfo.branch;
 
     const getSales = async () => {
       const response = await fetchAPI((token: string) =>
         getSalesService(
           branch.id,
           token,
-          page-1,
+          page - 1,
           pastSalesNumber,
           startDate.value,
           endDate.value,
@@ -697,11 +729,12 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     };
 
     getSales();
-  }, [page, pastSalesNumber, applyFilter]);
+  }, [page, pastSalesNumber, applyFilter, branchInfo]);
 
   return (
     <BranchSales
       header={header}
+      haveBranch={branchInfo !== undefined}
       // Ongoing sale
       table={table.value}
       taxes={taxes}

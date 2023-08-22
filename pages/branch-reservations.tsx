@@ -1,7 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useAppSelector } from "context";
-import { PageProps, ReservationDTO, toReservationProps } from "objects";
+import {
+  PageProps,
+  GuestDTO,
+  ReservationDTO,
+  ReservationInfoDTO,
+  toReservationProps,
+  InvoiceDTO,
+  ClientDTO,
+} from "objects";
 import {
   useInputForm,
   OptionObject,
@@ -31,61 +39,62 @@ import {
 
 export default function BranchReservations({ header, fetchAPI }: PageProps) {
   const branches = useAppSelector((state) => state.branches).branches;
-  const branch = branches[useAppSelector((state) => state.branches).current];
+  const branchInfo =
+    branches[useAppSelector((state) => state.branches).current];
 
   const [applyFilter, setApplyFilter] = useState<boolean>(true);
 
   const [page, setPage] = useState<number>(1);
+  const [showModal, setshowModal] = useState(false);
   const [totalPages, setTotalPages] = useState<number>(1);
-  const [pastReservationsNumber, setPastReservationsNumber] = useState<number>(10);
-  const [totalHistoricElements,setTotalHistoricElements] = useState<number>(10);
+  const [totalHistoricElements, setTotalHistoricElements] = useState<number>(0);
+  const [pastReservationsNumber, setPastReservationsNumber] =
+    useState<number>(10);
+  const [pendingReservationList, setPendingReservationList] = useState<
+    ReservationProps[]
+  >([]);
+  const [startedReservationList, setStartedReservationList] = useState<
+    ReservationProps[]
+  >([]);
+  const [acceptedReservationList, setAcceptedReservationList] = useState<
+    ReservationProps[]
+  >([]);
+  const [historicReservationList, setHistoricReservationList] = useState<
+    ReservationProps[]
+  >([]);
 
-  const [pendingReservationList, setPendingReservationList] = useState<ReservationProps[]>(
-    []
-  );
-
-  const [startedReservationList, setStartedReservationList] = useState<ReservationProps[]>(
-    []
-  );
-
-  const [acceptedReservationList, setAcceptedReservationList] = useState<ReservationProps[]>(
-    []
-  );
-
-  const [historicReservationList, setHistoricReservationList] = useState<ReservationProps[]>(
-    []
-  );
-
-  const filterStartDate = useInputForm<Date|null>(null);
-  const filterEndDate = useInputForm<Date|null>(null);
+  // Filters
+  const filterFullName = useInputForm<string>("");
+  const filterEndDate = useInputForm<Date | null>(null);
+  const filterStartDate = useInputForm<Date | null>(null);
+  const filterIdentityDocument = useInputForm<string>("");
   const filterStatus = useInputForm<OptionObject<string | null>>({
     label: "",
     value: null,
   });
-  const filterStatusOptions: OptionObject<string>[] = [
-    {label: "Cerrada", value: "6"},
-    {label: "Retirada", value: "4"},
-    {label: "Rechazada", value: "2"},
-  ];
-  const filterIdentityDocument = useInputForm<string>("");
   const filterIdentityDocumentType = useInputForm<OptionObject<string | null>>({
     label: "",
     value: "",
   });
-  const filterIdentityDocumentTypeOpt: OptionObject<string>[] = [
-    {label: "V", value: "V"},
-    {label: "E", value: "E"},
-    {label: "J", value: "J"},
-    {label: "G", value: "G"},
-    {label: "P", value: "P"},
+  const filterStatusOptions: OptionObject<string>[] = [
+    { label: "Cerrada", value: "6" },
+    { label: "Retirada", value: "4" },
+    { label: "Rechazada", value: "2" },
   ];
-  const filterFullName = useInputForm<string>("");
-  
+  const filterIdentityDocumentTypeOpt: OptionObject<string>[] = [
+    { label: "V", value: "V" },
+    { label: "E", value: "E" },
+    { label: "J", value: "J" },
+    { label: "G", value: "G" },
+    { label: "P", value: "P" },
+  ];
+
   // Client data
+  const email = useInputForm<string>("");
   const firstName = useInputForm<string>("");
   const lastName = useInputForm<string>("");
   const phone = useInputForm<string>("");
-  const email = useInputForm<string>("");
+  const clientGuestId = useInputForm<number>(-1);
   const identityDocument = useInputForm<string>("");
   const identityDocumentType = useInputForm<OptionObject<string | null>>({
     value: "V",
@@ -106,18 +115,30 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     value: "",
     label: "",
   });
-  
-  const [validHoursIn, setValidHoursIn] = useState<OptionObject<string>[]>(
-    []
-  );
+  const [validHoursIn, setValidHoursIn] = useState<OptionObject<string>[]>([]);
   const [validHoursOut, setValidHoursOut] = useState<OptionObject<string>[]>(
     []
   );
 
-  const [showModal, setshowModal] = useState(false);
+  const averageReserveTime = useMemo(() => {
+    if (!branchInfo)
+      return {
+        hours: 0,
+        minutes: 0,
+      };
+
+    const branch = branchInfo.branch;
+    const currenAverageReserveTime = moment.duration(branch.averageReserveTime);
+    return {
+      hours: parseInt(formatTime(currenAverageReserveTime.hours().toString())),
+      minutes: parseInt(
+        formatTime(currenAverageReserveTime.minutes().toString())
+      ),
+    };
+  }, [branchInfo]);
 
   const addDatePlusHour = (date: Date, hour: string) => {
-    if (hour === ""){
+    if (hour === "") {
       return "";
     }
     const [hours, minutes, seconds] = hour.split(":").map(Number);
@@ -125,28 +146,41 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     return date.toISOString();
   };
 
-  const getUpdatedReservation = (): ReservationDTO => {
-    return {
-      id: 69,
+  const getUpdatedReservation = (): ReservationInfoDTO => {
+    if (!branchInfo) return {} as ReservationInfoDTO;
+
+    const branch = branchInfo.branch;
+
+    const reservation: ReservationDTO = {
+      id: -1,
       branchId: branch.id,
-      guestId: 69,
+      guestId: -1,
+      invoiceId: -1,
       requestDate: new Date().toISOString(),
       reservationDateIn: addDatePlusHour(date.value!, hourIn.value.value!),
       reservationDateOut: addDatePlusHour(date.value!, hourOut.value.value!),
-      clientNumber: parseInt(persons.value),
-      payment: "",
-      status: 1,
-      payDate: "",
       price: 0,
+      status: 1,
+      tableNumber: parseInt(tables.value),
+      clientNumber: parseInt(persons.value),
       occasion: occasion.value,
       byClient: false,
-      haveGuest: true,
+    };
+    const guest: GuestDTO = {
+      id: -1,
       name: firstName.value,
       surname: lastName.value,
       email: email.value,
       phoneNumber: phone.value,
-      identityDocument: identityDocumentType.value.value! + identityDocument.value,
-      tableNumber: parseInt(tables.value),
+      identityDocument:
+        identityDocumentType.value.value! + identityDocument.value,
+    };
+
+    return {
+      reservation,
+      guest,
+      invoice: null,
+      owner: null,
     };
   };
 
@@ -161,16 +195,17 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     persons.setCode(0);
     hourIn.setCode(0);
 
-
     // identity Document validation
-    const currentIdentityDocument = identityDocumentType.value.value! + identityDocument.value.trim();
+    const currentIdentityDocument =
+      identityDocumentType.value.value! + identityDocument.value.trim();
     const identityDocumentValidation = validateIdentityDocument(
-      identityDocumentType.value.value!, identityDocument.value.trim());
-    if (currentIdentityDocument !== identityDocumentChecked){
+      identityDocumentType.value.value!,
+      identityDocument.value.trim()
+    );
+    if (currentIdentityDocument !== identityDocumentChecked) {
       valid = false;
       identityDocument.setCode(4);
-      identityDocument.setMessage(
-        "Haga click en Obtener Usuario");
+      identityDocument.setMessage("Haga click en Obtener Usuario");
     }
 
     if (identityDocumentValidation.code !== 0) {
@@ -179,11 +214,13 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       switch (identityDocumentValidation.code) {
         case 1:
           identityDocument.setMessage(
-            "Introduzca un número de documento de identidad");
+            "Introduzca un número de documento de identidad"
+          );
           break;
         case 2:
           identityDocument.setMessage(
-            "Introduzca un documento de identidad con solo números");
+            "Introduzca un documento de identidad con solo números"
+          );
           break;
         default:
           identityDocument.setMessage("Documento inválido.");
@@ -312,20 +349,23 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   };
 
   const getGuest = async (identityDocument: string) => {
-    const response = await fetchAPI(
-      (token: string) => getGuestService(identityDocument, token)
+    const response = await fetchAPI((token: string) =>
+      getGuestService(identityDocument, token)
     );
-    
+
     if (!!response.isError || typeof response.data === "string") {
       if (!!response.exception) {
       }
-      return [];
+      return null;
     } else {
       return response.data!;
     }
   };
 
   const getReservationsFiltered = async () => {
+    if (!branchInfo) return;
+    const branch = branchInfo.branch;
+
     const response = await fetchAPI((token: string) =>
       getBranchReservations(
         branch.id,
@@ -335,22 +375,23 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
         filterStartDate.value,
         filterEndDate.value,
         filterFullName.value,
-        (filterIdentityDocumentType.value.value || "") + filterIdentityDocument.value,
-        filterStatus.value.value === null ? null : [filterStatus.value.value],
-      ));
+        (filterIdentityDocumentType.value.value || "") +
+          filterIdentityDocument.value,
+        filterStatus.value.value === null ? null : [filterStatus.value.value]
+      )
+    );
 
     if (response.isError || typeof response.data === "string") {
       const message = !!response.exception
         ? response.exception.message
         : response.error?.message;
-      alertService.error(`Error al obtener las ventas: ${message}`);
+      alertService.error(`Error al obtener las reservas: ${message}`);
     } else {
-
       const rejectReservation = async (id: number) => {
-        const response = await fetchAPI(
-          (token: string) => rejectReservationService(id, token)
+        const response = await fetchAPI((token: string) =>
+          rejectReservationService(id, token)
         );
-    
+
         if (!!response.isError || typeof response.data === "string") {
           if (!!response.exception) {
           }
@@ -364,7 +405,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
         const response = await fetchAPI((token: string) =>
           acceptReservationService(id, token)
         );
-    
+
         if (!!response.isError) {
           const message = !!response.exception
             ? response.exception.message
@@ -375,12 +416,12 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           getReservationsFiltered();
         }
       };
-    
+
       const retireReservation = async (id: number) => {
-        const response = await fetchAPI(
-          (token: string) => retireReservationService(id, token)
+        const response = await fetchAPI((token: string) =>
+          retireReservationService(id, token)
         );
-    
+
         if (!!response.isError || typeof response.data === "string") {
           const message = !!response.exception
             ? response.exception.message
@@ -391,12 +432,12 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           getReservationsFiltered();
         }
       };
-    
+
       const startReservation = async (id: number) => {
-        const response = await fetchAPI(
-          (token: string) => startReservationService(id, token)
+        const response = await fetchAPI((token: string) =>
+          startReservationService(id, token)
         );
-    
+
         if (!!response.isError || typeof response.data === "string") {
           const message = !!response.exception
             ? response.exception.message
@@ -407,12 +448,12 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           getReservationsFiltered();
         }
       };
-    
+
       const closeReservation = async (id: number) => {
         const response = await fetchAPI((token: string) =>
           closeReservationService(id, token)
         );
-    
+
         if (!!response.isError || typeof response.data === "string") {
           const message = !!response.exception
             ? response.exception.message
@@ -423,31 +464,42 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
           getReservationsFiltered();
         }
       };
-      const pending = response.data?.pendingReservations!.map((reservationInfo) => {
-        return {
+
+      const pending = response.data?.pendingReservations!.map(
+        (reservationInfo) => {
+          return {
             ...toReservationProps(reservationInfo),
-            onReject: () => rejectReservation(reservationInfo.id),
-            onAccept: () => acceptReservation(reservationInfo.id),
-        };
-      });
-      const accepted = response.data?.acceptedReservations!.map((reservationInfo) => {
-        return {
+            onReject: () => rejectReservation(reservationInfo.reservation.id),
+            onAccept: () => acceptReservation(reservationInfo.reservation.id),
+          };
+        }
+      );
+      const accepted = response.data?.acceptedReservations!.map(
+        (reservationInfo) => {
+          return {
             ...toReservationProps(reservationInfo),
-            onRetire: () => retireReservation(reservationInfo.id),
-            onStart: () => startReservation(reservationInfo.id),
-        };
-      });
-      const started = response.data?.startedReservations!.map((reservationInfo) => {
-        return {
+            onRetire: () => retireReservation(reservationInfo.reservation.id),
+            onStart: () => startReservation(reservationInfo.reservation.id),
+          };
+        }
+      );
+      const started = response.data?.startedReservations!.map(
+        (reservationInfo) => {
+          return {
             ...toReservationProps(reservationInfo),
-            onCloseReservation: () => closeReservation(reservationInfo.id),
-        };
-      });
-      const historic = response.data?.historicReservations!.map((reservationInfo) => {
-        return {
+            onCloseReservation: () =>
+              closeReservation(reservationInfo.reservation.id),
+          };
+        }
+      );
+      const historic = response.data?.historicReservations!.map(
+        (reservationInfo) => {
+          return {
             ...toReservationProps(reservationInfo),
-        };
-      });
+          };
+        }
+      );
+
       setPendingReservationList(pending!.reverse());
       setAcceptedReservationList(accepted!.reverse());
       setStartedReservationList(started!.reverse());
@@ -465,15 +517,17 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       const message = !!response.exception
         ? response.exception.message
         : response.error?.message;
-      alertService.error(`Error creando la reserva: ${message}`, {autoClose: false});
+      alertService.error(`Error creando la reserva: ${message}`, {
+        autoClose: false,
+      });
     } else {
       getReservationsFiltered();
-    };
+    }
   };
 
   const cancelReservation = async (id: number) => {
-    const response = await fetchAPI(
-      (token: string) => cancelReservationService(id, token)
+    const response = await fetchAPI((token: string) =>
+      cancelReservationService(id, token)
     );
 
     if (!!response.isError || typeof response.data === "string") {
@@ -483,25 +537,29 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     }
   };
 
-  const onGetGuest = () => {
-    const getGuest_ = async () => {
-      const currentIdentityDocument = identityDocumentType.value.value! + identityDocument.value.trim();
-      const aux = (await getGuest(currentIdentityDocument));
-      setIdentityDocumentChecked(currentIdentityDocument);
-      if (Array.isArray(aux)) {
-          identityDocument.setCode(3);
-          identityDocument.setMessage("Usuario no encontrado en la base de datos, complete los datos");        
-        }
-        else{
-          firstName.setValue(aux.name);
-          lastName.setValue(aux.surname);
-          email.setValue(aux.email);
-          phone.setValue(aux.phoneNumber);
-          identityDocument.setCode(1);
-          identityDocument.setMessage("Usuario obtenido exitosamente");
-      }
-    };
-    getGuest_();
+  const onGetGuest = async () => {
+    const currentIdentityDocument =
+      identityDocumentType.value.value! + identityDocument.value.trim();
+    const guestInfo = await getGuest(currentIdentityDocument);
+
+    setIdentityDocumentChecked(currentIdentityDocument);
+
+    if (!guestInfo) {
+      identityDocument.setCode(3);
+      identityDocument.setMessage(
+        "Usuario no encontrado en la base de datos, complete los datos"
+      );
+    } else {
+      const guest = guestInfo.guest;
+
+      email.setValue(guest.email);
+      firstName.setValue(guest.name);
+      lastName.setValue(guest.surname);
+      phone.setValue(guest.phoneNumber);
+      clientGuestId.setValue(guestInfo.clientGuestId);
+      identityDocument.setCode(1);
+      identityDocument.setMessage("Usuario obtenido exitosamente");
+    }
   };
 
   const onSubmit = () => {
@@ -535,7 +593,9 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
   };
 
   useEffect(() => {
-    if (!branch) return;
+    if (!branchInfo) return;
+
+    const branch = branchInfo.branch;
     const validHoursIn_ = generateValidHours(branch.hourIn, branch.hourOut).map(
       (x) => {
         return { value: x, label: x };
@@ -546,10 +606,13 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
 
     setValidHoursIn(validHoursIn_);
     setValidHoursOut(validHoursOut_);
-  }, []);
+  }, [branchInfo]);
 
   useEffect(() => {
+    if (!branchInfo) return;
+
     // Warning Persons
+    const branch = branchInfo.branch;
     try {
       parseInt(persons.value);
       if (parseInt(persons.value) > branch.capacity) {
@@ -565,15 +628,7 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
     if (!applyFilter) return;
     setApplyFilter(false);
     getReservationsFiltered();
-  }, [page, pastReservationsNumber,applyFilter]);
-
-  const currenAverageReserveTime = moment.duration(branch?.averageReserveTime);
-  const branchAverageReserveTimeHours = parseInt(
-    formatTime(currenAverageReserveTime.hours().toString())
-  );
-  const branchAverageReserveTimeMinutes = parseInt(
-    formatTime(currenAverageReserveTime.minutes().toString())
-  );
+  }, [page, pastReservationsNumber, applyFilter]);
 
   return (
     <BranchReserves
@@ -587,8 +642,14 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       historicTotalPage={totalPages}
       historicReservationListTotalLenght={totalHistoricElements}
       // totalPages
-      onNextPage={() => { setPage(page + 1); setApplyFilter(true); }}
-      onPreviousPage={() => { setPage(page - 1); setApplyFilter(true); }}
+      onNextPage={() => {
+        setPage(page + 1);
+        setApplyFilter(true);
+      }}
+      onPreviousPage={() => {
+        setPage(page - 1);
+        setApplyFilter(true);
+      }}
       //Filter
       filterStartDate={filterStartDate}
       filterEndDate={filterEndDate}
@@ -615,13 +676,13 @@ export default function BranchReservations({ header, fetchAPI }: PageProps) {
       email={email}
       identityDocument={identityDocument}
       identityDocumentType={identityDocumentType}
-      durationHour={branchAverageReserveTimeHours}
-      durationMin={branchAverageReserveTimeMinutes}
+      durationHour={averageReserveTime.hours}
+      durationMin={averageReserveTime.minutes}
       //Cositas
       color={"#EF7A08"}
       submitButtonColor="#EF7A08"
       header={header}
-      haveBranch={branch !== undefined}
+      haveBranch={branchInfo !== undefined}
       icon_size="450px"
       showModal={showModal}
       setShowModal={setshowModal}

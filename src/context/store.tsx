@@ -1,3 +1,4 @@
+import app from "./slices/app";
 import auth from "./slices/auth";
 import business from "./slices/business";
 import branches from "./slices/branches";
@@ -18,6 +19,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 // Combine the reducers into a single root reducer
 const reducer = combineReducers({
+  app,
   auth,
   business,
   branches,
