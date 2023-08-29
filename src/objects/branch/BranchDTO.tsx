@@ -13,21 +13,9 @@ type BranchDTO = {
    */
   businessId: number;
   /**
-   * Branch location
-   */
-  location: string;
-  /**
-   * Branch Google Maps URL
-   */
-  mapsLink: string;
-  /**
    * Branch name
    */
   name: string;
-  /**
-   * Branch overview
-   */
-  overview: string;
   /**
    * Branch score given by users
    */
@@ -41,17 +29,25 @@ type BranchDTO = {
    */
   reservationPrice: number;
   /**
-   * Indicates if reservations can be made
+   * Branch Google Maps URL
    */
-  reserveOff: boolean;
+  mapsLink: string;
   /**
-   * Average time a reservation lasts
+   * Branch location
    */
-  averageReserveTime: Duration;
+  location: string;
+  /**
+   * Branch overview
+   */
+  overview: string;
   /**
    * Indicates if the branch will be publicly visible
    */
   visibility: boolean;
+  /**
+   * Indicates if reservations can be made
+   */
+  reserveOff: boolean;
   /**
    * Branch phone number
    */
@@ -69,17 +65,17 @@ type BranchDTO = {
    */
   hourOut: LocalTime;
   /**
-   * Indicate if the branch is deleted
+   * Average time a reservation lasts
    */
-  deleted: boolean;
+  averageReserveTime: Duration;
   /**
    * Exchange between the dollar and the local currency
    */
-  dollarToLocalCurrencyExchange: number;
+  dollarExchange: number;
   /**
-   * Default taxes
+   * Indicate if the branch is deleted
    */
-  defaultTaxes: DefaultTaxDTO[];
+  deleted: boolean;
 };
 
 export { type BranchDTO as default };

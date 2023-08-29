@@ -8,10 +8,6 @@ type TableDTO = {
    */
   branchId: number;
   /**
-   * Indicates if the product is deleted
-   */
-  deleted: boolean;
-  /**
    * Table name
    */
   name: string;

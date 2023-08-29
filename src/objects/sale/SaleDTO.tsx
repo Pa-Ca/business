@@ -1,6 +1,3 @@
-import TaxDTO from "./TaxDTO";
-import SaleProductDTO from "./SaleProductDTO";
-
 export enum SaleStatus {
   CANCELED = 0,
   ONGOING = 1,
@@ -13,17 +10,25 @@ type SaleDTO = {
    */
   id: number;
   /**
-   * Id of the table that corresponds to the sale
+   * Id of the branch that corresponds to the sale
    */
-  tableId: number;
+  branchId: number;
   /**
-   * Id of the reservation that corresponds to the sale
+   * Id of the owner that corresponds to the sale
    */
-  reservationId?: number;
+  clientGuestId: number;
+  /**
+   * Id of the invoice that corresponds to the sale
+   */
+  invoiceId: number;
   /**
    * Client quantity
    */
   clientQuantity: number;
+  /**
+   * Sale status
+   */
+  status: SaleStatus;
   /**
    * Start datetime of the sale
    */
@@ -33,29 +38,13 @@ type SaleDTO = {
    */
   endTime?: string;
   /**
-   * Sale status
+   * Sale dollar to local currency exchange
    */
-  status: SaleStatus;
-  /**
-   * Table name
-   */
-  tableName: string;
+  dollarExchange: number;
   /**
    * Sale note
    */
   note: string;
-  /**
-   * Sale dollar to local currency exchange
-   */
-  dollarToLocalCurrencyExchange: number;
-  /**
-   * Sale products
-   */
-  products: SaleProductDTO[];
-  /**
-   * Sale taxes
-   */
-  taxes: TaxDTO[];
 };
 
 export { type SaleDTO as default };

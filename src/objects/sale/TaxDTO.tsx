@@ -9,10 +9,6 @@ type TaxDTO = {
    */
   id: number;
   /**
-   * Sale id 
-   */
-  saleId: number;
-  /**
    * Tax name
    */
   name: string;

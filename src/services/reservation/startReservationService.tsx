@@ -1,6 +1,11 @@
 import { API_ENDPOINT } from "../../config";
 import FetchResponse from "../../objects/FetchResponse";
 import ExceptionResponse from "../../objects/ExceptionResponse";
+import { SaleInfoDTO, TableDTO } from "objects";
+
+type TableListDTO = {
+  tables: TableDTO[];
+};
 
 /**
  * @brief Start reservation
@@ -9,20 +14,26 @@ import ExceptionResponse from "../../objects/ExceptionResponse";
  *
  * @returns API response
  */
-export default async (id: number, token: string): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/reservation/start/${id}`;
+export default async (
+  id: number,
+  dto: TableListDTO,
+  token: string
+): Promise<FetchResponse<SaleInfoDTO>> => {
+  const uri = `${API_ENDPOINT}/reservation/${id}/start`;
 
   try {
     const response = await fetch(uri, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(dto),
     });
 
     if (response.status === 200) {
-      return { isError: false };
+      const data: SaleInfoDTO = await response.json();
+      return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();
       return { exception, isError: true };

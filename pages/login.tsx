@@ -77,6 +77,7 @@ export default function Login() {
       setToken,
       (token: string) => getProductCategoriesService(token)
     );
+    console.log(categoriesResponse);
 
     if (
       !!categoriesResponse.isError ||
@@ -93,20 +94,20 @@ export default function Login() {
     }
 
     // Change hourIn and hourOut from 23:59:59 to 24:00:00
-    branchesResponse.data!.branches.forEach((branch) => {
-      if (branch.hourIn === "23:59:59") {
-        branch.hourIn = "24:00:00";
+    branchesResponse.data!.branches.forEach((b) => {
+      if (b.branch.hourIn === "23:59:59") {
+        b.branch.hourIn = "24:00:00";
       }
-      if (branch.hourOut === "23:59:59") {
-        branch.hourOut = "24:00:00";
+      if (b.branch.hourOut === "23:59:59") {
+        b.branch.hourOut = "24:00:00";
       }
     });
 
     const branchList = branchesResponse.data!.branches.filter(
-      (branch) => !branch.deleted
+      (b) => !b.branch.deleted
     );
     // Sort branches by name
-    branchList.sort((a, b) => a.name.localeCompare(b.name));
+    branchList.sort((a, b) => a.branch.name.localeCompare(b.branch.name));
     const branchIndex = branchList.length > 0 ? 0 : -1;
 
     dispatch(
@@ -143,7 +144,7 @@ export default function Login() {
     );
 
     if (branchIndex !== -1) {
-      const branch = branchList[branchIndex];
+      const branch = branchList[branchIndex].branch;
       await getProducts(
         branch.id,
         response.data!.token,

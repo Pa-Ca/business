@@ -1,6 +1,5 @@
 import { API_ENDPOINT } from "../../config";
 import {
-  SaleDTO,
   SaleInfoDTO,
   FetchResponse,
   ExceptionResponse,
@@ -15,7 +14,7 @@ import {
  * @returns API response when refresh
  */
 export default async (
-  dto: Partial<SaleDTO>,
+  dto: Partial<SaleInfoDTO>,
   token: string
 ): Promise<FetchResponse<SaleInfoDTO>> => {
   const uri = `${API_ENDPOINT}/sale`;

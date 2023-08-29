@@ -1,8 +1,8 @@
 import { API_ENDPOINT } from "../../config";
-import { FetchResponse, ExceptionResponse, BranchDTO } from "objects";
+import { FetchResponse, ExceptionResponse, BranchInfoDTO } from "objects";
 
 type BranchesResponse = {
-  branches: BranchDTO[];
+  branches: BranchInfoDTO[];
 };
 
 /**

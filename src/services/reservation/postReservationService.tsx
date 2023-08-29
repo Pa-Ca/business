@@ -1,5 +1,9 @@
 import { API_ENDPOINT } from "../../config";
-import { FetchResponse, ExceptionResponse, ReservationDTO } from "objects";
+import {
+  FetchResponse,
+  ExceptionResponse,
+  ReservationInfoDTO,
+} from "objects";
 
 /**
  * @brief Create reservation
@@ -10,9 +14,9 @@ import { FetchResponse, ExceptionResponse, ReservationDTO } from "objects";
  * @returns API response when refresh
  */
 export default async (
-  dto: ReservationDTO,
+  dto: ReservationInfoDTO,
   token: string
-): Promise<FetchResponse<ReservationDTO>> => {
+): Promise<FetchResponse<ReservationInfoDTO>> => {
   const uri = `${API_ENDPOINT}/reservation`;
   try {
     const response = await fetch(uri, {
@@ -25,7 +29,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: ReservationDTO = await response.json();
+      const data: ReservationInfoDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

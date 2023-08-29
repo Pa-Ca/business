@@ -27,7 +27,7 @@ export default async (
     };
   }
 
-  // Create the Business
+  // Get the Business
   const uri = `${API_ENDPOINT}/business/user/${userResponse.data.id}`;
   try {
     const response = await fetch(uri, {

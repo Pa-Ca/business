@@ -24,7 +24,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
   const dispatch = useDispatch();
   const branches = useAppSelector((state) => state.branches).branches;
   const products_ = useAppSelector((state) => state.products.products);
-  const branch = branches[useAppSelector((state) => state.branches).current];
+  const branchInfo = branches[useAppSelector((state) => state.branches).current];
   const productCategories_ = useAppSelector(
     (state) => state.products.categories
   );
@@ -322,6 +322,9 @@ export default function Product({ header, fetchAPI }: PageProps) {
     categoryId: number,
     subCategory: InputFormHook<string>
   ) => {
+    if (!branchInfo) return { id: -1, name: "", categoryId: -1 };
+    const branch = branchInfo.branch;
+
     const response = await fetchAPI((token: string) =>
       createProductSubCategoryService(
         { id: 0, branchId: branch.id, categoryId, name: subCategory.value! },
@@ -362,6 +365,9 @@ export default function Product({ header, fetchAPI }: PageProps) {
     subCategory: InputFormHook<string>,
     categoryId: number
   ) => {
+    if (!branchInfo) return false;
+    const branch = branchInfo.branch;
+
     const response = await fetchAPI((token: string) =>
       updateProductSubCategoryService(
         { id, branchId: branch.id, categoryId, name: subCategory.value! },
@@ -414,6 +420,7 @@ export default function Product({ header, fetchAPI }: PageProps) {
   return (
     <BranchProducts
       header={header}
+      haveBranch={!!branchInfo}
       products={products}
       categories={productCategories}
       subCategories={productSubCategories}

@@ -4,8 +4,8 @@ import { Provider } from "react-redux";
 import type { AppProps } from "next/app";
 import store, { persistor } from "context";
 import { SessionProvider } from "next-auth/react";
-import { HeaderWrapper, AuthWrapper, Alert } from "components";
 import { PersistGate } from "redux-persist/integration/react";
+import { HeaderWrapper, AuthWrapper, Alert, Spinner } from "components";
 
 export default function App({
   Component,
@@ -25,6 +25,7 @@ export default function App({
             </Head>
             <HeaderWrapper Component={Component} pageProps={pageProps} />
             <Alert />
+            <Spinner />
           </PersistGate>
         </AuthWrapper>
       </Provider>

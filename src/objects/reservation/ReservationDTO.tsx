@@ -1,6 +1,3 @@
-import { ReservationProps } from "paca-ui";
-import getReservationStatusObject from "../../utils/getReservationStatusObject";
-
 type ReservationDTO = {
   /**
    * Reservation Identifier
@@ -15,6 +12,10 @@ type ReservationDTO = {
    */
   guestId: number;
   /**
+   * Id of the invoice
+   */
+  invoiceId: number;
+  /**
    * Date the Reservation was requested
    */
   requestDate: string;
@@ -27,29 +28,21 @@ type ReservationDTO = {
    */
   reservationDateOut: string;
   /**
-   * Number of clients in this reservation
+   * Reservation price
    */
-  clientNumber: number;
-  /**
-   * Number of clients in this reservation
-   */
-  tableNumber: number;
-  /**
-   * Reservation payment code
-   */
-  payment: string;
+  price: number;
   /**
    * Reservation status
    */
   status: number;
   /**
-   * Date when it was payed
+   * Number of tables in this reservation
    */
-  payDate: string;
+  tableNumber: number;
   /**
-   * Reservation price
+   * Number of clients in this reservation
    */
-  price: number;
+  clientNumber: number;
   /**
    * Reservation occasion
    */
@@ -58,75 +51,6 @@ type ReservationDTO = {
    * If reservation was created by client or business
    */
   byClient: boolean;
-  /**
-   * If reservation was created by guest or
-   */
-  haveGuest: boolean;
-  /**
-   * Owner name
-   */
-  name: string;
-  /**
-   * Owner surname
-   */
-  surname: string;
-  /**
-   * Owner email
-   */
-  email: string;
-  /**
-   * Owner phone number
-   */
-  phoneNumber: string;
-  /**
-   * Owner identity document
-   */
-  identityDocument: string;
-};
-
-export const toReservationProps = (
-  reservation: ReservationDTO
-): ReservationProps => {
-  function hourMinFormat(hour: string)  {
-    if(hour === "" || hour === null){
-      return "";
-    }else{
-      const date = new Date(hour);
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-  }
-  function yearMonthDayFormat(hour: string)  {
-    if(hour === "" || hour === null){
-      return "";
-    }else{
-      const date = new Date(hour);
-      return date.toLocaleTimeString([], {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
-    }
-  }
-  console.log(reservation.reservationDateIn);
-  const result = {
-    id: reservation.id,
-    start: hourMinFormat(reservation.reservationDateIn),
-    end: hourMinFormat(reservation.reservationDateOut),
-    requestDate: yearMonthDayFormat(reservation.requestDate),
-    date: reservation.reservationDateIn,
-    owner: reservation.name + " " + reservation.surname,
-    ownerEmail: reservation.email,
-    ownerOccasion: reservation.occasion,
-    ownerPhone: reservation.phoneNumber,
-    persons: reservation.clientNumber,
-    tables: reservation.tableNumber,
-    status: getReservationStatusObject(reservation.status),
-    identityDocument: reservation.identityDocument,
-  };
-  return result;
 };
 
 export { type ReservationDTO as default };
