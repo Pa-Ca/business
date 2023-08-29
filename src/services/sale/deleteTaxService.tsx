@@ -14,7 +14,7 @@ export default async (
   id: number,
   token: string
 ): Promise<FetchResponse<null>> => {
-  const uri = `${API_ENDPOINT}/tax/${id}`;
+  const uri = `${API_ENDPOINT}/sale-tax/${id}`;
 
   try {
     const response = await fetch(uri, {

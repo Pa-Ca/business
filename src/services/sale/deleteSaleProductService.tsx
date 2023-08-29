@@ -5,14 +5,12 @@ import { FetchResponse, ExceptionResponse } from "objects";
  * @brief Delete sale product
  *
  * @param id product id
- * @param saleId sale id
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
   id: number,
-  saleId: number,
   token: string
 ): Promise<FetchResponse<null>> => {
   const uri = `${API_ENDPOINT}/sale-product/${id}`;

@@ -1,4 +1,4 @@
-import { ReservationProps } from "paca-ui";
+import { ReservationProps, TableObject } from "paca-ui";
 import GuestDTO from "./GuestDTO";
 import InvoiceDTO from "./InvoiceDTO";
 import ReservationDTO from "./ReservationDTO";
@@ -26,6 +26,7 @@ type ReservationInfoDTO = {
 
 export const toReservationProps = (
   reservationInfo: ReservationInfoDTO,
+  tables: TableObject[]
 ): ReservationProps => {
   const { reservation, invoice, guest, owner } = reservationInfo;
   const ownerData = reservation.byClient ? owner! : guest!;
@@ -42,9 +43,9 @@ export const toReservationProps = (
     }
   }
 
-  const result = {
+  const result: ReservationProps = {
     id: reservation.id,
-    requestDate: reservation.requestDate,
+    requestDate: reservation.requestDate.split("T")[0] + " " + hourFormat(reservation.requestDate),
     start: hourFormat(reservation.reservationDateIn),
     end: hourFormat(reservation.reservationDateOut),
     tables: reservation.tableNumber,
@@ -55,6 +56,7 @@ export const toReservationProps = (
     ownerOccasion: reservation.occasion,
     ownerPhone: ownerData.phoneNumber,
     identityDocument: ownerData.identityDocument,
+    tableList: tables,
     status: getReservationStatusObject(reservation.status),
   };
   return result;

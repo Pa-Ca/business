@@ -82,7 +82,6 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   const branchLocation = useInputForm<OptionObject<string | null>>(emptyOption);
 
   const branch = useMemo(() => {
-    console.log(branches, branchIndex)
     if (branchIndex === -1) {
       return undefined;
     }

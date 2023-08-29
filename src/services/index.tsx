@@ -48,6 +48,7 @@ import deleteProductSubCategoryService from "./productSubCategory/deleteProductS
 import updateProductSubCategoryService from "./productSubCategory/updateProductSubCategoryService";
 
 // Reservation
+import createGuestService from "./reservation/createGuestService";
 import postReservationService from "./reservation/postReservationService";
 import closeReservationService from "./reservation/closeReservationService";
 import startReservationService from "./reservation/startReservationService";
@@ -119,6 +120,7 @@ export {
   deleteProductSubCategoryService,
   updateProductSubCategoryService,
   // Reservation
+  createGuestService,
   postReservationService,
   closeReservationService,
   startReservationService,

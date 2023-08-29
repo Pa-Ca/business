@@ -1,25 +1,9 @@
 import { API_ENDPOINT } from "../../config";
-import {
-  TaxDTO,
-  SaleDTO,
-  FetchResponse,
-  SaleProductDTO,
-  ExceptionResponse,
-  TableDTO,
-} from "objects";
-
-type SaleInfo = {
-  sale: SaleDTO;
-  insite: boolean;
-  reservationId: number;
-  taxes: TaxDTO[];
-  tables: TableDTO[];
-  products: SaleProductDTO[];
-};
+import { SaleInfoDTO, FetchResponse, ExceptionResponse } from "objects";
 
 type SaleResponse = {
-  ongoingSalesInfo: SaleInfo[];
-  historicSalesInfo: SaleInfo[];
+  ongoingSalesInfo: SaleInfoDTO[];
+  historicSalesInfo: SaleInfoDTO[];
   currentHistoricPage: number;
   totalHistoricPages: number;
   totalHistoricElements: number;
@@ -47,7 +31,7 @@ export default async (
   startTime: Date | null = null,
   endTime: Date | null = null,
   fullname: string | null = null,
-  identityDocument: string | null = null,
+  identityDocument: string | null = null
 ): Promise<FetchResponse<SaleResponse>> => {
   let uri = `${API_ENDPOINT}/branch/${id}/sale?page=${pageIndex}&size=${pageSize}`;
 

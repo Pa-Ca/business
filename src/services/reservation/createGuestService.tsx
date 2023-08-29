@@ -1,23 +1,28 @@
 import { API_ENDPOINT } from "../../config";
-import { FetchResponse, ExceptionResponse, TaxDTO } from "objects";
+import {
+  GuestDTO,
+  GuestInfoDTO,
+  FetchResponse,
+  ExceptionResponse,
+} from "objects";
 
 /**
- * @brief Change the data of a tax. Undefined variables will be ignored
+ * @brief Create a new guest
  *
- * @param dto Tax data
+ * @param dto Guest data
  * @param token Authorization token
  *
  * @returns API response when refresh
  */
 export default async (
-  dto: Partial<TaxDTO>,
+  dto: Partial<GuestDTO>,
   token: string
-): Promise<FetchResponse<TaxDTO>> => {
-  const uri = `${API_ENDPOINT}/sale-tax/${dto.id}`;
+): Promise<FetchResponse<GuestInfoDTO>> => {
+  const uri = `${API_ENDPOINT}/guest`;
 
   try {
     const response = await fetch(uri, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -26,7 +31,7 @@ export default async (
     });
 
     if (response.status === 200) {
-      const data: TaxDTO = await response.json();
+      const data: GuestInfoDTO = await response.json();
       return { data, isError: false };
     } else {
       const exception: ExceptionResponse = await response.json();

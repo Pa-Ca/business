@@ -4,7 +4,7 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 Run this command to initialize paca-ui submodule
 
 ```bash
-git submodule update --init
+git submodule update --init --recursive
 ```
 
 If you want to use the develop branch of paca-ui

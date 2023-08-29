@@ -36,7 +36,7 @@ type ReservationDTO = {
    */
   status: number;
   /**
-   * Number of clients in this reservation
+   * Number of tables in this reservation
    */
   tableNumber: number;
   /**
