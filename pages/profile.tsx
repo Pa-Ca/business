@@ -1,49 +1,46 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import moment from "moment";
 import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { GOOGLE_MAPS_API_KEY } from "config";
 import { useSession, signOut } from "next-auth/react";
+import { logout, cousines, locations, formatTime, validateName, validatePhone } from "utils";
+import { setName, setBranches, setPhoneNumber, useAppSelector, setCurrentBranch } from "context";
 import {
-  logout,
-  cousines,
-  locations,
-  formatTime,
-  validateName,
-  validatePhone,
-} from "utils";
-import {
-  setName,
-  setBranches,
-  setPhoneNumber,
-  useAppSelector,
-  setCurrentBranch,
-} from "context";
-import {
+  alertService,
+  getSalesService,
   S3UploadService,
+  getTablesService,
   getBranchesService,
   createBranchService,
   updateBranchService,
   updateBusinessService,
   updateDefaultTaxService,
-  resetPasswordRequestService,
-  resetPasswordWithOldPasswordService,
   deleteDefaultTaxService,
   createDefaultTaxService,
+  resetPasswordRequestService,
+  resetPasswordWithOldPasswordService,
+  createTableService,
+  updateTableService,
+  deleteTableService,
 } from "services";
 import {
+  TaxType,
   PageProps,
   BranchDTO,
   LocalTime,
   Duration as BranchDuration,
-  TaxType,
+  SaleInfoDTO,
+  TableDTO,
 } from "objects";
 import {
+  TaxObject,
+  SaleObject,
+  TableObject,
+  OptionObject,
   useInputForm,
   InputFormHook,
-  OptionObject,
   BusinessProfile,
-  TaxObject,
 } from "paca-ui";
 
 export default function Profile({ header, fetchAPI }: PageProps) {
@@ -81,6 +78,12 @@ export default function Profile({ header, fetchAPI }: PageProps) {
   const branchType = useInputForm<OptionObject<string | null>>(emptyOption);
   const branchLocation = useInputForm<OptionObject<string | null>>(emptyOption);
 
+  // Tables
+  const [searchTable, setSearchTable] = useState("");
+  const [sales, setSales] = useState<SaleObject[]>([]);
+  const [fetchTables, setFetchTables] = useState(false);
+  const [tables, setTables] = useState<TableObject[]>([]);
+
   const branch = useMemo(() => {
     if (branchIndex === -1) {
       return undefined;
@@ -105,18 +108,10 @@ export default function Profile({ header, fetchAPI }: PageProps) {
 
     branchOpeningTimeHour.setValue(openingHour);
     branchClosingTimeHour.setValue(closingHour);
-    branchOpeningTimeMinute.setValue(
-      formatTime(openingTime.minutes().toString())
-    );
-    branchClosingTimeMinute.setValue(
-      formatTime(closingTime.minutes().toString())
-    );
-    branchAverageReserveTimeHours.setValue(
-      formatTime(averageReserveTime.hours().toString())
-    );
-    branchAverageReserveTimeMinutes.setValue(
-      formatTime(averageReserveTime.minutes().toString())
-    );
+    branchOpeningTimeMinute.setValue(formatTime(openingTime.minutes().toString()));
+    branchClosingTimeMinute.setValue(formatTime(closingTime.minutes().toString()));
+    branchAverageReserveTimeHours.setValue(formatTime(averageReserveTime.hours().toString()));
+    branchAverageReserveTimeMinutes.setValue(formatTime(averageReserveTime.minutes().toString()));
 
     return branch;
   }, [branchIndex, branches]);
@@ -129,11 +124,217 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     return branches[branchIndex].defaultTaxes;
   }, [branchIndex, branches]);
 
+  const taxes: TaxObject[] = useMemo(() => {
+    if (!branch || !defaultTaxes) {
+      return [];
+    }
+
+    const updateTax = async (
+      id: number,
+      name: InputFormHook<string>,
+      type: InputFormHook<string>,
+      value: InputFormHook<string>
+    ) => {
+      const dto = {
+        id,
+        name: name.value,
+        type: TaxType[type.value as keyof typeof TaxType],
+        value: Number(value.value) || 0,
+      };
+      const response = await fetchAPI((token: string) => updateDefaultTaxService(dto, token));
+
+      if (response.isError || typeof response.data === "string") {
+        name.setCode(4);
+        name.setMessage("Error guardando el nombre.");
+      } else {
+        // Update branch taxes
+        const newTax = response.data!;
+        const newTaxes = defaultTaxes.map((tax) => {
+          if (tax.id === newTax.id) {
+            return newTax;
+          }
+
+          return tax;
+        });
+        dispatch(
+          setBranches(
+            branches.map((b) => {
+              if (b.branch.id === branch.id) {
+                return {
+                  ...b,
+                  defaultTaxes: newTaxes,
+                };
+              }
+
+              return b;
+            })
+          )
+        );
+      }
+    };
+
+    const deleteTax = async (id: number) => {
+      const response = await fetchAPI((token: string) => deleteDefaultTaxService(id, token));
+
+      if (response.isError || typeof response.data === "string") {
+        return;
+      }
+
+      // Update branch taxes
+      const newTaxes = defaultTaxes.filter((tax) => tax.id !== id);
+      dispatch(
+        setBranches(
+          branches.map((b) => {
+            if (b.branch.id === branch.id) {
+              return {
+                ...b,
+                defaultTaxes: newTaxes,
+              };
+            }
+
+            return b;
+          })
+        )
+      );
+    };
+
+    return defaultTaxes.map((tax) => {
+      return {
+        ...tax,
+        saveValueFunction: (
+          name: InputFormHook<string>,
+          type: InputFormHook<string>,
+          value: InputFormHook<string>
+        ) => updateTax(tax.id, name, type, value),
+        deleteValueFunction: () => deleteTax(tax.id),
+      };
+    });
+  }, [defaultTaxes]);
+
+  const tablesToShow = useMemo(() => {
+    return tables.filter((t) => t.name.toLowerCase().includes(searchTable.toLowerCase()));
+  }, [tables, searchTable]);
+
+  const saleInfoToObject = (saleInfo: SaleInfoDTO): SaleObject => {
+    let ownerName = "",
+      ownerPhone = "",
+      ownerEmail = "";
+    if (!!saleInfo.guest) {
+      ownerEmail = saleInfo.guest.email;
+      ownerPhone = saleInfo.guest.phoneNumber;
+      ownerName = `${saleInfo.guest.name} ${saleInfo.guest.surname}`;
+    } else if (!!saleInfo.client) {
+      ownerEmail = saleInfo.client.email;
+      ownerPhone = saleInfo.client.phoneNumber;
+      ownerName = `${saleInfo.client.name} ${saleInfo.client.surname}`;
+    }
+    const sale: SaleObject = {
+      id: saleInfo.sale.id,
+      ownerName,
+      ownerPhone,
+      ownerEmail,
+      startTime: new Date(saleInfo.sale.startTime),
+      clientQuantity: saleInfo.sale.clientQuantity,
+      note: saleInfo.sale.note,
+      taxes: [],
+      tables: saleInfo.tables,
+      products: [],
+      hasReservation: !!saleInfo.reservationId && saleInfo.reservationId > 0,
+    };
+
+    return sale;
+  };
+
+  // Business profile
+  const saveName = async (newName: string) => {
+    const response = await fetchAPI((token: string) =>
+      updateBusinessService({ id: auth.id!, name: newName }, token)
+    );
+
+    if (response.isError) {
+      name.setCode(4);
+      name.setMessage("Error guardando el nombre.");
+    } else {
+      dispatch(setName(name.value));
+    }
+  };
+
+  const savePhoneNumber = async (newPhoneNumber: string) => {
+    const response = await fetchAPI((token: string) =>
+      updateBusinessService({ id: auth.id!, phoneNumber: newPhoneNumber }, token)
+    );
+
+    if (response.isError) {
+      phoneNumber.setCode(4);
+      phoneNumber.setMessage("Error guardando el numero de telefono.");
+    } else {
+      dispatch(setPhoneNumber(phoneNumber.value));
+    }
+  };
+
+  const onProfileUploadImage = async (file: File) => {
+    const response = await S3UploadService(file, `business-${business.id}-profile.jpeg`);
+
+    if (!response.data || response.isError) return;
+  };
+
+  const saveNewPassword = async () => {
+    const response = await resetPasswordWithOldPasswordService(
+      auth.email!,
+      password.value,
+      newPassword.value
+    );
+
+    if (response.isError) {
+      if (!!response.exception) {
+        switch (response.exception.code) {
+          case 2:
+          case 3:
+            newPassword.setMessage("La contraseña debe tener entre 8 y 64 caracteres.");
+            newPassword.setCode(4);
+            break;
+          case 9:
+            password.setMessage("Contraseña incorrecta");
+            password.setCode(4);
+            break;
+        }
+      }
+    } else {
+      password.setValue("");
+      newPassword.setValue("");
+      setDone(true);
+      logout(
+        auth.token!,
+        auth.refresh!,
+        dispatch,
+        router,
+        "/reset-password",
+        {
+          completed: true,
+        },
+        () => {
+          if (session) signOut();
+        }
+      );
+    }
+  };
+
+  const onForgotClick = async () => {
+    const response = await resetPasswordRequestService(auth.email!);
+
+    if (!!response.isError) {
+      return;
+    }
+
+    setEmailSent(true);
+  };
+
+  // Branch functions
   const getUpdatedBranch = (): BranchDTO => {
     if (!branch) {
       return {} as BranchDTO;
     }
-  
+
     const hourIn =
       branchOpeningTimeHour.value === "24"
         ? "23:59:59"
@@ -168,93 +369,10 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     return dto;
   };
 
-  const saveName = async (newName: string) => {
-    const response = await fetchAPI((token: string) =>
-      updateBusinessService({ id: auth.id!, name: newName }, token)
-    );
-
-    if (response.isError) {
-      name.setCode(4);
-      name.setMessage("Error guardando el nombre.");
-    } else {
-      dispatch(setName(name.value));
-    }
-  };
-
-  const savePhoneNumber = async (newPhoneNumber: string) => {
-    const response = await fetchAPI((token: string) =>
-      updateBusinessService(
-        { id: auth.id!, phoneNumber: newPhoneNumber },
-        token
-      )
-    );
-
-    if (response.isError) {
-      phoneNumber.setCode(4);
-      phoneNumber.setMessage("Error guardando el numero de telefono.");
-    } else {
-      dispatch(setPhoneNumber(phoneNumber.value));
-    }
-  };
-
-  const onProfileUploadImage = async (file: File) => {
-    const response = await S3UploadService(
-      file,
-      `business-${business.id}-profile.jpeg`
-    );
-
-    if (!response.data || response.isError) return;
-  };
-
-  const saveNewPassword = async () => {
-    const response = await resetPasswordWithOldPasswordService(
-      auth.email!,
-      password.value,
-      newPassword.value
-    );
-
-    if (response.isError) {
-      if (!!response.exception) {
-        switch (response.exception.code) {
-          case 2:
-          case 3:
-            newPassword.setMessage(
-              "La contraseña debe tener entre 8 y 64 caracteres."
-            );
-            newPassword.setCode(4);
-            break;
-          case 9:
-            password.setMessage("Contraseña incorrecta");
-            password.setCode(4);
-            break;
-        }
-      }
-    } else {
-      password.setValue("");
-      newPassword.setValue("");
-      setDone(true);
-      logout(
-        auth.token!,
-        auth.refresh!,
-        dispatch,
-        router,
-        "/reset-password",
-        {
-          completed: true,
-        },
-        () => {
-          if (session) signOut();
-        }
-      );
-    }
-  };
-
   const updateBranch = async (deleted: boolean = false) => {
     const dto = getUpdatedBranch();
     dto.deleted = deleted;
-    const response = await fetchAPI((token: string) =>
-      updateBranchService(dto, token)
-    );
+    const response = await fetchAPI((token: string) => updateBranchService(dto, token));
 
     if (response.isError || typeof response.data === "string") {
       if (!!response.exception) {
@@ -280,23 +398,12 @@ export default function Profile({ header, fetchAPI }: PageProps) {
 
         if (branchList.length > 0) {
           dispatch(setCurrentBranch(0));
-        }
-        else {
+        } else {
           dispatch(setCurrentBranch(-1));
         }
         router.reload();
       }
     }
-  };
-
-  const onForgotClick = async () => {
-    const response = await resetPasswordRequestService(auth.email!);
-
-    if (!!response.isError) {
-      return;
-    }
-
-    setEmailSent(true);
   };
 
   const onCreateBranch = async (
@@ -344,9 +451,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     // Verify that the average reserve time minutes is valid
     if (averageReserveTimeMinutes.value === "") {
       averageReserveTimeMinutes.setCode(4);
-      averageReserveTimeMinutes.setMessage(
-        "Debe ingresar la cantidad de minutos."
-      );
+      averageReserveTimeMinutes.setMessage("Debe ingresar la cantidad de minutos.");
       error = true;
     }
 
@@ -414,17 +519,17 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     const hourIn: LocalTime =
       openingTimeHour.value === "24"
         ? "23:59:59"
-        : (`${parseInt(openingTimeHour.value)
-            .toString()
-            .padStart(2, "0")}:${parseInt(openingTimeMinute.value)
+        : (`${parseInt(openingTimeHour.value).toString().padStart(2, "0")}:${parseInt(
+            openingTimeMinute.value
+          )
             .toString()
             .padStart(2, "0")}:00` as LocalTime);
     const hourOut: LocalTime =
       closingTimeHour.value === "24"
         ? "23:59:59"
-        : (`${parseInt(closingTimeHour.value)
-            .toString()
-            .padStart(2, "0")}:${parseInt(closingTimeMinute.value)
+        : (`${parseInt(closingTimeHour.value).toString().padStart(2, "0")}:${parseInt(
+            closingTimeMinute.value
+          )
             .toString()
             .padStart(2, "0")}:00` as LocalTime);
 
@@ -441,9 +546,9 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       capacity: parseInt(capacity.value),
       reservationPrice: parseFloat(price.value),
       reserveOff: false,
-      averageReserveTime: `PT${parseInt(
-        averageReserveTimeHours.value
-      )}H${parseInt(averageReserveTimeMinutes.value)}M0S`,
+      averageReserveTime: `PT${parseInt(averageReserveTimeHours.value)}H${parseInt(
+        averageReserveTimeMinutes.value
+      )}M0S`,
       visibility: true,
       hourIn,
       hourOut,
@@ -451,9 +556,7 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       dollarExchange: 1,
     };
 
-    const response = await fetchAPI((token: string) =>
-      createBranchService(dto, token)
-    );
+    const response = await fetchAPI((token: string) => createBranchService(dto, token));
 
     if (response.isError) {
       if (!!response.exception) {
@@ -464,16 +567,11 @@ export default function Profile({ header, fetchAPI }: PageProps) {
         getBranchesService(auth.id!, token)
       );
 
-      if (
-        !!branchesResponse.isError ||
-        typeof branchesResponse.data === "string"
-      ) {
+      if (!!branchesResponse.isError || typeof branchesResponse.data === "string") {
         return;
       }
 
-      const branchList = branchesResponse.data!.branches.filter(
-        (branch) => !branch.branch.deleted
-      );
+      const branchList = branchesResponse.data!.branches.filter((branch) => !branch.branch.deleted);
       dispatch(setBranches(branchList));
       dispatch(setCurrentBranch(branchList.length - 1));
 
@@ -521,96 +619,110 @@ export default function Profile({ header, fetchAPI }: PageProps) {
     }
   };
 
-  const taxes: TaxObject[] = useMemo(() => {
-    if (!branch || !defaultTaxes) {
-      return [];
+  // Table functions
+  const onUpdateSearchTable = (search: string) => {
+    setSearchTable(search);
+  }
+
+  const onSearchTable = (table: InputFormHook<string>) => {
+    setSearchTable(table.value);
+    setFetchTables(true);
+  };
+
+  const onCreateTable = async (table: InputFormHook<string>) => {
+    if (!branch) return false;
+
+    const dto: TableDTO = {
+      id: -1,
+      branchId: branch.id,
+      name: table.value,
+    };
+    const response = await fetchAPI((token: string) => createTableService(dto, token));
+
+    if (response.isError || typeof response.data === "string") {
+      table.setCode(4);
+      table.setMessage("Error al crear la mesa.");
+      return false;
+    } else {
+      setFetchTables(true);
+      return true;
     }
+  };
 
-    const updateTax = async (
-      id: number,
-      name: InputFormHook<string>,
-      type: InputFormHook<string>,
-      value: InputFormHook<string>
-    ) => {
-      const dto = {
-        id,
-        name: name.value,
-        type: TaxType[type.value as keyof typeof TaxType],
-        value: Number(value.value) || 0,
-      };
-      const response = await fetchAPI((token: string) =>
-        updateDefaultTaxService(dto, token)
-      );
+  const onEditTable = async (id: number, table: InputFormHook<string>) => {
+    if (!branch) return;
+
+    const dto: TableDTO = {
+      id,
+      branchId: branch.id,
+      name: table.value,
+    };
+    const response = await fetchAPI((token: string) => updateTableService(dto, token));
+
+    if (response.isError || typeof response.data === "string") {
+      table.setCode(4);
+      table.setMessage("Ya existe una mesa con ese nombre.");
+    } else {
+      setFetchTables(true);
+    }
+  };
+
+  const onDeleteTable = async (tableId: number) => {
+    if (!branch) return;
+
+    const response = await fetchAPI((token: string) => deleteTableService(tableId, token));
+
+    if (response.isError || typeof response.data === "string") {
+    } else {
+      setFetchTables(true);
+    }
+  };
+
+  // Get tables
+  useEffect(() => {
+    if (!branch) return;
+
+    if (fetchTables) setFetchTables(false);
+
+    const getTables = async () => {
+      const response = await fetchAPI((token: string) => getTablesService(branch.id, token));
 
       if (response.isError || typeof response.data === "string") {
-        name.setCode(4);
-        name.setMessage("Error guardando el nombre.");
+        const message = !!response.exception ? response.exception.message : response.error?.message;
+        alertService.error(`Error al obtener las mesas: ${message}`);
+      } else if (response.data?.tables.length! > 0) {
+        // Sort tables by name
+        const tables = response.data?.tables!;
+        tables.sort((a, b) => a.name.localeCompare(b.name));
+        setTables(tables);
+      }
+    };
+
+    getTables();
+  }, [branch, fetchTables]);
+
+  // Get sales
+  useEffect(() => {
+    if (!branch) return;
+
+    const getSales = async () => {
+      const response = await fetchAPI((token: string) =>
+        getSalesService(branch.id, token, 1, 1, null, null, null, null)
+      );
+      const data = response.data;
+
+      if (response.isError || typeof data === "string") {
+        const message = !!response.exception ? response.exception.message : response.error?.message;
+        alertService.error(`Error al obtener las ventas: ${message}`);
       } else {
-        // Update branch taxes
-        const newTax = response.data!;
-        const newTaxes = defaultTaxes.map((tax) => {
-          if (tax.id === newTax.id) {
-            return newTax;
-          }
+        const ongoing = data?.ongoingSalesInfo!.map((saleInfo) => saleInfoToObject(saleInfo));
 
-          return tax;
-        });
-        dispatch(
-          setBranches(
-            branches.map((b) => {
-              if (b.branch.id === branch.id) {
-                return {
-                  ...b,
-                  defaultTaxes: newTaxes,
-                };
-              }
-
-              return b;
-            })
-          )
-        );
+        setSales(ongoing!);
       }
     };
 
-    const deleteTax = async (id: number) => {
-      const response = await fetchAPI((token: string) =>
-        deleteDefaultTaxService(id, token)
-      );
-
-      if (response.isError || typeof response.data === "string") {
-        return;
-      }
-
-      // Update branch taxes
-      const newTaxes = defaultTaxes.filter((tax) => tax.id !== id);
-      dispatch(
-        setBranches(
-          branches.map((b) => {
-            if (b.branch.id === branch.id) {
-              return {
-                ...b,
-                defaultTaxes: newTaxes,
-              };
-            }
-
-            return b;
-          })
-        )
-      );
-    };
-
-    return defaultTaxes.map((tax) => {
-      return {
-        ...tax,
-        saveValueFunction: (
-          name: InputFormHook<string>,
-          type: InputFormHook<string>,
-          value: InputFormHook<string>
-        ) => updateTax(tax.id, name, type, value),
-        deleteValueFunction: () => deleteTax(tax.id),
-      };
-    });
-  }, [defaultTaxes]);
+    getSales();
+  }, [branch, fetchTables]);
 
   return (
     <BusinessProfile
@@ -667,6 +779,14 @@ export default function Profile({ header, fetchAPI }: PageProps) {
       onSaveProfilePicture={() => {}}
       uploadProfilePicture={onProfileUploadImage}
       onAddTax={onCreateDefaultTax}
+      // Tables
+      sales={sales}
+      tables={tablesToShow}
+      onUpdateSearch={onUpdateSearchTable}
+      onSearchTable={onSearchTable}
+      onCreateTable={onCreateTable}
+      onEditTable={onEditTable}
+      onDeleteTable={onDeleteTable}
     />
   );
 }

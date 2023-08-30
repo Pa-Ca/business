@@ -1036,7 +1036,7 @@ export default function Sales({ header, fetchAPI }: PageProps) {
     };
 
     getTables();
-  }, [sales, branchInfo]);
+  }, [branchInfo]);
 
   // Get sales
   useEffect(() => {
