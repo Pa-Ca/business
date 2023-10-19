@@ -94,7 +94,7 @@ export default function HeaderWrapper({
       }),
       onEditProfile: () => router.push("/profile"),
       onReserveClick: () => {},
-      onReservationsClick: () => router.push("/branch-reservations"),
+      onReservationsClick: () => router.push("/sales"),
       onFavoritesClick: () => {},
       onLeftSectionClick: () => {},
       onPacaClick: () => router.reload(),

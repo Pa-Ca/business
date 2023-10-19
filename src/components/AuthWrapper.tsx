@@ -84,23 +84,23 @@ export default function AuthWrapper({
       }
       dispatch(setToken(refreshResponse.data!));
 
-      // User is logged in, so redirect to branch-reservations in case user is
+      // User is logged in, so redirect to sales in case user is
       // in login or signup page
       switch (router.pathname) {
         case "/":
         case "/login":
         case "/signup":
-          router.push("/branch-reservations").then(() => setLoading(false));
+          router.push("/sales").then(() => setLoading(false));
           break;
         default:
           setLoading(false);
       }
     } else {
       // User is not logged in, so redirect to login page in case user is in
-      // branch-reservations or profile page
+      // sales or profile page
       switch (router.pathname) {
         case "/":
-        case "/branch-reservations":
+        case "/sales":
         case "/profile":
           router.push("/login").then(() => setLoading(false));
           break;

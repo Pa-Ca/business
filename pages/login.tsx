@@ -155,7 +155,7 @@ export default function Login() {
       );
     }
 
-    router.push("/branch-reservations");
+    router.push("/sales");
   };
 
   return (
